@@ -176,7 +176,8 @@
                 var wrap = document.createElement('div'); wrap.className = 'ratio' + (it.dataset.platform === 'instagram' ? ' portrait' : '');
                 if (it.dataset.embed) {
                     var f = document.createElement('iframe');
-                    f.src = it.dataset.embed + (it.dataset.embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1';
+                    // HP hanya mengizinkan autoplay tanpa suara; ketuk ikon speaker untuk suara.
+                    f.src = it.dataset.embed + (it.dataset.embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1&mute=1&playsinline=1&rel=0';
                     f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'; f.allowFullscreen = true;
                     f.setAttribute('scrolling', 'no');
                     wrap.appendChild(f);
@@ -193,6 +194,7 @@
                         }
                     });
                     wrap.appendChild(v);
+                    var pl = v.play(); if (pl && pl.catch) pl.catch(function () { v.muted = true; v.play().catch(function () {}); });
                 }
                 media.appendChild(wrap);
                 if (it.dataset.link) {

@@ -42,7 +42,11 @@
         <section class="gallery-grid">
             @foreach ($galleries as $gallery)
                 <article class="item-card {{ $gallery->isActive() ? '' : 'inactive' }}">
-                    <div class="item-thumb">
+                    <div class="item-thumb" data-play role="button" tabindex="0" aria-label="Putar {{ $gallery->title }}"
+                         data-type="{{ $gallery->type }}" data-title="{{ $gallery->title }}"
+                         data-src="{{ $gallery->image_url }}" data-embed="{{ $gallery->embed_url }}" data-platform="{{ $gallery->video_platform }}"
+                         data-link="{{ $gallery->social_link[0] ?? '' }}" data-link-label="{{ $gallery->social_link[1] ?? '' }}"
+                         data-file="{{ $gallery->video_file_url }}" data-poster="{{ $gallery->image_url }}">
                         @if ($gallery->thumbnail_url)
                             <img src="{{ $gallery->thumbnail_url }}" alt="{{ $gallery->title }}" loading="lazy">
                         @elseif ($gallery->video_file_url)
@@ -96,6 +100,7 @@
             @endforeach
         </section>
     @endif
+    @include('partials.media-player')
 @endsection
 
 @push('scripts')
