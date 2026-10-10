@@ -8,7 +8,7 @@
     $positionCss = collect(\App\Models\Program::POSITIONS)->map(fn ($item) => $item[1]);
 @endphp
 
-<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="programForm">
+<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="programForm" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
     @csrf
     @if ($isEdit)
         @method('PUT')
@@ -27,10 +27,10 @@
     {{-- Foto --}}
     <div class="field">
         <label for="fImage">Foto program</label>
-        <input type="file" name="image_file" id="fImage" accept="image/jpeg,image/png,image/webp"
+        <input type="file" name="image_file" id="fImage" data-folder="programs" accept="image/*"
                class="input @error('image_file') is-invalid @enderror">
         <p class="field-hint">
-            JPG, PNG, atau WEBP. Maksimal 5 MB. Foto landscape paling cocok.
+            JPG, PNG, atau WEBP. Ukuran tidak dibatasi. Foto landscape paling cocok.
             @if ($isEdit && $program->image) Kosongkan jika tidak ingin mengganti foto. @else Jika dikosongkan, memakai gambar bawaan. @endif
         </p>
         @error('image_file') <p class="field-error">{{ $message }}</p> @enderror

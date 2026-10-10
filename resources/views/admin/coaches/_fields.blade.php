@@ -47,8 +47,8 @@
         </div>
         <div>
             <span class="cf-lbl">Foto coach</span>
-            <label class="cf-file"><input type="file" name="photo_file" accept="image/jpeg,image/png,image/webp" data-cf-photo>📷 Ganti foto</label>
-            <span class="cf-hint">JPG, PNG, atau WEBP, maks. 4 MB. Foto potret (tegak) paling bagus.</span>
+            <label class="cf-file"><input type="file" name="photo_file" accept="image/*" data-folder="coaches" data-cf-photo>📷 Ganti foto</label>
+            <span class="cf-hint">JPG, PNG, atau WEBP, ukuran bebas. Foto potret (tegak) paling bagus.</span>
             @if ($coach->photo)
                 <label class="cf-check"><input type="checkbox" name="remove_photo" value="1"> Hapus foto</label>
             @endif

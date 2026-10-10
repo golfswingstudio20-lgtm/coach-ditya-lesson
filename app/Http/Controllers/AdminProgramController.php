@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Uploads;
 use App\Models\Program;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -111,7 +112,7 @@ class AdminProgramController extends Controller
             'name'           => ['required', 'string', 'max:100'],
             'description'    => ['nullable', 'string', 'max:255'],
             'features'       => ['nullable', 'string', 'max:1000'],
-            'image_file'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'image_file'     => ['nullable', 'file'],
             'image_position' => ['required', Rule::in(array_keys(Program::POSITIONS))],
             'sort_order'     => ['nullable', 'integer', 'min:0'],
             'is_active'      => ['nullable', 'boolean'],
@@ -149,9 +150,10 @@ class AdminProgramController extends Controller
             $program->image = null;
         }
 
-        if ($request->hasFile('image_file')) {
+        $image = Uploads::take($request, 'image_file', 'programs');
+        if ($image) {
             $this->deleteStoredFile($program->image);
-            $program->image = $request->file('image_file')->store('programs', 'public');
+            $program->image = $image;
         }
     }
 
@@ -160,8 +162,6 @@ class AdminProgramController extends Controller
      */
     private function deleteStoredFile(?string $path): void
     {
-        if ($path && str_starts_with($path, 'programs/') && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
+        Uploads::delete($path, 'programs/');
     }
 }

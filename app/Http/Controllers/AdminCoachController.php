@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Uploads;
 use App\Models\Coach;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -66,7 +67,7 @@ class AdminCoachController extends Controller
             'certifications'   => ['nullable', 'string', 'max:1200'],
             'achievements'     => ['nullable', 'string', 'max:1200'],
             'quote'            => ['nullable', 'string', 'max:200'],
-            'photo_file'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'photo_file'       => ['nullable', 'file'],
             'is_active'        => ['nullable', 'boolean'],
         ], [
             'name.required'    => 'Nama coach wajib diisi.',
@@ -104,9 +105,10 @@ class AdminCoachController extends Controller
             $coach->photo = null;
         }
 
-        if ($request->hasFile('photo_file')) {
+        $photo = Uploads::take($request, 'photo_file', 'coaches');
+        if ($photo) {
             $this->deletePhoto($coach->photo);
-            $coach->photo = $request->file('photo_file')->store('coaches', 'public');
+            $coach->photo = $photo;
         }
 
         $coach->save();

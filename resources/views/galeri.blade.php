@@ -33,6 +33,10 @@
     .gl-item .play svg { width: 22px; height: 22px; margin-left: 3px; }
     .gl-ph { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .35); }
     .gl-ph svg { width: 40px; height: 40px; }
+    .gl-item.ig { background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%); }
+    .gl-item.ig .gl-ph { color: rgba(255, 255, 255, .85); }
+    .gl-item video.thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    .lb-media .ratio.portrait { aspect-ratio: auto; width: min(420px, 100%); height: min(82vh, 760px); margin: 0 auto; background: #fff; }
     .lb { position: fixed; inset: 0; z-index: 330; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(15, 26, 19, .88); }
     .lb.open { display: flex; }
     .lb-box { width: min(980px, 100%); }
@@ -84,19 +88,21 @@
                     $thumb   = $isVideo ? $g->thumbnail_url : $g->image_url;
                     $shape   = [0 => 'big', 3 => 'tall', 4 => 'wide', 7 => 'big'][$loop->index % 8] ?? '';
                     if ($isVideo && $shape === '') { $shape = 'tall'; }
+                    $platform = $g->video_platform;
                 @endphp
-                <button type="button" class="gl-item {{ $shape }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
+                <button type="button" class="gl-item {{ $shape }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
                         data-title="{{ $g->title }}" data-desc="{{ $g->category ?: \Illuminate\Support\Str::limit($g->description, 90) }}"
                         @if ($isVideo)
-                            data-embed="{{ $g->embed_url }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
+                            data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
                         @else
                             data-src="{{ $g->image_url }}"
                         @endif
                         aria-label="{{ $g->title }}">
                     <span class="gl-ph">{!! Icons::svg($isVideo ? 'video' : 'image') !!}</span>
-                    @if ($thumb)<img src="{{ $thumb }}" alt="" loading="lazy" onerror="this.remove()">@endif
+                    @if ($thumb)<img src="{{ $thumb }}" alt="" loading="lazy" onerror="this.remove()">
+                    @elseif ($platform === 'file' && $g->video_file_url)<video class="thumb" src="{{ $g->video_file_url }}#t=1" muted playsinline preload="metadata"></video>@endif
                     @if ($isVideo)
-                        <span class="badge">Video</span>
+                        <span class="badge">{{ ['youtube' => 'YouTube', 'instagram' => 'Instagram'][$platform] ?? 'Video' }}</span>
                         <span class="play">{!! Icons::svg('play') !!}</span>
                     @endif
                     <span class="cap"><strong>{{ $g->title }}</strong>@if ($g->category)<small>{{ $g->category }}</small>@endif</span>
@@ -139,7 +145,7 @@
         it.addEventListener('click', function () {
             media.innerHTML = '';
             if (it.dataset.type === 'video') {
-                var wrap = document.createElement('div'); wrap.className = 'ratio';
+                var wrap = document.createElement('div'); wrap.className = 'ratio' + (it.dataset.platform === 'instagram' ? ' portrait' : '');
                 if (it.dataset.embed) {
                     var f = document.createElement('iframe');
                     f.src = it.dataset.embed + (it.dataset.embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1';

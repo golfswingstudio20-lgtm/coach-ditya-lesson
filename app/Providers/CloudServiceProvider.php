@@ -14,6 +14,10 @@ class CloudServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (! filter_var(env('SUPABASE_STORAGE', false), FILTER_VALIDATE_BOOL)) {
+            // Lokal: alamat gambar relatif (/storage/...), supaya tetap tampil walau APP_URL beda
+            // dengan alamat yang dibuka di browser (mis. http://golf-booking-lesson.test).
+            config(['filesystems.disks.public.url' => '/storage']);
+
             return;
         }
 

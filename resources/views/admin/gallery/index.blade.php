@@ -47,6 +47,8 @@
                             <img src="{{ $gallery->thumbnail_url }}" alt="{{ $gallery->title }}" loading="lazy">
                         @elseif ($gallery->video_file_url)
                             <video src="{{ $gallery->video_file_url }}#t=1" muted preload="metadata"></video>
+                        @elseif ($gallery->video_platform === 'instagram')
+                            <div class="no-thumb" style="background:linear-gradient(135deg,#f9ce34,#ee2a7b 50%,#6228d7);color:#fff">IG</div>
                         @else
                             <div class="no-thumb">▧</div>
                         @endif
@@ -57,7 +59,7 @@
 
                         <div class="badges">
                             <span class="badge type">
-                                {{ $gallery->type === 'image' ? 'Foto' : ($gallery->video_url ? 'YouTube' : 'Video') }}
+                                {{ $gallery->type === 'image' ? 'Foto' : ['youtube' => 'YouTube', 'instagram' => 'Instagram'][$gallery->video_platform] ?? 'Video' }}
                             </span>
                             <span class="badge {{ $gallery->status }}">
                                 {{ $gallery->isActive() ? 'Tampil' : 'Disembunyikan' }}

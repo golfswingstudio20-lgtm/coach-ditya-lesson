@@ -55,6 +55,9 @@ class BuatEnvVercel extends Command
         if (($env['SUPABASE_S3_KEY'] ?? '') === '') {
             $this->warn('SUPABASE_S3_KEY masih kosong. Upload logo/galeri/bukti transfer tidak akan jalan di Vercel.');
         }
+        if (($env['SUPABASE_SERVICE_KEY'] ?? $env['SUPABASE_SERVICE_ROLE_KEY'] ?? '') === '') {
+            $this->warn('SUPABASE_SERVICE_KEY kosong. Upload foto/video besar dari admin akan dibatasi server (maks. ~4 MB di Vercel).');
+        }
         if (! $this->option('url')) {
             $this->warn('APP_URL masih contoh. Setelah tahu alamat Vercel, ganti APP_URL di Vercel.');
         }

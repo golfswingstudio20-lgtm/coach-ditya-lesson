@@ -57,7 +57,7 @@
         </div>
 
         <form class="hce-form" method="POST" enctype="multipart/form-data" id="hceForm"
-              action="{{ $coach->exists ? route('admin.coaches.update', $coach) : route('admin.coaches.store') }}">
+              action="{{ $coach->exists ? route('admin.coaches.update', $coach) : route('admin.coaches.store') }}" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
             @csrf
             @if ($coach->exists) @method('PUT') @endif
             <input type="hidden" name="return" value="home">
@@ -91,3 +91,4 @@
     });
 })();
 </script>
+<script src="{{ asset('js/direct-upload.js') }}?v={{ @filemtime(public_path('js/direct-upload.js')) }}" defer></script>

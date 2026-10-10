@@ -25,7 +25,7 @@
     </section>
 
     <div class="ab-grid">
-        <form method="POST" action="{{ $coach->exists ? route('admin.coaches.update', $coach) : route('admin.coaches.store') }}" enctype="multipart/form-data" class="form-card" id="coachForm">
+        <form method="POST" action="{{ $coach->exists ? route('admin.coaches.update', $coach) : route('admin.coaches.store') }}" enctype="multipart/form-data" class="form-card" id="coachForm" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
             @csrf
             @if ($coach->exists) @method('PUT') @endif
 

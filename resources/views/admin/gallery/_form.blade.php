@@ -4,11 +4,13 @@
 --}}
 @php
     $type        = old('type', $gallery->type ?? 'image');
-    $videoSource = old('video_source', $gallery->video_file && ! $gallery->video_url ? 'upload' : 'youtube');
+    $videoSource = old('video_source', $gallery->video_file && ! $gallery->video_url
+        ? 'upload'
+        : (str_contains((string) $gallery->video_url, 'instagram.com') ? 'instagram' : 'youtube'));
     $isActive    = old('status', $gallery->status ?? 'active') === 'active';
 @endphp
 
-<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="galleryForm">
+<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="galleryForm" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
     @csrf
     @if ($isEdit)
         @method('PUT')
@@ -58,10 +60,10 @@
     {{-- ===================== FOTO ===================== --}}
     <div class="field" id="imageGroup">
         <label for="fImage">File foto</label>
-        <input type="file" name="image_file" id="fImage" accept="image/jpeg,image/png,image/webp,image/gif"
+        <input type="file" name="image_file" id="fImage" data-folder="gallery/images" accept="image/*"
                class="input @error('image_file') is-invalid @enderror">
         <p class="field-hint">
-            JPG, PNG, WEBP, atau GIF. Maksimal 5 MB.
+            JPG, PNG, WEBP, GIF, atau HEIC. Ukuran tidak dibatasi.
             @if ($isEdit && $gallery->image) Kosongkan jika tidak ingin mengganti foto. @endif
         </p>
         @error('image_file') <p class="field-error">{{ $message }}</p> @enderror
@@ -71,29 +73,31 @@
     <div id="videoGroup">
         <div class="field">
             <span class="field-label">Sumber video</span>
-            <div class="segmented">
+            <div class="segmented" style="grid-template-columns: repeat(3, 1fr)">
                 <input type="radio" name="video_source" id="srcYoutube" value="youtube" @checked($videoSource === 'youtube')>
-                <label for="srcYoutube">Link YouTube</label>
+                <label for="srcYoutube">YouTube</label>
+                <input type="radio" name="video_source" id="srcInstagram" value="instagram" @checked($videoSource === 'instagram')>
+                <label for="srcInstagram">Instagram</label>
                 <input type="radio" name="video_source" id="srcUpload" value="upload" @checked($videoSource === 'upload')>
                 <label for="srcUpload">Upload file</label>
             </div>
         </div>
 
         <div class="field" id="youtubeGroup">
-            <label for="fVideoUrl">Link YouTube</label>
-            <input type="url" name="video_url" id="fVideoUrl" maxlength="255"
+            <label for="fVideoUrl" id="fVideoUrlLabel">Link YouTube</label>
+            <input type="url" name="video_url" id="fVideoUrl" maxlength="500"
                    class="input @error('video_url') is-invalid @enderror"
                    value="{{ old('video_url', $gallery->video_url) }}" placeholder="https://www.youtube.com/watch?v=...">
-            <p class="field-hint">Thumbnail diambil otomatis dari YouTube jika tidak mengunggah thumbnail sendiri.</p>
+            <p class="field-hint" id="fVideoUrlHint">Thumbnail diambil otomatis dari YouTube jika tidak mengunggah thumbnail sendiri.</p>
             @error('video_url') <p class="field-error">{{ $message }}</p> @enderror
         </div>
 
         <div class="field" id="uploadGroup">
             <label for="fVideoUpload">File video</label>
-            <input type="file" name="video_upload" id="fVideoUpload" accept="video/mp4,video/webm,video/quicktime"
+            <input type="file" name="video_upload" id="fVideoUpload" data-folder="gallery/videos" accept="video/*"
                    class="input @error('video_upload') is-invalid @enderror">
             <p class="field-hint">
-                MP4, WEBM, atau MOV. Maksimal 50 MB.
+                MP4, WEBM, atau MOV. Ukuran tidak dibatasi.
                 @if ($isEdit && $gallery->video_file) Kosongkan jika tidak ingin mengganti video. @endif
             </p>
             @if ($isEdit && $gallery->video_file)
@@ -104,8 +108,8 @@
 
         <div class="field">
             <label for="fThumb">Thumbnail (opsional)</label>
-            <input type="file" name="image_file" id="fThumb" accept="image/jpeg,image/png,image/webp" class="input" disabled>
-            <p class="field-hint">Gambar sampul sebelum video diputar. Maksimal 5 MB.</p>
+            <input type="file" name="image_file" id="fThumb" data-folder="gallery/images" accept="image/*" class="input" disabled>
+            <p class="field-hint">Gambar sampul sebelum video diputar. Disarankan untuk video Instagram.</p>
         </div>
     </div>
 
@@ -144,7 +148,8 @@
             const $ = (id) => document.getElementById(id);
 
             const typeImage  = $('typeImage');
-            const srcYoutube = $('srcYoutube');
+            const srcUpload  = $('srcUpload');
+            const srcInsta   = $('srcInstagram');
             const photoInput = $('fImage');
             const thumbInput = $('fThumb');
             const preview    = $('mediaPreview');
@@ -152,12 +157,18 @@
             // Hanya satu input "image_file" yang aktif: foto (tipe foto) atau thumbnail (tipe video)
             function syncFields() {
                 const isImage   = typeImage.checked;
-                const isYoutube = srcYoutube.checked;
+                const isLink    = !srcUpload.checked;
+                const isInsta   = srcInsta.checked;
 
                 $('imageGroup').hidden   = !isImage;
                 $('videoGroup').hidden   = isImage;
-                $('youtubeGroup').hidden = !isYoutube;
-                $('uploadGroup').hidden  = isYoutube;
+                $('youtubeGroup').hidden = !isLink;
+                $('uploadGroup').hidden  = isLink;
+                $('fVideoUrlLabel').textContent = isInsta ? 'Link Instagram (post / reel)' : 'Link YouTube';
+                $('fVideoUrl').placeholder = isInsta ? 'https://www.instagram.com/reel/ABC123xyz/' : 'https://www.youtube.com/watch?v=...';
+                $('fVideoUrlHint').textContent = isInsta
+                    ? 'Salin dari tombol Bagikan > Salin tautan di Instagram. Akun harus publik. Upload thumbnail di bawah supaya kartunya tampil bagus.'
+                    : 'Thumbnail diambil otomatis dari YouTube jika tidak mengunggah thumbnail sendiri.';
 
                 photoInput.disabled = !isImage;
                 thumbInput.disabled = isImage;

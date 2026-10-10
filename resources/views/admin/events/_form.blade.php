@@ -10,7 +10,7 @@
     $isActive   = (bool) old('is_active', $event->is_active ?? true);
 @endphp
 
-<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="eventForm">
+<form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="eventForm" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
     @csrf
     @if ($isEdit)
         @method('PUT')
@@ -29,10 +29,10 @@
     {{-- Poster --}}
     <div class="field">
         <label for="fPoster">Poster event</label>
-        <input type="file" name="poster_file" id="fPoster" accept="image/jpeg,image/png,image/webp"
+        <input type="file" name="poster_file" id="fPoster" data-folder="events/posters" accept="image/*"
                class="input @error('poster_file') is-invalid @enderror">
         <p class="field-hint">
-            JPG, PNG, atau WEBP. Maksimal 5 MB. Disarankan poster tegak (portrait).
+            JPG, PNG, atau WEBP. Ukuran tidak dibatasi. Disarankan poster tegak (portrait).
             @if ($isEdit && $event->poster) Kosongkan jika tidak ingin mengganti poster. @endif
         </p>
         @error('poster_file') <p class="field-error">{{ $message }}</p> @enderror

@@ -84,6 +84,19 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         /*
+        | File terlalu besar untuk batas server (PHP / Vercel): kembali ke form dengan pesan jelas.
+        */
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, Request $request) {
+            $message = 'File terlalu besar untuk server ini. Aktifkan upload langsung ke Supabase (isi SUPABASE_SERVICE_KEY) supaya ukuran file tidak dibatasi.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 413);
+            }
+
+            return redirect()->back()->withErrors(['upload' => $message]);
+        });
+
+        /*
         |--------------------------------------------------------------------------
         | Session Expired / CSRF
         |--------------------------------------------------------------------------

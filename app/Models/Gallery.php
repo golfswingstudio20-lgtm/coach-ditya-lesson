@@ -98,9 +98,49 @@ class Gallery extends Model
         return preg_match($pattern, $this->video_url, $match) ? $match[1] : null;
     }
 
+    /** Kode postingan Instagram: ['p'|'reel', 'ABC123'] atau null. */
+    public function getInstagramPostAttribute(): ?array
+    {
+        if (! $this->video_url) {
+            return null;
+        }
+
+        if (! preg_match('~instagram\.com/(p|reel|reels|tv)/([A-Za-z0-9_-]+)~i', $this->video_url, $m)) {
+            return null;
+        }
+
+        $kind = strtolower($m[1]) === 'p' ? 'p' : (strtolower($m[1]) === 'tv' ? 'tv' : 'reel');
+
+        return [$kind, $m[2]];
+    }
+
+    /** youtube | instagram | file | null */
+    public function getVideoPlatformAttribute(): ?string
+    {
+        if ($this->type !== 'video') {
+            return null;
+        }
+        if ($this->youtube_id) {
+            return 'youtube';
+        }
+        if ($this->instagram_post) {
+            return 'instagram';
+        }
+
+        return $this->video_file ? 'file' : null;
+    }
+
     public function getEmbedUrlAttribute(): ?string
     {
-        return $this->youtube_id ? "https://www.youtube.com/embed/{$this->youtube_id}" : null;
+        if ($this->youtube_id) {
+            return "https://www.youtube.com/embed/{$this->youtube_id}";
+        }
+
+        if ($ig = $this->instagram_post) {
+            return "https://www.instagram.com/{$ig[0]}/{$ig[1]}/embed/captioned/";
+        }
+
+        return null;
     }
 
     public function getThumbnailUrlAttribute(): ?string

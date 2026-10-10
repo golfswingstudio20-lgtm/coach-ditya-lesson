@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Uploads;
 use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,7 +123,7 @@ class AdminEventController extends Controller
         $request->validate([
             'title'               => ['required', 'string', 'max:150'],
             'description'         => ['nullable', 'string', 'max:1000'],
-            'poster_file'         => [Rule::requiredIf(! $event?->poster), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'poster_file'         => [Rule::requiredIf(! $event?->poster && ! $request->filled('poster_file_path')), 'nullable', 'file'],
             'event_date'          => ['required', 'date'],
             'start_time'          => ['nullable', 'date_format:H:i'],
             'end_time'            => ['nullable', 'date_format:H:i', Rule::when($request->filled('start_time'), 'after:start_time')],
@@ -161,12 +162,13 @@ class AdminEventController extends Controller
 
     private function handlePoster(Request $request, Event $event): void
     {
-        if (! $request->hasFile('poster_file')) {
+        $poster = Uploads::take($request, 'poster_file', 'events/posters');
+        if (! $poster) {
             return;
         }
 
         $this->deleteStoredFile($event->poster);
-        $event->poster = $request->file('poster_file')->store('events/posters', 'public');
+        $event->poster = $poster;
     }
 
     /**
@@ -175,8 +177,6 @@ class AdminEventController extends Controller
      */
     private function deleteStoredFile(?string $path): void
     {
-        if ($path && str_starts_with($path, 'events/') && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
+        Uploads::delete($path, 'events/');
     }
 }

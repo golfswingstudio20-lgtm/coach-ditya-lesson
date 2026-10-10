@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Gallery;
+use App\Support\Uploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +12,8 @@ use Illuminate\View\View;
 
 class AdminGalleryController extends Controller
 {
-    private const YOUTUBE_PATTERN = '~^https?://(www\.|m\.)?(youtube\.com|youtu\.be)/~i';
+    private const YOUTUBE_PATTERN   = '~^https?://(www\.|m\.)?(youtube\.com|youtu\.be)/~i';
+    private const INSTAGRAM_PATTERN = '~^https?://(www\.)?instagram\.com/(p|reel|reels|tv)/[A-Za-z0-9_-]+~i';
 
     /**
      * Menampilkan daftar gallery.
@@ -125,10 +127,11 @@ class AdminGalleryController extends Controller
     {
         $type   = $request->input('type');
         $source = $request->input('video_source', 'youtube');
+        $isLink = in_array($source, ['youtube', 'instagram'], true);
 
-        // File wajib jika belum ada file lama
-        $needsImage     = $type === 'image' && ! $gallery?->image;
-        $needsVideoFile = $type === 'video' && $source === 'upload' && ! $gallery?->video_file;
+        // File wajib jika belum ada file lama (file bisa datang dari upload langsung: *_path)
+        $needsImage     = $type === 'image' && ! $gallery?->image && ! $request->filled('image_file_path');
+        $needsVideoFile = $type === 'video' && $source === 'upload' && ! $gallery?->video_file && ! $request->filled('video_upload_path');
 
         $request->validate([
             'type'         => ['required', Rule::in(['image', 'video'])],
@@ -137,19 +140,22 @@ class AdminGalleryController extends Controller
             'category'     => ['nullable', 'string', 'max:100'],
             'status'       => ['required', Rule::in(['active', 'inactive'])],
             'sort_order'   => ['nullable', 'integer', 'min:0'],
-            'video_source' => ['nullable', Rule::in(['youtube', 'upload'])],
-            'image_file'   => [Rule::requiredIf($needsImage), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
-            'video_url'    => [Rule::requiredIf($type === 'video' && $source === 'youtube'), 'nullable', 'url', 'max:255', 'regex:' . self::YOUTUBE_PATTERN],
-            'video_upload' => [Rule::requiredIf($needsVideoFile), 'nullable', 'file', 'mimetypes:video/mp4,video/webm,video/quicktime', 'max:51200'],
+            'video_source' => ['nullable', Rule::in(['youtube', 'instagram', 'upload'])],
+            // Ukuran file tidak dibatasi.
+            'image_file'   => [Rule::requiredIf($needsImage), 'nullable', 'file'],
+            'video_url'    => [
+                Rule::requiredIf($type === 'video' && $isLink), 'nullable', 'url', 'max:500',
+                $source === 'instagram' ? 'regex:' . self::INSTAGRAM_PATTERN : 'regex:' . self::YOUTUBE_PATTERN,
+            ],
+            'video_upload' => [Rule::requiredIf($needsVideoFile), 'nullable', 'file'],
         ], [
             'title.required'        => 'Judul wajib diisi.',
             'image_file.required'   => 'Pilih file foto yang akan diunggah.',
-            'image_file.image'      => 'File foto harus berupa gambar.',
-            'image_file.max'        => 'Ukuran foto maksimal 5 MB.',
-            'video_url.required'    => 'Link YouTube wajib diisi.',
-            'video_url.regex'       => 'Link harus berasal dari YouTube.',
+            'video_url.required'    => $source === 'instagram' ? 'Link Instagram wajib diisi.' : 'Link YouTube wajib diisi.',
+            'video_url.regex'       => $source === 'instagram'
+                ? 'Link harus dari postingan / reel Instagram, contoh: https://www.instagram.com/reel/ABC123/'
+                : 'Link harus berasal dari YouTube.',
             'video_upload.required' => 'Pilih file video yang akan diunggah.',
-            'video_upload.max'      => 'Ukuran video maksimal 50 MB.',
         ]);
 
         return [
@@ -165,9 +171,10 @@ class AdminGalleryController extends Controller
     private function handleMedia(Request $request, Gallery $gallery): void
     {
         // Foto (untuk tipe image) atau thumbnail (untuk tipe video)
-        if ($request->hasFile('image_file')) {
+        $image = Uploads::take($request, 'image_file', 'gallery/images');
+        if ($image) {
             $this->deleteStoredFile($gallery->image);
-            $gallery->image = $request->file('image_file')->store('gallery/images', 'public');
+            $gallery->image = $image;
         }
 
         if ($gallery->type === 'image') {
@@ -178,17 +185,20 @@ class AdminGalleryController extends Controller
             return;
         }
 
-        if ($request->input('video_source', 'youtube') === 'youtube') {
-            $gallery->video_url = $request->input('video_url');
+        $source = $request->input('video_source', 'youtube');
+
+        if (in_array($source, ['youtube', 'instagram'], true)) {
+            $gallery->video_url = trim((string) $request->input('video_url'));
             $this->deleteStoredFile($gallery->video_file);
             $gallery->video_file = null;
 
             return;
         }
 
-        if ($request->hasFile('video_upload')) {
+        $video = Uploads::take($request, 'video_upload', 'gallery/videos');
+        if ($video) {
             $this->deleteStoredFile($gallery->video_file);
-            $gallery->video_file = $request->file('video_upload')->store('gallery/videos', 'public');
+            $gallery->video_file = $video;
         }
 
         $gallery->video_url = null;
@@ -200,8 +210,6 @@ class AdminGalleryController extends Controller
      */
     private function deleteStoredFile(?string $path): void
     {
-        if ($path && str_starts_with($path, 'gallery/') && Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-        }
+        Uploads::delete($path, 'gallery/');
     }
 }

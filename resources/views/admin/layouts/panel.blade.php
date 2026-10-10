@@ -415,6 +415,7 @@
     if (toast) setTimeout(() => toast.remove(), 3500);
 </script>
 
+<script src="{{ asset('js/direct-upload.js') }}?v={{ @filemtime(public_path('js/direct-upload.js')) }}" defer></script>
 @stack('scripts')
 
 </body>
