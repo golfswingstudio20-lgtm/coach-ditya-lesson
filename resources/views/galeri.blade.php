@@ -118,10 +118,11 @@
         <div class="fw-pagehead-title">
             <a href="{{ $isCustomer ? route('dashboard') : route('home') }}" class="fw-back" aria-label="Kembali">{!! Icons::svg('back') !!}</a>
             <div>
-                <h1 class="fw-h1">Galeri</h1>
-                <p class="fw-sub">Aktivitas latihan, suasana lapangan, dan video rekomendasi.</p>
+                <h1 class="fw-h1">{!! \App\Support\Content::html('galeri_title') !!}</h1>
+                <p class="fw-sub">{{ \App\Support\Content::get('galeri_sub') }}</p>
             </div>
         </div>
+            @if ((auth()->check() && auth()->user()->role === 'admin'))<button type="button" class="ce-btn" data-ce-open="galeri_head">✎ Edit</button>@endif
     </div>
 
     @if ($folders->count() > 1)
@@ -181,6 +182,9 @@
             <div class="lb-cap"><strong id="lbTitle"></strong><span id="lbDesc"></span></div>
         </div>
     </div>
+    @if ((auth()->check() && auth()->user()->role === 'admin'))
+        @include('partials.content-editor', ['keys' => ['galeri_head']])
+    @endif
 @endsection
 
 @push('scripts')

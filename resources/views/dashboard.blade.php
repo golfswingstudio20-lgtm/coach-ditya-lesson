@@ -104,7 +104,7 @@
         <div>
             <small>Halo,</small>
             <h1>{{ $user->name }}</h1>
-            <p>{{ $greet }}! Saatnya tingkatkan permainan golf Anda.</p>
+            <p>{{ $greet }}! {{ \App\Support\Content::get('member_greet') }}</p>
         </div>
         <a href="{{ Route::has('menu') ? route('menu') : route('profile.edit') }}" class="fw-av lg" aria-label="Menu akun">{{ Icons::initials($user->name) }}</a>
     </div>
@@ -144,8 +144,8 @@
                 <img class="ph" src="{{ $photo }}" alt="" onerror="this.remove()">
                 <div>
                     <span class="fw-pc-label lime">Lesson golf per jam</span>
-                    <h2 style="margin-top:12px">Better Swing,<br>Better You</h2>
-                    <p style="margin-top:8px">Pilih jam kosong dan booking lesson sekarang.</p>
+                    <h2 style="margin-top:12px">{!! \App\Support\Content::html('member_banner_title') !!}</h2>
+                    <p style="margin-top:8px">{{ \App\Support\Content::get('member_banner_text') }}</p>
                 </div>
                 <a href="{{ route('booking') }}" class="fw-pc-btn">Booking Sekarang {!! Icons::svg('arrow') !!}</a>
             </div>

@@ -17,8 +17,14 @@
     $coach     = \App\Models\Coach::main();
     $price     = \App\Models\Payment::pricePerHour();
 
-    $ctaUrl   = auth()->check() ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('booking')) : route('login');
-    $ctaLabel = auth()->check() && auth()->user()->role === 'admin' ? 'Buka Panel Admin' : 'Mulai Sekarang';
+    $c        = fn ($k) => \App\Support\Content::get($k);
+    $ch       = fn ($k) => \App\Support\Content::html($k);
+    $on       = fn ($k) => \App\Support\Content::on($k);
+    $isAdmin  = auth()->check() && auth()->user()->role === 'admin';
+    $ctaUrl   = auth()->check() ? ($isAdmin ? route('admin.dashboard') : route('booking')) : route('login');
+    $ctaLabel = $isAdmin ? 'Buka Panel Admin' : $c('home_btn_primary');
+    $edit     = fn ($k, $cls = '') => $isAdmin ? '<button type="button" class="ce-btn ' . $cls . '" data-ce-open="' . $k . '">✎ Edit</button>' : '';
+    $hiddenBar = fn ($k, $label) => $isAdmin ? '<div class="hm-wrap"><div class="hm-hidden"><span>Bagian <b>' . e($label) . '</b> disembunyikan dari pengunjung.</span>' . '<button type="button" class="ce-btn" data-ce-open="' . $k . '">✎ Tampilkan / edit</button></div></div>' : '';
 @endphp
 
 @push('head')
@@ -102,6 +108,11 @@
     .hm-band p { position: relative; margin-top: 8px; color: rgba(255, 255, 255, .75); }
     .hm-band .fw-btn { position: relative; }
 
+    .hm-sec-head .hm-acts { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .hm-hidden { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 18px 0; padding: 12px 16px; border: 1px dashed rgba(233, 162, 59, .6); border-radius: 16px; background: var(--d-orange-tint, #fdf1de); color: var(--d-orange-ink, #8a5608); font-size: 13px; }
+    .hm-band .fw-hl { color: #cde8a3; }
+    .hm-band .ce-btn { position: absolute; top: 14px; right: 14px; z-index: 2; }
+
     @media (max-width: 960px) {
         .hm-hero-grid { grid-template-columns: 1fr; }
         .hm-side { display: none; }
@@ -129,10 +140,12 @@
 </style>
 @endpush
 
+
 @section('content')
     {{-- ================= HERO ================= --}}
-    <section class="hm-hero">
+    <section class="hm-hero" id="top">
         <img class="hm-hero-bg" src="{{ $photo }}" alt="" fetchpriority="high">
+        {!! $edit('hero', 'light float') !!}
         <div class="hm-wrap hm-hero-grid">
             <div>
                 <span class="hm-label"><i></i>{{ $nice($hero['hero_label']) }}</span>
@@ -140,7 +153,7 @@
                 <p class="hm-text">{{ $hero['hero_text'] }}</p>
                 <div class="hm-cta">
                     <a href="{{ $ctaUrl }}" class="fw-btn lime">{{ $ctaLabel }} {!! Icons::svg('arrow') !!}</a>
-                    <a href="{{ route('program') }}" class="fw-btn glass">Lihat Program</a>
+                    <a href="{{ route('program') }}" class="fw-btn glass">{{ $c('home_btn_secondary') }}</a>
                 </div>
             </div>
 
@@ -152,17 +165,17 @@
                         @else
                             <span class="fw-av">{{ Icons::initials($coach->name) }}</span>
                         @endif
-                        <div><small>Coach Anda</small><strong>{{ $coach->name }}</strong><span>{{ $coach->role ?: 'Coach profesional' }}</span></div>
+                        <div><small>{{ $c('home_side_coach') }}</small><strong>{{ $coach->name }}</strong><span>{{ $coach->role ?: 'Coach profesional' }}</span></div>
                     </a>
                 @endif
                 <div class="hm-float">
                     <span class="ic">{!! Icons::svg('calendar') !!}</span>
-                    <div><strong>Booking online</strong><span>Pilih jam, bayar, langsung main</span></div>
+                    <div><strong>{{ $c('home_side_book') }}</strong><span>{{ $c('home_side_book_text') }}</span></div>
                 </div>
                 @if ($locations->isNotEmpty())
                     <div class="hm-float">
                         <span class="ic">{!! Icons::svg('pin') !!}</span>
-                        <div><strong>{{ $locations->count() }} lokasi latihan</strong><span>{{ \Illuminate\Support\Str::limit($locations->pluck('name')->implode(', '), 40) }}</span></div>
+                        <div><strong>{{ $locations->count() }} {{ $c('home_side_loc') }}</strong><span>{{ \Illuminate\Support\Str::limit($locations->pluck('name')->implode(', '), 40) }}</span></div>
                     </div>
                 @endif
             </div>
@@ -171,46 +184,60 @@
 
     @php
         $trust = array_values(array_filter([
-            $coach?->years_experience ? [$coach->years_experience . '+', 'Tahun melatih'] : null,
-            $locations->isNotEmpty() ? [$locations->count(), 'Lokasi latihan'] : null,
-            $programs->isNotEmpty() ? [\App\Models\Program::active()->count(), 'Program'] : null,
+            $coach?->years_experience ? [$coach->years_experience . '+', $c('home_stat_years')] : null,
+            $locations->isNotEmpty() ? [$locations->count(), $c('home_stat_locations')] : null,
+            $programs->isNotEmpty() ? [\App\Models\Program::active()->count(), $c('home_stat_programs')] : null,
         ]));
     @endphp
-    @if ($trust)
-        <div class="hm-wrap">
+    @if ($trust && $on('home_show_stats'))
+        <div class="hm-wrap" style="position:relative">
             <div class="hm-trust" style="--n: {{ count($trust) }}">
                 @foreach ($trust as [$v, $l])<div><strong>{{ $v }}</strong><span>{{ $l }}</span></div>@endforeach
             </div>
+            @if ($isAdmin)<div style="position:relative;z-index:3;margin-top:8px">{!! $edit('stats') !!}</div>@endif
         </div>
+    @elseif ($trust)
+        {!! $hiddenBar('stats', 'Angka di bawah hero') !!}
     @endif
 
     {{-- ================= KEUNGGULAN ================= --}}
-    <section class="hm-sec alt">
-        <div class="hm-wrap">
-            <div class="hm-sec-head">
-                <div>
-                    <span class="fw-eyebrow">Kenapa kami</span>
-                    <h2 class="fw-h2" style="margin-top:6px">Belajar golf jadi lebih mudah</h2>
-                </div>
-            </div>
-            <div class="fw-grid c3">
-                <div class="hm-feat"><span class="ic">{!! Icons::svg('calendar') !!}</span><h3>Atur jadwal sendiri</h3><p>Lihat jam kosong secara langsung dan booking lesson per jam dari HP.</p></div>
-                <div class="hm-feat"><span class="ic">{!! Icons::svg('coach') !!}</span><h3>Coach berpengalaman</h3><p>Dilatih langsung oleh coach profesional dengan metode yang terstruktur.</p></div>
-                <div class="hm-feat"><span class="ic">{!! Icons::svg('pin') !!}</span><h3>Pilih lokasi latihan</h3><p>Driving range atau course lesson di lapangan golf pilihan Anda.</p></div>
-            </div>
-        </div>
-    </section>
-
-    {{-- ================= PROGRAM ================= --}}
-    @if ($programs->isNotEmpty())
-        <section class="hm-sec">
+    @if ($on('home_show_features'))
+        <section class="hm-sec alt" id="hm-features">
             <div class="hm-wrap">
                 <div class="hm-sec-head">
                     <div>
-                        <span class="fw-eyebrow">Program</span>
-                        <h2 class="fw-h2" style="margin-top:6px">Pilih program sesuai level Anda</h2>
+                        <span class="fw-eyebrow">{{ $c('home_feat_eyebrow') }}</span>
+                        <h2 class="fw-h2" style="margin-top:6px">{!! $ch('home_feat_title') !!}</h2>
                     </div>
-                    <a href="{{ route('program') }}" class="fw-link">Semua program →</a>
+                    {!! $edit('features') !!}
+                </div>
+                <div class="fw-grid c3">
+                    @foreach ([1, 2, 3] as $n)
+                        @if ($c("home_feat{$n}_title") || $c("home_feat{$n}_text"))
+                            <div class="hm-feat"><span class="ic">{!! Icons::svg($c("home_feat{$n}_icon") ?: 'star') !!}</span><h3>{{ $c("home_feat{$n}_title") }}</h3><p>{{ $c("home_feat{$n}_text") }}</p></div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @else
+        {!! $hiddenBar('features', 'Keunggulan') !!}
+    @endif
+
+    {{-- ================= PROGRAM ================= --}}
+    @if ($programs->isNotEmpty() && $on('home_show_programs'))
+        <section class="hm-sec" id="hm-programs">
+            <div class="hm-wrap">
+                <div class="hm-sec-head">
+                    <div>
+                        <span class="fw-eyebrow">{{ $c('home_prog_eyebrow') }}</span>
+                        <h2 class="fw-h2" style="margin-top:6px">{!! $ch('home_prog_title') !!}</h2>
+                    </div>
+                    <div class="hm-acts">
+                        {!! $edit('programs') !!}
+                        @if ($isAdmin)<a href="{{ route('admin.programs.index') }}" class="ce-btn light" style="text-decoration:none">✎ Kartu program</a>@endif
+                        <a href="{{ route('program') }}" class="fw-link">{{ $c('home_prog_link') }}</a>
+                    </div>
                 </div>
                 <div class="fw-grid c3">
                     @foreach ($programs as $p)
@@ -221,8 +248,8 @@
                                 <h3>{{ $p->name }}</h3>
                                 <p>{{ Str::limit($p->description, 90) }}</p>
                                 <div class="fw-pc-foot">
-                                    <span class="fw-pc-price">{{ \App\Models\Payment::formatRupiah($price) }}<small> / jam</small></span>
-                                    <span class="fw-pc-btn">Lihat {!! Icons::svg('arrow') !!}</span>
+                                    <span class="fw-pc-price">{{ \App\Models\Payment::formatRupiah($price) }}<small> {{ $c('home_prog_price') }}</small></span>
+                                    <span class="fw-pc-btn">{{ $c('home_prog_btn') }} {!! Icons::svg('arrow') !!}</span>
                                 </div>
                             </div>
                         </a>
@@ -230,21 +257,26 @@
                 </div>
             </div>
         </section>
+    @elseif ($programs->isNotEmpty())
+        {!! $hiddenBar('programs', 'Program') !!}
     @endif
 
     {{-- ================= ABOUT COACH ================= --}}
     @include('partials.home-coaches')
 
     {{-- ================= GALERI ================= --}}
-    @if ($photos->isNotEmpty())
-        <section class="hm-sec">
+    @if ($photos->isNotEmpty() && $on('home_show_gallery'))
+        <section class="hm-sec" id="hm-gallery">
             <div class="hm-wrap">
                 <div class="hm-sec-head">
                     <div>
-                        <span class="fw-eyebrow">Galeri</span>
-                        <h2 class="fw-h2" style="margin-top:6px">Suasana latihan kami</h2>
+                        <span class="fw-eyebrow">{{ $c('home_gal_eyebrow') }}</span>
+                        <h2 class="fw-h2" style="margin-top:6px">{!! $ch('home_gal_title') !!}</h2>
                     </div>
-                    <a href="{{ route('galeri') }}" class="fw-link">Lihat galeri →</a>
+                    <div class="hm-acts">
+                        {!! $edit('gallery') !!}
+                        <a href="{{ route('galeri') }}" class="fw-link">{{ $c('home_gal_link') }}</a>
+                    </div>
                 </div>
                 <div class="hm-gal">
                     @foreach ($photos as $g)
@@ -260,18 +292,23 @@
                 </div>
             </div>
         </section>
+    @elseif ($photos->isNotEmpty())
+        {!! $hiddenBar('gallery', 'Galeri') !!}
     @endif
 
     {{-- ================= EVENT ================= --}}
-    @if ($events->isNotEmpty())
-        <section class="hm-sec alt">
+    @if ($events->isNotEmpty() && $on('home_show_events'))
+        <section class="hm-sec alt" id="hm-events">
             <div class="hm-wrap">
                 <div class="hm-sec-head">
                     <div>
-                        <span class="fw-eyebrow">Event</span>
-                        <h2 class="fw-h2" style="margin-top:6px">Event mendatang</h2>
+                        <span class="fw-eyebrow">{{ $c('home_ev_eyebrow') }}</span>
+                        <h2 class="fw-h2" style="margin-top:6px">{!! $ch('home_ev_title') !!}</h2>
                     </div>
-                    <a href="{{ route('event') }}" class="fw-link">Semua event →</a>
+                    <div class="hm-acts">
+                        {!! $edit('events') !!}
+                        <a href="{{ route('event') }}" class="fw-link">{{ $c('home_ev_link') }}</a>
+                    </div>
                 </div>
                 <div class="fw-grid c2">
                     @foreach ($events as $ev)
@@ -294,18 +331,29 @@
                 </div>
             </div>
         </section>
+    @elseif ($events->isNotEmpty())
+        {!! $hiddenBar('events', 'Event') !!}
     @endif
 
     {{-- ================= CTA ================= --}}
-    <section class="hm-sec">
-        <div class="hm-wrap">
-            <div class="hm-band">
-                <div>
-                    <h2>Latihan hari ini,<br>prestasi esok hari.</h2>
-                    <p>Booking lesson pertama Anda sekarang, hanya butuh 1 menit.</p>
+    @if ($on('home_show_cta'))
+        <section class="hm-sec" id="hm-cta">
+            <div class="hm-wrap">
+                <div class="hm-band">
+                    {!! $edit('cta', 'light') !!}
+                    <div>
+                        <h2>{!! $ch('home_cta_title') !!}</h2>
+                        <p>{{ $c('home_cta_text') }}</p>
+                    </div>
+                    <a href="{{ $ctaUrl }}" class="fw-btn lime">{{ $isAdmin ? $ctaLabel : $c('home_cta_btn') }} {!! Icons::svg('arrow') !!}</a>
                 </div>
-                <a href="{{ $ctaUrl }}" class="fw-btn lime">{{ $ctaLabel }} {!! Icons::svg('arrow') !!}</a>
             </div>
-        </div>
-    </section>
+        </section>
+    @else
+        {!! $hiddenBar('cta', 'Ajakan di bawah') !!}
+    @endif
+
+    @if ($isAdmin)
+        @include('partials.content-editor', ['keys' => ['hero', 'stats', 'features', 'programs', 'gallery', 'events', 'cta', 'coach_text', 'footer']])
+    @endif
 @endsection

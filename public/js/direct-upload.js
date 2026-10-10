@@ -6,6 +6,8 @@
  */
 (function () {
     'use strict';
+    if (window.__directUpload) return; // jangan terpasang dua kali
+    window.__directUpload = true;
 
     function token(form) {
         var i = form.querySelector('input[name="_token"]');

@@ -17,9 +17,9 @@
     $hcAch   = collect($hcCoach->achievements ?? []);
     $hcSkill = collect($hcCoach->skills ?? []);
     $hcStats = array_filter([
-        $hcCoach->years_experience ? [$hcCoach->years_experience . '+', 'Tahun melatih'] : null,
-        $hcCoach->students ? [$hcCoach->students, 'Murid dilatih'] : null,
-        $hcCert->isNotEmpty() ? [$hcCert->count(), 'Sertifikasi'] : null,
+        $hcCoach->years_experience ? [$hcCoach->years_experience . '+', \App\Support\Content::get('coach_stat_years')] : null,
+        $hcCoach->students ? [$hcCoach->students, \App\Support\Content::get('coach_stat_students')] : null,
+        $hcCert->isNotEmpty() ? [$hcCert->count(), \App\Support\Content::get('coach_stat_cert')] : null,
     ]);
 @endphp
 <style>
@@ -102,7 +102,7 @@
                 </div>
             </div>
             @if ($hcCoach->years_experience)
-                <div class="hc-float"><strong>{{ $hcCoach->years_experience }}+</strong><span>tahun<br>melatih</span></div>
+                <div class="hc-float"><strong>{{ $hcCoach->years_experience }}+</strong><span style="display:block;max-width:9ch">{{ \App\Support\Content::get('coach_float') }}</span></div>
             @endif
         </div>
 
@@ -124,7 +124,7 @@
             <div class="hc-cols">
                 @if ($hcExp->isNotEmpty())
                     <div class="hc-box @if ($hcCert->isEmpty() && $hcAch->isEmpty()) wide @endif">
-                        <h3><i>{!! Icons::svg('history') !!}</i>Pengalaman</h3>
+                        <h3><i>{!! Icons::svg('history') !!}</i>{{ \App\Support\Content::get('coach_exp_title') }}</h3>
                         <div class="hc-time">
                             @foreach ($hcExp as $e)<div>@if (! empty($e['period']))<small>{{ $e['period'] }}</small>@endif<span>{{ $e['text'] }}</span></div>@endforeach
                         </div>
@@ -133,18 +133,18 @@
                 @if ($hcCert->isNotEmpty() || $hcAch->isNotEmpty())
                     <div class="hc-box @if ($hcExp->isEmpty()) wide @endif">
                         @if ($hcCert->isNotEmpty())
-                            <h3><i>{!! Icons::svg('award') !!}</i>Sertifikasi</h3>
+                            <h3><i>{!! Icons::svg('award') !!}</i>{{ \App\Support\Content::get('coach_cert_title') }}</h3>
                             <ul class="hc-list">@foreach ($hcCert as $c)<li>{{ $c }}</li>@endforeach</ul>
                         @endif
                         @if ($hcAch->isNotEmpty())
-                            <h3 @if ($hcCert->isNotEmpty()) style="margin-top: 18px" @endif><i>{!! Icons::svg('trophy') !!}</i>Prestasi</h3>
+                            <h3 @if ($hcCert->isNotEmpty()) style="margin-top: 18px" @endif><i>{!! Icons::svg('trophy') !!}</i>{{ \App\Support\Content::get('coach_ach_title') }}</h3>
                             <ul class="hc-list trophy">@foreach ($hcAch as $a)<li>{{ $a }}</li>@endforeach</ul>
                         @endif
                     </div>
                 @endif
                 @if ($hcSkill->isNotEmpty())
                     <div class="hc-box wide">
-                        <h3><i>{!! Icons::svg('golf') !!}</i>Keahlian yang diajarkan</h3>
+                        <h3><i>{!! Icons::svg('golf') !!}</i>{{ \App\Support\Content::get('coach_skill_title') }}</h3>
                         <div class="hc-chips">@foreach ($hcSkill as $s)<span>{{ $s }}</span>@endforeach</div>
                     </div>
                 @endif
@@ -153,12 +153,13 @@
             @if ($hcCoach->quote)<blockquote class="hc-quote">“{{ $hcCoach->quote }}”</blockquote>@endif
 
             <div class="hc-cta">
-                <a class="fw-btn" href="{{ auth()->check() ? route('booking') : route('login') }}">Booking Sekarang</a>
+                <a class="fw-btn" href="{{ auth()->check() ? route('booking') : route('login') }}">{{ \App\Support\Content::get('coach_btn_book') }}</a>
                 @if (Route::has('chat') && auth()->check() && auth()->user()->role === 'customer')
-                    <a class="fw-btn ghost" href="{{ route('chat') }}">{!! Icons::svg('chat') !!} Chat coach</a>
+                    <a class="fw-btn ghost" href="{{ route('chat') }}">{!! Icons::svg('chat') !!} {{ \App\Support\Content::get('coach_btn_chat') }}</a>
                 @else
-                    <a class="fw-btn ghost" href="{{ route('program') }}">Lihat program</a>
+                    <a class="fw-btn ghost" href="{{ route('program') }}">{{ \App\Support\Content::get('coach_btn_program') }}</a>
                 @endif
+                @if ($hcIsAdmin)<button type="button" class="ce-btn light" data-ce-open="coach_text">✎ Edit judul kotak & tombol</button>@endif
             </div>
         </div>
     </div>

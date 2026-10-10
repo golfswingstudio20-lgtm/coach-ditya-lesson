@@ -36,16 +36,17 @@
         <div class="fw-pagehead-title">
             <a href="{{ $isCustomer ? route('dashboard') : route('home') }}" class="fw-back" aria-label="Kembali">{!! Icons::svg('back') !!}</a>
             <div>
-                <h1 class="fw-h1">Bantuan & Kontak</h1>
+                <h1 class="fw-h1">{!! \App\Support\Content::html('contact_title') !!}</h1>
                 @if ($setting->description)<p class="fw-sub">{{ $setting->description }}</p>@endif
             </div>
         </div>
+            @if ((auth()->check() && auth()->user()->role === 'admin'))<button type="button" class="ce-btn" data-ce-open="contact_head">✎ Edit</button>@endif
     </div>
 
     <div class="kt-grid">
         <section>
             @if ($locations->isNotEmpty())
-                <div class="fw-section-head"><h2>Lokasi latihan</h2></div>
+                <div class="fw-section-head"><h2>{{ \App\Support\Content::get('contact_loc_title') }}</h2></div>
                 <div class="fw-list">
                     @foreach ($locations as $index => $location)
                         <button type="button" class="kt-loc location-tab {{ $index === 0 ? 'active' : '' }}"
@@ -58,7 +59,7 @@
                 </div>
             @endif
 
-            <div class="fw-section-head" style="margin-top:22px"><h2>Hubungi kami</h2></div>
+            <div class="fw-section-head" style="margin-top:22px"><h2>{{ \App\Support\Content::get('contact_reach_title') }}</h2></div>
             <div class="fw-menu">
                 @if ($setting->whatsapp_url)
                     <a href="{{ $setting->whatsapp_url }}" target="_blank" rel="noopener"><span class="ic">{!! Icons::svg('whatsapp') !!}</span><span class="lbl">{{ $setting->whatsapp }} <small class="fw-muted">(WhatsApp)</small></span>{!! Icons::svg('chev', 'fw-chev') !!}</a>
@@ -87,7 +88,7 @@
             @endif
 
             <form class="fw-card kt-form" id="contactForm">
-                <h2>Kirim pesan</h2>
+                <h2>{{ \App\Support\Content::get('contact_form_title') }}</h2>
                 <div class="fw-form-grid">
                     <div class="fw-field"><label for="contactName">Nama</label><input type="text" id="contactName" autocomplete="name" required value="{{ auth()->user()->name ?? '' }}"></div>
                     <div class="fw-field"><label for="contactEmail">Email</label><input type="email" id="contactEmail" autocomplete="email" required value="{{ auth()->user()->email ?? '' }}"></div>
@@ -97,6 +98,9 @@
             </form>
         </section>
     </div>
+    @if ((auth()->check() && auth()->user()->role === 'admin'))
+        @include('partials.content-editor', ['keys' => ['contact_head']])
+    @endif
 @endsection
 
 @push('scripts')

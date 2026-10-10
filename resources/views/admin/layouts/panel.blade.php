@@ -351,6 +351,9 @@
 
             <div class="sidebar-title">Content</div>
             <div class="sidebar-section">
+                <a href="{{ route('admin.content.index') }}" class="sidebar-link {{ request()->routeIs('admin.content.*') ? 'active' : '' }}">
+                    <span class="sidebar-icon">{!! \App\Support\Icons::svg('edit') !!}</span> Konten Website
+                </a>
                 <a href="{{ route('admin.gallery.index') }}" class="sidebar-link {{ request()->routeIs('admin.gallery.*') ? 'active' : '' }}">
                     <span class="sidebar-icon">{!! \App\Support\Icons::svg('image') !!}</span> Gallery
                 </a>

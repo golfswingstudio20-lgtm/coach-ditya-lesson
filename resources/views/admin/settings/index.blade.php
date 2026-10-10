@@ -315,42 +315,9 @@
             </section>
 
             <section class="st-card">
-                <h2>Teks halaman Home</h2>
-                <p class="st-sub">Tampil di halaman Home untuk visitor dan dashboard customer.</p>
-
-                <div class="st-hero-preview" style="background-image: linear-gradient(90deg, rgba(245,242,232,.97), rgba(245,242,232,.55)), url('{{ Brand::background('public') }}')">
-                    <small id="pLabel">{{ $hero['hero_label'] }}</small>
-                    <h3><span style="color: var(--d-text, #17261d)" id="pTitle1">{{ $hero['hero_title_1'] }}</span><br><span style="color: var(--d-text, #17261d)" id="pTitle2">{{ $hero['hero_title_2'] }}</span> <span id="pHighlight">{{ $hero['hero_highlight'] }}</span></h3>
-                    <p id="pText">{{ $hero['hero_text'] }}</p>
-                </div>
-
-                <div class="st-grid-2" style="margin-top: 16px">
-                    <div class="field">
-                        <label for="hLabel">Label kecil di atas judul</label>
-                        <input type="text" name="hero_label" id="hLabel" class="input" maxlength="60" data-preview="pLabel"
-                               value="{{ old('hero_label', $hero['hero_label']) }}">
-                    </div>
-                    <div class="field">
-                        <label for="hTitle1">Judul baris 1</label>
-                        <input type="text" name="hero_title_1" id="hTitle1" class="input" maxlength="60" data-preview="pTitle1"
-                               value="{{ old('hero_title_1', $hero['hero_title_1']) }}">
-                    </div>
-                    <div class="field">
-                        <label for="hTitle2">Judul baris 2</label>
-                        <input type="text" name="hero_title_2" id="hTitle2" class="input" maxlength="60" data-preview="pTitle2"
-                               value="{{ old('hero_title_2', $hero['hero_title_2']) }}">
-                    </div>
-                    <div class="field">
-                        <label for="hHighlight">Kata berwarna hijau (di akhir baris 2)</label>
-                        <input type="text" name="hero_highlight" id="hHighlight" class="input" maxlength="40" data-preview="pHighlight"
-                               value="{{ old('hero_highlight', $hero['hero_highlight']) }}">
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label for="hText">Deskripsi</label>
-                    <textarea name="hero_text" id="hText" class="input" maxlength="300" data-preview="pText">{{ old('hero_text', $hero['hero_text']) }}</textarea>
-                </div>
+                <h2>Teks & foto halaman website</h2>
+                <p class="st-sub" style="margin-bottom: 12px">Semua judul, kalimat, tombol, dan foto di Home, Program, Galeri, Event, Kontak, dan footer sekarang diatur di menu <strong>Konten Website</strong>.</p>
+                <a href="{{ route('admin.content.index') }}" class="btn btn-outline">✎ Buka Konten Website</a>
             </section>
 
             <div class="st-actions">

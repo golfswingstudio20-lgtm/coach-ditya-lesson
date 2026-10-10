@@ -76,10 +76,11 @@
         <div class="fw-pagehead-title">
             <a href="{{ $isCustomer ? route('dashboard') : route('home') }}" class="fw-back" aria-label="Kembali">{!! Icons::svg('back') !!}</a>
             <div>
-                <h1 class="fw-h1">Program Latihan</h1>
-                <p class="fw-sub">Program terstruktur bersama coach profesional, sesuai level permainan Anda.</p>
+                <h1 class="fw-h1">{!! \App\Support\Content::html('program_title') !!}</h1>
+                <p class="fw-sub">{{ \App\Support\Content::get('program_sub') }}</p>
             </div>
         </div>
+            @if ((auth()->check() && auth()->user()->role === 'admin'))<button type="button" class="ce-btn" data-ce-open="program_head">✎ Edit</button>@endif
     </div>
 
     @if ($programs->isEmpty())
@@ -153,14 +154,14 @@
     <section class="fw-section" style="margin-top:44px">
         <div class="fw-section-head">
             <div>
-                <span class="fw-eyebrow">Harga lesson</span>
-                <h2 class="fw-h2" style="margin-top:6px">Pilih jenis lesson</h2>
+                <span class="fw-eyebrow">{{ \App\Support\Content::get('program_price_eyebrow') }}</span>
+                <h2 class="fw-h2" style="margin-top:6px">{!! \App\Support\Content::html('program_price_title') !!}</h2>
             </div>
         </div>
         <div class="fw-grid c2">
             <article class="fw-card pg-price">
                 <span class="fw-badge tag">Driving Range</span>
-                <h3>Lesson Driving Range</h3>
+                <h3>{{ \App\Support\Content::get('program_range_title') }}</h3>
                 <div class="amount">{{ $rp(BookingRules::pricePerHour()) }} <small>/ jam</small></div>
                 <ul>
                     <li>Pilih jam antara {{ BookingRules::openTime() }} – {{ BookingRules::closeTime() }}</li>
@@ -172,7 +173,7 @@
             @if (BookingRules::courseEnabled())
                 <article class="fw-card pg-price dark">
                     <span class="fw-badge lime tag">On Course</span>
-                    <h3>Course Lesson</h3>
+                    <h3>{{ \App\Support\Content::get('program_course_title') }}</h3>
                     <div class="amount">{{ $rp(BookingRules::coursePrice()) }} <small>/ sesi</small></div>
                     <ul>
                         <li>Sesi {{ BookingRules::courseStart() }} – {{ BookingRules::courseEnd() }}</li>
@@ -190,6 +191,9 @@
         <div class="pd-back" data-pd-close></div>
         <div class="pd-box" id="pdBox"></div>
     </div>
+    @if ((auth()->check() && auth()->user()->role === 'admin'))
+        @include('partials.content-editor', ['keys' => ['program_head']])
+    @endif
 @endsection
 
 @push('scripts')

@@ -53,14 +53,15 @@
         <div class="fw-pagehead-title">
             <a href="{{ $isCustomer ? route('dashboard') : route('home') }}" class="fw-back" aria-label="Kembali">{!! Icons::svg('back') !!}</a>
             <div>
-                <h1 class="fw-h1">Event</h1>
-                <p class="fw-sub">Ikuti event & coaching clinic, amankan tempat Anda.</p>
+                <h1 class="fw-h1">{!! \App\Support\Content::html('event_title') !!}</h1>
+                <p class="fw-sub">{{ \App\Support\Content::get('event_sub') }}</p>
             </div>
         </div>
+            @if ((auth()->check() && auth()->user()->role === 'admin'))<button type="button" class="ce-btn" data-ce-open="event_head">✎ Edit</button>@endif
     </div>
 
     @if ($events->isEmpty())
-        <div class="fw-empty"><b>Belum ada event terdekat</b>Nantikan event berikutnya.</div>
+        <div class="fw-empty"><b>{{ \App\Support\Content::get('event_empty') }}</b>Nantikan event berikutnya.</div>
     @else
         <div class="ev-list">
             @foreach ($events as $event)
@@ -120,5 +121,8 @@
                 </article>
             @endforeach
         </div>
+    @endif
+    @if ((auth()->check() && auth()->user()->role === 'admin'))
+        @include('partials.content-editor', ['keys' => ['event_head']])
     @endif
 @endsection

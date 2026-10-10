@@ -58,7 +58,8 @@
         <div class="am-group">
             <h2>Konten website</h2>
             <div class="fw-menu">
-                {!! $item(route('home') . '#coach', 'edit', 'Edit Home & About Coach') !!}
+                {!! $item(route('home'), 'edit', 'Edit langsung di Home') !!}
+                {!! $item(route('admin.content.index'), 'layers', 'Konten Website (semua teks & foto)') !!}
                 {!! $item(route('admin.coaches.index'), 'coach', 'About Coach') !!}
                 {!! $item(route('admin.programs.index'), 'star', 'Program') !!}
                 {!! $item(route('admin.gallery.index'), 'image', 'Galeri') !!}
