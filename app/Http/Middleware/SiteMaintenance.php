@@ -16,7 +16,7 @@ class SiteMaintenance
     /** Alamat yang tetap bisa dibuka saat maintenance (login admin, dsb.) */
     private const ALLOWED = [
         'login', 'logout', 'forgot-password', 'reset-password*', 'two-factor-challenge',
-        'email/*', 'user/*', 'livewire*', 'up', 'storage/*', 'admin*',
+        'email/*', 'user/*', 'livewire*', 'up', 'storage/*', 'admin*', 'cron/*',
     ];
 
     public function handle(Request $request, Closure $next): Response

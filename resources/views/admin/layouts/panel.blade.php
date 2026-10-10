@@ -388,6 +388,9 @@
 
             <div class="sidebar-title">System</div>
             <div class="sidebar-section">
+                <a href="{{ route('admin.storage.index') }}" class="sidebar-link {{ request()->routeIs('admin.storage.*') ? 'active' : '' }}">
+                    <span class="sidebar-icon">{!! \App\Support\Icons::svg('layers') !!}</span> Penyimpanan
+                </a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                     <span class="sidebar-icon">{!! \App\Support\Icons::svg('settings') !!}</span> Settings
                 </a>

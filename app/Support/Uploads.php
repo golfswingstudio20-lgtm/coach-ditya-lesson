@@ -52,6 +52,26 @@ class Uploads
         return (string) env('SUPABASE_PUBLIC_BUCKET', 'public');
     }
 
+    /** Header untuk Supabase Storage API memakai service key. */
+    public static function headers(): array
+    {
+        $key = (string) self::serviceKey();
+
+        // Kunci baru (sb_secret_...) hanya boleh di header "apikey"; kunci lama (JWT service_role) di keduanya.
+        $headers = ['apikey' => $key];
+        if (str_starts_with($key, 'eyJ')) {
+            $headers['Authorization'] = 'Bearer ' . $key;
+        }
+
+        return $headers;
+    }
+
+    /** Alamat dasar Supabase Storage API, misal https://xxx.supabase.co/storage/v1 */
+    public static function apiBase(): string
+    {
+        return rtrim((string) env('SUPABASE_URL'), '/') . '/storage/v1';
+    }
+
     /**
      * Minta URL upload sekali pakai ke Supabase.
      *
@@ -74,11 +94,7 @@ class Uploads
             throw new \RuntimeException('SUPABASE_SERVICE_KEY berisi kunci publik (publishable/anon). Ganti dengan kunci rahasia: sb_secret_... atau service_role.');
         }
 
-        // Kunci baru (sb_secret_...) hanya boleh di header "apikey"; kunci lama (JWT service_role) di keduanya.
-        $headers = ['apikey' => $key];
-        if (str_starts_with($key, 'eyJ')) {
-            $headers['Authorization'] = 'Bearer ' . $key;
-        }
+        $headers = self::headers();
 
         $res = Http::withHeaders($headers)
             ->timeout(15)

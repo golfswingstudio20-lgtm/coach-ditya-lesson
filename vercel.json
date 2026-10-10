@@ -1,7 +1,9 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
     "framework": null,
-    "regions": ["hnd1"],
+    "regions": [
+        "hnd1"
+    ],
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {
@@ -10,9 +12,26 @@
         }
     },
     "routes": [
-        { "src": "/", "dest": "/api/index.php" },
-        { "src": "/(.*)\\.php", "dest": "/api/index.php" },
-        { "handle": "filesystem" },
-        { "src": "/(.*)", "dest": "/api/index.php" }
+        {
+            "src": "/",
+            "dest": "/api/index.php"
+        },
+        {
+            "src": "/(.*)\\.php",
+            "dest": "/api/index.php"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/index.php"
+        }
+    ],
+    "crons": [
+        {
+            "path": "/cron/bersihkan-storage",
+            "schedule": "0 19 * * *"
+        }
     ]
 }
