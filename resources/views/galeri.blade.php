@@ -44,9 +44,14 @@
     .lb-media:has(.lb-open) { background: transparent; overflow: visible; }
     .lb-media:has(.lb-open) .ratio { border-radius: 20px; overflow: hidden; }
     .lb-box:has(.lb-open) .lb-cap { text-align: center; }
+    .ig-box { width: min(400px, 100%); max-height: calc(100svh - 190px); margin: 0 auto; overflow-y: auto; border-radius: 16px; background: #fff; -webkit-overflow-scrolling: touch; }
+    .ig-box .instagram-media { margin: 0 !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+    .ig-box iframe { position: static !important; width: 100% !important; min-width: 0 !important; }
+    .ig-loading { padding: 60px 20px; text-align: center; color: #555; font-size: 14px; }
+    .lb:has(.ig-box) { align-items: flex-start; padding-top: 64px; overflow-y: auto; }
     .lb-media img { width: 100%; max-height: 78vh; object-fit: contain; display: block; margin: 0 auto; }
     .lb-media .ratio { position: relative; aspect-ratio: 16 / 9; }
-    .lb-media iframe, .lb-media video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+    .lb-media .ratio iframe, .lb-media .ratio video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .lb-cap { margin-top: 12px; color: #fff; }
     .lb-open { display: flex; width: fit-content; align-items: center; gap: 8px; margin: 12px auto 0; height: 44px; padding: 0 20px; border-radius: 99px; background: linear-gradient(90deg, #f58529, #dd2a7b 55%, #8134af); color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; }
     .lb-open svg { width: 18px; height: 18px; }
@@ -148,13 +153,26 @@
     function close() { lb.classList.remove('open'); media.innerHTML = ''; document.body.style.overflow = ''; }
     grid.querySelectorAll('.gl-item').forEach(function (it) {
         it.addEventListener('click', function () {
-            // Instagram di HP: langsung buka postingannya (aplikasi Instagram / tab baru).
-            if (it.dataset.platform === 'instagram' && it.dataset.link && window.matchMedia('(max-width: 820px), (pointer: coarse)').matches) {
-                window.open(it.dataset.link, '_blank', 'noopener');
-                return;
-            }
             media.innerHTML = '';
-            if (it.dataset.type === 'video') {
+            if (it.dataset.platform === 'instagram' && it.dataset.link) {
+                // Pemutar resmi Instagram (embed.js): ukuran menyesuaikan, video diputar di halaman ini.
+                var box = document.createElement('div'); box.className = 'ig-box';
+                var q = document.createElement('blockquote');
+                q.className = 'instagram-media';
+                q.setAttribute('data-instgrm-permalink', it.dataset.link.split('?')[0]);
+                q.setAttribute('data-instgrm-version', '14');
+                q.innerHTML = '<div class="ig-loading">Memuat video Instagram…</div>';
+                box.appendChild(q); media.appendChild(box);
+                var a = document.createElement('a');
+                a.className = 'lb-open'; a.href = it.dataset.link; a.target = '_blank'; a.rel = 'noopener';
+                a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Buka di Instagram';
+                media.appendChild(a);
+                if (window.instgrm && window.instgrm.Embeds) { window.instgrm.Embeds.process(); }
+                else if (!document.getElementById('igEmbedJs')) {
+                    var sc = document.createElement('script'); sc.id = 'igEmbedJs'; sc.async = true; sc.src = 'https://www.instagram.com/embed.js';
+                    document.body.appendChild(sc);
+                }
+            } else if (it.dataset.type === 'video') {
                 var wrap = document.createElement('div'); wrap.className = 'ratio' + (it.dataset.platform === 'instagram' ? ' portrait' : '');
                 if (it.dataset.embed) {
                     var f = document.createElement('iframe');

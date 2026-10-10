@@ -12,6 +12,10 @@
 
 <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="galleryForm" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
     @csrf
+    {{-- File yang sudah ter-upload tetap dipakai kalau form kembali karena ada error --}}
+    @foreach (['image_file_path', 'video_upload_path'] as $kept)
+        @if (old($kept))<input type="hidden" name="{{ $kept }}" value="{{ old($kept) }}">@endif
+    @endforeach
     @if ($isEdit)
         @method('PUT')
     @endif
@@ -100,6 +104,9 @@
                 MP4, WEBM, atau MOV. Ukuran tidak dibatasi.
                 @if ($isEdit && $gallery->video_file) Kosongkan jika tidak ingin mengganti video. @endif
             </p>
+            @if (old('video_upload_path'))
+                <p class="current-file">✓ Video sudah ter-upload, tidak perlu pilih ulang.</p>
+            @endif
             @if ($isEdit && $gallery->video_file)
                 <p class="current-file">File saat ini: {{ basename($gallery->video_file) }}</p>
             @endif

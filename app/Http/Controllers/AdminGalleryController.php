@@ -126,8 +126,13 @@ class AdminGalleryController extends Controller
     private function validatedData(Request $request, ?Gallery $gallery = null): array
     {
         $type   = $request->input('type');
-        $source = $request->input('video_source', 'youtube');
-        $isLink = in_array($source, ['youtube', 'instagram'], true);
+        $source = $this->videoSource($request);
+        $isLink = $type === 'video' && in_array($source, ['youtube', 'instagram'], true);
+
+        // Link hanya dicek kalau memang memakai link; kalau upload file, kolom link diabaikan.
+        if (! $isLink) {
+            $request->merge(['video_url' => null]);
+        }
 
         // File wajib jika belum ada file lama (file bisa datang dari upload langsung: *_path)
         $needsImage     = $type === 'image' && ! $gallery?->image && ! $request->filled('image_file_path');
@@ -143,10 +148,10 @@ class AdminGalleryController extends Controller
             'video_source' => ['nullable', Rule::in(['youtube', 'instagram', 'upload'])],
             // Ukuran file tidak dibatasi.
             'image_file'   => [Rule::requiredIf($needsImage), 'nullable', 'file'],
-            'video_url'    => [
-                Rule::requiredIf($type === 'video' && $isLink), 'nullable', 'url', 'max:500',
+            'video_url'    => $isLink ? [
+                'required', 'url', 'max:500',
                 $source === 'instagram' ? 'regex:' . self::INSTAGRAM_PATTERN : 'regex:' . self::YOUTUBE_PATTERN,
-            ],
+            ] : ['nullable'],
             'video_upload' => [Rule::requiredIf($needsVideoFile), 'nullable', 'file'],
         ], [
             'title.required'        => 'Judul wajib diisi.',
@@ -168,6 +173,24 @@ class AdminGalleryController extends Controller
         ];
     }
 
+    /** Sumber video; link Instagram/YouTube dikenali otomatis walau tab yang dipilih salah. */
+    private function videoSource(Request $request): string
+    {
+        $source = $request->input('video_source', 'youtube');
+
+        if ($source !== 'upload') {
+            $url = (string) $request->input('video_url');
+            if (preg_match(self::INSTAGRAM_PATTERN, $url)) {
+                return 'instagram';
+            }
+            if (preg_match(self::YOUTUBE_PATTERN, $url)) {
+                return 'youtube';
+            }
+        }
+
+        return in_array($source, ['youtube', 'instagram', 'upload'], true) ? $source : 'youtube';
+    }
+
     private function handleMedia(Request $request, Gallery $gallery): void
     {
         // Foto (untuk tipe image) atau thumbnail (untuk tipe video)
@@ -185,7 +208,7 @@ class AdminGalleryController extends Controller
             return;
         }
 
-        $source = $request->input('video_source', 'youtube');
+        $source = $this->videoSource($request);
 
         if (in_array($source, ['youtube', 'instagram'], true)) {
             $gallery->video_url = trim((string) $request->input('video_url'));
