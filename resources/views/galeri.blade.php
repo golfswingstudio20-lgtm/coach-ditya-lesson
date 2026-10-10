@@ -12,18 +12,23 @@
     $videoCount = $items->where('type', 'video')->count();
 
     // Folder: isi, jumlah, dan foto sampul (item pertama yang punya gambar)
-    $folders = collect(Gallery::ALBUMS)->map(function ($meta, $key) use ($items) {
+    $folders = collect(Gallery::albums())->filter(fn ($meta) => $meta[3])->map(function ($meta, $key) use ($items) {
         $list  = $items->filter(fn ($g) => $g->album_key === $key);
-        $cover = $list->first(fn ($g) => $g->type === 'video' ? $g->thumbnail_url : $g->image_url);
+        $first = $list->first(fn ($g) => $g->type !== 'video' && $g->image_url);
 
         return [
             'key'   => $key,
             'label' => $meta[0],
             'desc'  => $meta[1],
+            'kind'  => $meta[2],
             'count' => $list->count(),
-            'cover' => $cover ? ($cover->type === 'video' ? $cover->thumbnail_url : $cover->image_url) : null,
+            // Sampul: foto sampul folder dari admin, kalau kosong foto pertama di folder
+            'cover' => $meta[4] ?: ($meta[2] === 'image' ? $first?->image_url : null),
         ];
     })->filter(fn ($f) => $f['count'] > 0)->values();
+    // Item di folder yang disembunyikan admin juga tidak tampil
+    $hiddenAlbums = collect(Gallery::albums())->reject(fn ($meta) => $meta[3])->keys()->all();
+    $items = $items->reject(fn ($g) => in_array($g->album_key, $hiddenAlbums, true))->values();
     $folderIcons = ['latihan' => 'image', 'prestasi' => 'star', 'youtube' => 'play', 'instagram' => 'video'];
     $isCustomer = auth()->check() && auth()->user()->role === 'customer';
 @endphp
@@ -31,30 +36,27 @@
 @push('head')
 <style>
     .gl-tabs { margin-bottom: 18px; }
-    .gl-folders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
-    .gl-folder { position: relative; height: 128px; padding: 0; border: 2px solid transparent; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); color: #fff; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 8px 22px rgba(var(--d-shadow-rgb, 23, 46, 33), .14); transition: transform .2s, border-color .2s; }
-    .gl-folder.ig { background: linear-gradient(135deg, #f9ce34, #ee2a7b 50%, #6228d7); }
-    .gl-folder.yt { background: linear-gradient(135deg, #b31217, #3a0b0d); }
-    .gl-folder img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.05) saturate(1.1); }
-    .gl-folder::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 20, 13, .15), rgba(8, 20, 13, .85)); }
-    .gl-folder:hover { transform: translateY(-2px); }
-    .gl-folder.on { border-color: #cde8a3; box-shadow: 0 0 0 3px rgba(205, 232, 163, .45), 0 10px 26px rgba(var(--d-shadow-rgb, 23, 46, 33), .2); }
-    .gl-folder .fi { position: absolute; z-index: 1; top: 12px; left: 12px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: rgba(255, 255, 255, .92); color: #1f4d33; }
-    .gl-folder .fi svg { width: 17px; height: 17px; }
-    .gl-folder .fc { position: absolute; z-index: 1; top: 12px; right: 12px; padding: 3px 9px; border-radius: 99px; background: rgba(8, 20, 13, .55); font-size: 12px; font-weight: 700; }
-    .gl-folder .fn { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; }
-    .gl-folder .fn b { display: block; font-size: 15px; }
-    .gl-folder .fn small { display: block; margin-top: 1px; color: rgba(255, 255, 255, .78); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .gl-now { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 12px; }
-    .gl-now h2 { margin: 0; font-family: var(--fw-serif); font-size: 21px; }
-    .gl-now button { height: 34px; padding: 0 14px; border: 1px solid var(--fw-line-2); border-radius: 99px; background: var(--fw-surface); color: var(--fw-text); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-    @media (max-width: 960px) { .gl-folders { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 820px) { .gl-folder { height: 108px; border-radius: 18px; } .gl-folder .fn small { display: none; } .gl-now h2 { font-size: 19px; } }
-    .gl-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 210px; grid-auto-flow: dense; gap: 12px; }
-    .gl-item { position: relative; padding: 0; border: 0; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); cursor: pointer; box-shadow: 0 10px 26px rgba(var(--d-shadow-rgb, 23, 46, 33), .14); text-align: left; font: inherit; }
-    .gl-item.big { grid-column: span 2; grid-row: span 2; }
-    .gl-item.wide { grid-column: span 2; }
-    .gl-item.tall { grid-row: span 2; }
+    /* Folder: gaya "Sorotan" Instagram */
+    .gl-hl { display: flex; gap: 18px; margin: 4px -24px 18px; padding: 4px 24px 6px; overflow-x: auto; scrollbar-width: none; }
+    .gl-hl::-webkit-scrollbar { display: none; }
+    .gl-hl button { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 7px; width: 78px; padding: 0; border: 0; background: none; color: var(--fw-text); font: inherit; cursor: pointer; }
+    .gl-hl .ring { position: relative; width: 70px; height: 70px; padding: 3px; border-radius: 50%; background: var(--fw-line-2); transition: transform .15s; }
+    .gl-hl button:hover .ring { transform: scale(1.04); }
+    .gl-hl button.on .ring { background: linear-gradient(135deg, #cde8a3, #3d7d57); }
+    .gl-hl button.on.k-instagram .ring { background: linear-gradient(135deg, #f9ce34, #ee2a7b 55%, #6228d7); }
+    .gl-hl button.on.k-youtube .ring { background: linear-gradient(135deg, #ff4e45, #b31217); }
+    .gl-hl .in { width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; border-radius: 50%; border: 3px solid var(--fw-bg); background: var(--fw-tint); color: var(--d-ink-green, var(--fw-green)); }
+    .gl-hl .in { position: relative; }
+    .gl-hl .in img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .gl-hl .in svg { width: 24px; height: 24px; }
+    .gl-hl .k-instagram .in { background: linear-gradient(135deg, #f9ce34, #ee2a7b 55%, #6228d7); color: #fff; }
+    .gl-hl .k-youtube .in { background: #c4302b; color: #fff; }
+    .gl-hl .lbl { max-width: 78px; font-size: 12px; font-weight: 600; line-height: 1.2; text-align: center; }
+    .gl-hl .lbl small { display: block; color: var(--fw-muted); font-weight: 500; font-size: 11px; }
+    .gl-hl button.on .lbl { color: var(--d-ink-green, var(--fw-green)); }
+    @media (min-width: 821px) { .gl-hl { margin: 4px 0 22px; padding: 4px 0 6px; gap: 26px; } .gl-hl button { width: 88px; } .gl-hl .ring { width: 80px; height: 80px; } }
+    .gl-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .gl-item { aspect-ratio: 4 / 5; position: relative; padding: 0; border: 0; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); cursor: pointer; box-shadow: 0 10px 26px rgba(var(--d-shadow-rgb, 23, 46, 33), .14); text-align: left; font: inherit; }
     .gl-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.1) saturate(1.1); transition: transform .4s ease; }
     .gl-item:hover img { transform: scale(1.05); }
     .gl-item::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 20, 13, 0) 48%, rgba(8, 20, 13, .85) 100%); pointer-events: none; }
@@ -69,6 +71,9 @@
     .gl-ph svg { width: 40px; height: 40px; }
     .gl-item.ig { background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%); }
     .gl-item.ig .gl-ph { color: rgba(255, 255, 255, .85); }
+    .gl-item.vid .gl-ph { display: none; }
+    .gl-item .badge svg { width: 13px; height: 13px; }
+    .gl-item .badge { display: inline-flex; align-items: center; gap: 5px; }
     .gl-item video.thumb { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
     .lb-media .ratio.portrait { aspect-ratio: auto; width: min(420px, 100%); height: min(82vh, 760px); margin: 0 auto; background: #fff; }
     .lb { position: fixed; inset: 0; z-index: 330; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(15, 26, 19, .88); }
@@ -95,11 +100,14 @@
     .lb-x svg { width: 20px; height: 20px; }
     @media (max-width: 960px) { .gl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 820px) {
-        .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 120px; gap: 10px; }
+        .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
         .gl-item { border-radius: 18px; }
         .gl-item .cap strong { font-size: 13px; }
-        .gl-item:not(.big):not(.wide) .cap small { display: none; }
-        .gl-item .play { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
+        .gl-item .cap small { display: none; }
+        .gl-item .cap { left: 10px; right: 10px; bottom: 9px; }
+        .gl-item .badge { top: 8px; left: 8px; }
+        .gl-item .play { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+        .gl-item .play svg { width: 16px; height: 16px; }
         .lb { padding: 12px; }
     }
 </style>
@@ -117,17 +125,21 @@
     </div>
 
     @if ($folders->count() > 1)
-        <div class="gl-folders" id="glFolders" aria-label="Folder galeri">
+        <div class="gl-hl" id="glFolders" aria-label="Folder galeri">
+            <button type="button" class="on k-all" data-album="" data-label="Semua" aria-pressed="true">
+                <span class="ring"><span class="in">{!! Icons::svg('grid') !!}</span></span>
+                <span class="lbl">Semua<small>{{ $items->count() }}</small></span>
+            </button>
             @foreach ($folders as $f)
-                <button type="button" class="gl-folder {{ $f['key'] === 'instagram' ? 'ig' : ($f['key'] === 'youtube' ? 'yt' : '') }}" data-album="{{ $f['key'] }}" data-label="{{ $f['label'] }}" aria-pressed="false">
-                    @if ($f['cover'])<img src="{{ $f['cover'] }}" alt="" loading="lazy" onerror="this.remove()">@endif
-                    <span class="fi">{!! Icons::svg($folderIcons[$f['key']]) !!}</span>
-                    <span class="fc">{{ $f['count'] }}</span>
-                    <span class="fn"><b>{{ $f['label'] }}</b><small>{{ $f['desc'] }}</small></span>
+                <button type="button" class="k-{{ $f['key'] }}" data-album="{{ $f['key'] }}" data-label="{{ $f['label'] }}" aria-pressed="false">
+                    <span class="ring"><span class="in">
+                        {!! Icons::svg($folderIcons[$f['key']] ?? ($f['kind'] === 'video' ? 'video' : 'image')) !!}
+                        @if ($f['cover'])<img src="{{ $f['cover'] }}" alt="" loading="lazy" onerror="this.remove()">@endif
+                    </span></span>
+                    <span class="lbl">{{ $f['label'] }}<small>{{ $f['count'] }}</small></span>
                 </button>
             @endforeach
         </div>
-        <div class="gl-now"><h2 id="glNow">Semua <small class="fw-muted" style="font-family:var(--fw-sans);font-size:13px">{{ $items->count() }}</small></h2><button type="button" id="glAll" hidden>Lihat semua</button></div>
     @endif
 
     @if ($items->isEmpty())
@@ -138,11 +150,9 @@
                 @php
                     $isVideo = $g->type === 'video';
                     $thumb   = $isVideo ? $g->thumbnail_url : $g->image_url;
-                    $shape   = [0 => 'big', 3 => 'tall', 4 => 'wide', 7 => 'big'][$loop->index % 8] ?? '';
-                    if ($isVideo && $shape === '') { $shape = 'tall'; }
                     $platform = $g->video_platform;
                 @endphp
-                <button type="button" class="gl-item {{ $shape }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-album="{{ $g->album_key }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
+                <button type="button" class="gl-item {{ $isVideo ? 'vid' : '' }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-album="{{ $g->album_key }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
                         data-title="{{ $g->title }}" data-desc="{{ $g->category ?: \Illuminate\Support\Str::limit($g->description, 90) }}"
                         @if ($isVideo)
                             data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-link="{{ $g->social_link[0] ?? '' }}" data-link-label="{{ $g->social_link[1] ?? '' }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
@@ -154,7 +164,7 @@
                     @if ($thumb)<img src="{{ $thumb }}" alt="" loading="lazy" onerror="this.remove()">
                     @elseif ($platform === 'file' && $g->video_file_url)<video class="thumb" src="{{ $g->video_file_url }}#t=1" muted playsinline preload="metadata"></video>@endif
                     @if ($isVideo)
-                        <span class="badge">{{ ['youtube' => 'YouTube', 'instagram' => 'Instagram'][$platform] ?? 'Video' }}</span>
+                        <span class="badge">{!! Icons::svg($platform === 'youtube' ? 'play' : 'video') !!}{{ ['youtube' => 'YouTube', 'instagram' => 'Instagram'][$platform] ?? 'Video' }}</span>
                         <span class="play">{!! Icons::svg('play') !!}</span>
                     @endif
                     <span class="cap"><strong>{{ $g->title }}</strong>@if ($g->category)<small>{{ $g->category }}</small>@endif</span>
@@ -178,29 +188,19 @@
 (function () {
     var grid = document.getElementById('glGrid');
     if (!grid) return;
-    var folders = document.querySelectorAll('#glFolders .gl-folder'), now = document.getElementById('glNow'), all = document.getElementById('glAll');
-    function show(album, label) {
+    var folders = document.querySelectorAll('#glFolders button');
+    function show(album) {
         var shown = 0;
         grid.querySelectorAll('.gl-item').forEach(function (it) {
             var ok = !album || it.dataset.album === album;
             it.hidden = !ok; if (ok) shown++;
         });
         folders.forEach(function (f) { var on = f.dataset.album === album; f.classList.toggle('on', on); f.setAttribute('aria-pressed', on ? 'true' : 'false'); });
-        if (now) now.innerHTML = '';
-        if (now) { now.appendChild(document.createTextNode((label || 'Semua') + ' ')); var c = document.createElement('small'); c.className = 'fw-muted'; c.style.cssText = 'font-family:var(--fw-sans);font-size:13px'; c.textContent = shown; now.appendChild(c); }
-        if (all) all.hidden = !album;
         document.getElementById('glEmpty').hidden = shown > 0;
     }
-    folders.forEach(function (f) {
-        f.addEventListener('click', function () {
-            var off = f.classList.contains('on');
-            show(off ? '' : f.dataset.album, off ? '' : f.dataset.label);
-            if (!off && window.innerWidth <= 820) now.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    });
-    if (all) all.addEventListener('click', function () { show('', ''); });
+    folders.forEach(function (f) { f.addEventListener('click', function () { show(f.dataset.album); }); });
     var start = new URLSearchParams(location.search).get('folder');
-    if (start) { var sf = document.querySelector('#glFolders .gl-folder[data-album="' + start + '"]'); if (sf) show(start, sf.dataset.label); }
+    if (start && document.querySelector('#glFolders button[data-album="' + start + '"]')) show(start);
 
     var lb = document.getElementById('lb'), media = document.getElementById('lbMedia');
     function close() { lb.classList.remove('open'); media.innerHTML = ''; document.body.style.overflow = ''; }

@@ -20,14 +20,14 @@ class AdminGalleryController extends Controller
      */
     public function index(Request $request): View
     {
-        $album = array_key_exists((string) $request->query('album'), Gallery::ALBUMS) ? $request->query('album') : null;
+        $album = array_key_exists((string) $request->query('album'), Gallery::albums()) ? $request->query('album') : null;
         $type  = null;
 
         $all       = Gallery::query()->ordered()->get();
         $galleries = $album ? $all->filter(fn ($g) => $g->album_key === $album)->values() : $all;
 
         $counts = ['all' => $all->count()];
-        foreach (array_keys(Gallery::ALBUMS) as $key) {
+        foreach (array_keys(Gallery::albums()) as $key) {
             $counts[$key] = $all->filter(fn ($g) => $g->album_key === $key)->count();
         }
 
@@ -39,11 +39,11 @@ class AdminGalleryController extends Controller
      */
     public function create(Request $request): View
     {
-        $album = array_key_exists((string) $request->query('album'), Gallery::ALBUMS) ? $request->query('album') : null;
+        $album = array_key_exists((string) $request->query('album'), Gallery::albums()) ? $request->query('album') : null;
 
         $gallery = new Gallery([
             'album'      => $album,
-            'type'       => $album ? Gallery::ALBUMS[$album][2] : 'image',
+            'type'       => $album ? Gallery::albums()[$album][2] : 'image',
             'status'     => 'active',
             'sort_order' => 0,
         ]);
@@ -153,7 +153,7 @@ class AdminGalleryController extends Controller
             ] : ['nullable'],
             'video_upload' => [Rule::requiredIf($needsVideoFile), 'nullable', 'file'],
             'social_url'   => ['nullable', 'url', 'max:500'],
-            'album'        => ['nullable', Rule::in(array_keys(Gallery::ALBUMS))],
+            'album'        => ['nullable', Rule::in(array_keys(Gallery::albums()))],
         ], [
             'title.required'        => 'Judul wajib diisi.',
             'image_file.required'   => 'Pilih file foto yang akan diunggah.',

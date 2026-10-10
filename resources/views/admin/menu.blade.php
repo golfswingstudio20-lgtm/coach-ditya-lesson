@@ -62,6 +62,7 @@
                 {!! $item(route('admin.coaches.index'), 'coach', 'About Coach') !!}
                 {!! $item(route('admin.programs.index'), 'star', 'Program') !!}
                 {!! $item(route('admin.gallery.index'), 'image', 'Galeri') !!}
+                {!! $item(route('admin.gallery-albums.index'), 'grid', 'Folder Galeri') !!}
                 {!! $item(route('admin.events.index'), 'flag', 'Event') !!}
                 {!! $item(route('admin.contact.index'), 'phone', 'Kontak & Lokasi') !!}
             </div>

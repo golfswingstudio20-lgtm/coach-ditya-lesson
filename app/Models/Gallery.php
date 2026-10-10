@@ -9,13 +9,11 @@ use Illuminate\Support\Str;
 
 class Gallery extends Model
 {
-    /** Folder galeri: key => [nama, keterangan, jenis media]. */
-    public const ALBUMS = [
-        'latihan'   => ['Momen Latihan', 'Suasana sesi latihan & lapangan', 'image'],
-        'prestasi'  => ['Prestasi Murid', 'Pencapaian & turnamen murid', 'image'],
-        'youtube'   => ['Video YouTube', 'Tutorial & tips dari YouTube', 'video'],
-        'instagram' => ['Video Instagram', 'Reel & video latihan', 'video'],
-    ];
+    /** Folder galeri dari database (diatur admin): key => [nama, keterangan, jenis, aktif, sampul]. */
+    public static function albums(): array
+    {
+        return GalleryAlbum::map();
+    }
 
     protected $fillable = [
         'title',
@@ -151,7 +149,7 @@ class Gallery extends Model
     /** Folder yang dipakai; kalau kosong ditebak dari jenis media. */
     public function getAlbumKeyAttribute(): string
     {
-        if ($this->album && isset(self::ALBUMS[$this->album])) {
+        if ($this->album && isset(self::albums()[$this->album])) {
             return $this->album;
         }
 
@@ -160,16 +158,31 @@ class Gallery extends Model
 
     public function getAlbumLabelAttribute(): string
     {
-        return self::ALBUMS[$this->album_key][0];
+        return self::albums()[$this->album_key][0] ?? 'Galeri';
     }
 
     public static function guessAlbum(?string $type, string $links = ''): string
     {
-        if ($type !== 'video') {
-            return 'latihan';
+        $albums = self::albums();
+
+        if ($type === 'video') {
+            $want = str_contains($links, 'youtu') && ! str_contains($links, 'instagram.com') ? 'youtube' : 'instagram';
+        } else {
+            $want = 'latihan';
         }
 
-        return str_contains($links, 'youtu') && ! str_contains($links, 'instagram.com') ? 'youtube' : 'instagram';
+        if (isset($albums[$want])) {
+            return $want;
+        }
+
+        // Folder bawaan sudah dihapus/diganti: pakai folder pertama dengan jenis yang sama.
+        foreach ($albums as $key => $meta) {
+            if ($meta[2] === ($type === 'video' ? 'video' : 'image')) {
+                return $key;
+            }
+        }
+
+        return (string) array_key_first($albums);
     }
 
     /** youtube | instagram | file | null */

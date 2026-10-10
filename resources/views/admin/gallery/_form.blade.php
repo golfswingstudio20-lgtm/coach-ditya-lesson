@@ -57,10 +57,10 @@
     <div class="field">
         <span class="field-label">Folder</span>
         <div class="album-pick" id="albumPick">
-            @foreach (\App\Models\Gallery::ALBUMS as $key => [$label, $desc, $kind])
+            @foreach (\App\Models\Gallery::albums() as $key => [$label, $desc, $kind])
                 <label class="album-opt" data-kind="{{ $kind }}">
                     <input type="radio" name="album" value="{{ $key }}" @checked($albumNow === $key)>
-                    <span class="ic">{{ $albumIcons[$key] }}</span>
+                    <span class="ic">{{ $albumIcons[$key] ?? ($kind === 'video' ? '▶' : '📁') }}</span>
                     <span><b>{{ $label }}</b><small>{{ $desc }}</small></span>
                 </label>
             @endforeach

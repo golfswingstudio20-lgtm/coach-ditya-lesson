@@ -5,7 +5,7 @@
 @section('content')
     @php
         $tabs = ['' => ['label' => 'Semua', 'count' => $counts['all']]];
-        foreach (\App\Models\Gallery::ALBUMS as $key => [$label]) {
+        foreach (\App\Models\Gallery::albums() as $key => [$label]) {
             $tabs[$key] = ['label' => $label, 'count' => $counts[$key] ?? 0];
         }
     @endphp
@@ -17,8 +17,9 @@
         </div>
 
         <div class="head-actions">
+            <a href="{{ route('admin.gallery-albums.index') }}" class="btn btn-outline">📁 Kelola folder</a>
             <a href="{{ route('galeri') }}" target="_blank" rel="noopener" class="btn btn-outline">◉ Lihat halaman publik</a>
-            <a href="{{ route('admin.gallery.create', $album ? ['album' => $album] : []) }}" class="btn btn-primary">＋ Tambah{{ $album ? ' ke ' . \App\Models\Gallery::ALBUMS[$album][0] : ' foto / video' }}</a>
+            <a href="{{ route('admin.gallery.create', $album ? ['album' => $album] : []) }}" class="btn btn-primary">＋ Tambah{{ $album ? ' ke ' . \App\Models\Gallery::albums()[$album][0] : ' foto / video' }}</a>
         </div>
     </section>
 
@@ -33,7 +34,7 @@
 
     @if ($galleries->isEmpty())
         <div class="empty-state">
-            Belum ada isi di {{ $album ? 'folder ' . \App\Models\Gallery::ALBUMS[$album][0] : 'galeri' }}.
+            Belum ada isi di {{ $album ? 'folder ' . \App\Models\Gallery::albums()[$album][0] : 'galeri' }}.
             <br>
             <a href="{{ route('admin.gallery.create') }}" class="btn btn-primary">＋ Tambah sekarang</a>
         </div>
