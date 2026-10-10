@@ -48,7 +48,7 @@
                         @elseif ($gallery->video_file_url)
                             <video src="{{ $gallery->video_file_url }}#t=1" muted preload="metadata"></video>
                         @elseif ($gallery->video_platform === 'instagram')
-                            <div class="no-thumb" style="background:linear-gradient(135deg,#f9ce34,#ee2a7b 50%,#6228d7);color:#fff">IG</div>
+                            <div class="no-thumb" style="background:linear-gradient(135deg,#f9ce34,#ee2a7b 50%,#6228d7);color:transparent"></div>
                         @else
                             <div class="no-thumb">▧</div>
                         @endif

@@ -103,7 +103,7 @@
                 <button type="button" class="gl-item {{ $shape }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
                         data-title="{{ $g->title }}" data-desc="{{ $g->category ?: \Illuminate\Support\Str::limit($g->description, 90) }}"
                         @if ($isVideo)
-                            data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-link="{{ $platform === 'instagram' ? $g->video_url : '' }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
+                            data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-link="{{ $g->social_link[0] ?? '' }}" data-link-label="{{ $g->social_link[1] ?? '' }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
                         @else
                             data-src="{{ $g->image_url }}"
                         @endif
@@ -183,13 +183,23 @@
                 } else if (it.dataset.file) {
                     var v = document.createElement('video'); v.controls = true; v.autoplay = true; v.src = it.dataset.file;
                     if (it.dataset.poster) v.poster = it.dataset.poster;
+                    v.playsInline = true;
+                    // Video tegak (reel): kotak ikut menyesuaikan supaya tidak kecil.
+                    v.addEventListener('loadedmetadata', function () {
+                        if (v.videoHeight > v.videoWidth) {
+                            wrap.style.aspectRatio = v.videoWidth + ' / ' + v.videoHeight;
+                            wrap.style.width = 'min(100%, calc((100svh - 200px) * ' + (v.videoWidth / v.videoHeight).toFixed(4) + '))';
+                            wrap.style.margin = '0 auto';
+                        }
+                    });
                     wrap.appendChild(v);
                 }
                 media.appendChild(wrap);
                 if (it.dataset.link) {
                     var a = document.createElement('a');
                     a.className = 'lb-open'; a.href = it.dataset.link; a.target = '_blank'; a.rel = 'noopener';
-                    a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Buka di Instagram';
+                    a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>';
+                    a.appendChild(document.createTextNode('Lihat di ' + (it.dataset.linkLabel || 'Instagram')));
                     media.appendChild(a);
                 }
             } else {

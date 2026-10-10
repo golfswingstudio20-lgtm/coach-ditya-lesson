@@ -16,6 +16,7 @@ class Gallery extends Model
         'image',       // foto, atau thumbnail untuk video
         'video_url',   // link YouTube
         'video_file',  // file video hasil upload
+        'social_url',  // link Instagram / YouTube tambahan untuk video upload
         'category',
         'status',      // active | inactive
         'sort_order',
@@ -112,6 +113,25 @@ class Gallery extends Model
         $kind = strtolower($m[1]) === 'p' ? 'p' : (strtolower($m[1]) === 'tv' ? 'tv' : 'reel');
 
         return [$kind, $m[2]];
+    }
+
+    /** Link "Lihat di ..." untuk tombol di bawah video: [url, label] atau null. */
+    public function getSocialLinkAttribute(): ?array
+    {
+        $url = $this->social_url ?: ($this->instagram_post ? $this->video_url : null);
+        if (! $url) {
+            return null;
+        }
+
+        $label = match (true) {
+            str_contains($url, 'instagram.com') => 'Instagram',
+            str_contains($url, 'youtu')         => 'YouTube',
+            str_contains($url, 'tiktok.com')    => 'TikTok',
+            str_contains($url, 'facebook.com'), str_contains($url, 'fb.watch') => 'Facebook',
+            default                             => 'sumber asli',
+        };
+
+        return [$url, $label];
     }
 
     /** youtube | instagram | file | null */

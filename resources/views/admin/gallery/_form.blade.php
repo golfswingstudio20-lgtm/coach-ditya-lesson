@@ -113,6 +113,15 @@
             @error('video_upload') <p class="field-error">{{ $message }}</p> @enderror
         </div>
 
+        <div class="field" id="socialGroup">
+            <label for="fSocialUrl">Link Instagram / YouTube (opsional)</label>
+            <input type="url" name="social_url" id="fSocialUrl" maxlength="500"
+                   class="input @error('social_url') is-invalid @enderror"
+                   value="{{ old('social_url', $gallery->social_url) }}" placeholder="https://www.instagram.com/reel/ABC123xyz/">
+            <p class="field-hint">Video tetap diputar langsung di website. Link ini muncul sebagai tombol "Lihat di Instagram" supaya pengunjung bisa like &amp; follow.</p>
+            @error('social_url') <p class="field-error">{{ $message }}</p> @enderror
+        </div>
+
         <div class="field">
             <label for="fThumb">Thumbnail (opsional)</label>
             <input type="file" name="image_file" id="fThumb" data-folder="gallery/images" accept="image/*" class="input" disabled>
@@ -171,10 +180,11 @@
                 $('videoGroup').hidden   = isImage;
                 $('youtubeGroup').hidden = !isLink;
                 $('uploadGroup').hidden  = isLink;
+                $('socialGroup').hidden  = isLink;
                 $('fVideoUrlLabel').textContent = isInsta ? 'Link Instagram (post / reel)' : 'Link YouTube';
                 $('fVideoUrl').placeholder = isInsta ? 'https://www.instagram.com/reel/ABC123xyz/' : 'https://www.youtube.com/watch?v=...';
                 $('fVideoUrlHint').textContent = isInsta
-                    ? 'Salin dari tombol Bagikan > Salin tautan di Instagram. Akun harus publik. Upload thumbnail di bawah supaya kartunya tampil bagus.'
+                    ? 'Catatan: di HP, Instagram sering membuka aplikasinya sendiri saat video diputar. Supaya pasti bisa diputar di website, pilih "Upload file" lalu isi link Instagram di sana.'
                     : 'Thumbnail diambil otomatis dari YouTube jika tidak mengunggah thumbnail sendiri.';
 
                 photoInput.disabled = !isImage;

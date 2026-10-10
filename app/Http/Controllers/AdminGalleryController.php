@@ -153,6 +153,7 @@ class AdminGalleryController extends Controller
                 $source === 'instagram' ? 'regex:' . self::INSTAGRAM_PATTERN : 'regex:' . self::YOUTUBE_PATTERN,
             ] : ['nullable'],
             'video_upload' => [Rule::requiredIf($needsVideoFile), 'nullable', 'file'],
+            'social_url'   => ['nullable', 'url', 'max:500'],
         ], [
             'title.required'        => 'Judul wajib diisi.',
             'image_file.required'   => 'Pilih file foto yang akan diunggah.',
@@ -161,6 +162,7 @@ class AdminGalleryController extends Controller
                 ? 'Link harus dari postingan / reel Instagram, contoh: https://www.instagram.com/reel/ABC123/'
                 : 'Link harus berasal dari YouTube.',
             'video_upload.required' => 'Pilih file video yang akan diunggah.',
+            'social_url.url'        => 'Link Instagram / YouTube tidak valid.',
         ]);
 
         return [
@@ -201,6 +203,7 @@ class AdminGalleryController extends Controller
         }
 
         if ($gallery->type === 'image') {
+            $gallery->social_url = null;
             $gallery->video_url = null;
             $this->deleteStoredFile($gallery->video_file);
             $gallery->video_file = null;
@@ -212,6 +215,7 @@ class AdminGalleryController extends Controller
 
         if (in_array($source, ['youtube', 'instagram'], true)) {
             $gallery->video_url = trim((string) $request->input('video_url'));
+            $gallery->social_url = null;
             $this->deleteStoredFile($gallery->video_file);
             $gallery->video_file = null;
 
@@ -225,6 +229,7 @@ class AdminGalleryController extends Controller
         }
 
         $gallery->video_url = null;
+        $gallery->social_url = trim((string) $request->input('social_url')) ?: null;
     }
 
     /**
