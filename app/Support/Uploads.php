@@ -22,7 +22,7 @@ use Throwable;
 class Uploads
 {
     /** Folder yang boleh dipakai upload langsung. */
-    public const FOLDERS = ['gallery/images', 'gallery/videos', 'gallery/albums', 'events/posters', 'programs', 'coaches'];
+    public const FOLDERS = ['gallery/images', 'gallery/videos', 'gallery/albums', 'events/posters', 'events/payments', 'programs', 'coaches'];
 
     public static function supabaseOn(): bool
     {

@@ -133,7 +133,16 @@ class AdminEventController extends Controller
             'price_unit'          => ['nullable', 'string', 'max:30'],
             'note'                => ['nullable', 'string', 'max:500'],
             'is_active'           => ['nullable', 'boolean'],
+            'organizer'           => ['nullable', 'string', 'max:120'],
+            'pay_qr_file'         => ['nullable', 'file'],
+            'pay_accounts'        => ['nullable', 'string', 'max:1000'],
+            'pay_instructions'    => ['nullable', 'string', 'max:1500'],
+            'pay_contact'         => ['nullable', 'string', 'max:30'],
+            'pay_link'            => ['nullable', 'url', 'max:500'],
+            'referral_code'       => ['nullable', 'string', 'max:40'],
+            'referral_note'       => ['nullable', 'string', 'max:200'],
         ], [
+            'pay_link.url'         => 'Link pendaftaran harus berupa alamat lengkap (diawali https://).',
             'title.required'       => 'Judul event wajib diisi.',
             'poster_file.required' => 'Poster event wajib diunggah.',
             'poster_file.image'    => 'Poster harus berupa gambar.',
@@ -157,11 +166,28 @@ class AdminEventController extends Controller
             'price_unit'          => $request->input('price_unit') ?: 'person',
             'note'                => $request->input('note'),
             'is_active'           => $request->boolean('is_active'),
+            'organizer'           => $request->input('organizer'),
+            'pay_accounts'        => $request->input('pay_accounts'),
+            'pay_instructions'    => $request->input('pay_instructions'),
+            'pay_contact'         => $request->input('pay_contact'),
+            'pay_link'            => $request->input('pay_link'),
+            'referral_code'       => $request->filled('referral_code') ? strtoupper(trim($request->input('referral_code'))) : null,
+            'referral_note'       => $request->input('referral_note'),
         ];
     }
 
     private function handlePoster(Request $request, Event $event): void
     {
+        // QR pembayaran penyelenggara
+        if ($request->boolean('remove_pay_qr')) {
+            $this->deleteStoredFile($event->pay_qr);
+            $event->pay_qr = null;
+        }
+        if ($qr = Uploads::take($request, 'pay_qr_file', 'events/payments')) {
+            $this->deleteStoredFile($event->pay_qr);
+            $event->pay_qr = $qr;
+        }
+
         $poster = Uploads::take($request, 'poster_file', 'events/posters');
         if (! $poster) {
             return;
