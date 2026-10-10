@@ -70,7 +70,17 @@ class Uploads
         $base = rtrim((string) env('SUPABASE_URL'), '/') . '/storage/v1';
         $key  = self::serviceKey();
 
-        $res = Http::withHeaders(['apikey' => $key, 'Authorization' => 'Bearer ' . $key])
+        if (str_starts_with($key, 'sb_publishable_') || self::jwtRole($key) === 'anon') {
+            throw new \RuntimeException('SUPABASE_SERVICE_KEY berisi kunci publik (publishable/anon). Ganti dengan kunci rahasia: sb_secret_... atau service_role.');
+        }
+
+        // Kunci baru (sb_secret_...) hanya boleh di header "apikey"; kunci lama (JWT service_role) di keduanya.
+        $headers = ['apikey' => $key];
+        if (str_starts_with($key, 'eyJ')) {
+            $headers['Authorization'] = 'Bearer ' . $key;
+        }
+
+        $res = Http::withHeaders($headers)
             ->timeout(15)
             ->post($base . '/object/upload/sign/' . self::bucket() . '/' . $path);
 
@@ -127,6 +137,18 @@ class Uploads
         }
 
         return $stored;
+    }
+
+    /** Role di dalam kunci JWT lama (anon / service_role), atau null. */
+    private static function jwtRole(string $key): ?string
+    {
+        $parts = explode('.', $key);
+        if (count($parts) !== 3) {
+            return null;
+        }
+        $payload = json_decode((string) base64_decode(strtr($parts[1], '-_', '+/')), true);
+
+        return is_array($payload) ? ($payload['role'] ?? null) : null;
     }
 
     /** Hapus file lama yang dulu di-upload lewat admin. */
