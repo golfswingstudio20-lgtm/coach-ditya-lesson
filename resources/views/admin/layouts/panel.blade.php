@@ -345,6 +345,9 @@
                 <a href="{{ route('admin.schedule-blocks.index') }}" class="sidebar-link {{ request()->routeIs('admin.schedule-blocks.*') ? 'active' : '' }}">
                     <span class="sidebar-icon">{!! \App\Support\Icons::svg('calendar') !!}</span> Kelola Jadwal
                 </a>
+                <a href="{{ route('admin.poster.index') }}" class="sidebar-link {{ request()->routeIs('admin.poster.*') ? 'active' : '' }}">
+                    <span class="sidebar-icon">{!! \App\Support\Icons::svg('image') !!}</span> Poster Jadwal
+                </a>
             </div>
 
             <div class="sidebar-divider"></div>

@@ -195,6 +195,65 @@ class WhatsApp
         }
     }
 
+    /**
+     * Kirim gambar (URL publik) + keterangan. Hasil: ['ok' => bool, 'detail' => string]
+     */
+    public static function sendImage(array $numbers, string $caption, string $imageUrl): array
+    {
+        $token = self::token();
+
+        if (self::provider() === 'off' || ! $token) {
+            return ['ok' => false, 'detail' => 'Layanan WhatsApp belum diaktifkan atau token kosong.'];
+        }
+
+        if ($numbers === []) {
+            return ['ok' => false, 'detail' => 'Nomor WhatsApp admin belum diisi.'];
+        }
+
+        try {
+            if (self::provider() === 'fonnte') {
+                $response = Http::timeout(30)
+                    ->withHeaders(['Authorization' => $token])
+                    ->asForm()
+                    ->post('https://api.fonnte.com/send', [
+                        'target'      => implode(',', $numbers),
+                        'message'     => $caption,
+                        'url'         => $imageUrl,
+                        'countryCode' => '0',
+                    ]);
+
+                $json = $response->json() ?? [];
+                $ok   = $response->successful() && ($json['status'] ?? false) === true;
+
+                return ['ok' => $ok, 'detail' => $ok ? 'Terkirim lewat Fonnte.' : ('Fonnte: ' . ($json['reason'] ?? $json['detail'] ?? $response->body()))];
+            }
+
+            $base = self::wablasUrl();
+
+            if ($base === '') {
+                return ['ok' => false, 'detail' => 'URL server Wablas belum diisi.'];
+            }
+
+            $auth = $token . (self::secret() ? '.' . self::secret() : '');
+
+            $response = Http::timeout(30)
+                ->withHeaders(['Authorization' => $auth])
+                ->asForm()
+                ->post($base . '/api/send-image', [
+                    'phone'   => implode(',', $numbers),
+                    'caption' => $caption,
+                    'image'   => $imageUrl,
+                ]);
+
+            $json = $response->json() ?? [];
+            $ok   = $response->successful() && ($json['status'] ?? false) === true;
+
+            return ['ok' => $ok, 'detail' => $ok ? 'Terkirim lewat Wablas.' : ('Wablas: ' . ($json['message'] ?? $response->body()))];
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'detail' => 'Tidak bisa menghubungi layanan WhatsApp: ' . $e->getMessage()];
+        }
+    }
+
     private static function decrypt(?string $value): ?string
     {
         if (! $value) {

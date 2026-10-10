@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminChatController;
 use App\Http\Controllers\AdminCoachController;
 use App\Http\Controllers\AdminContentController;
 use App\Http\Controllers\AdminGalleryAlbumController;
+use App\Http\Controllers\AdminSchedulePosterController;
 use App\Http\Controllers\AdminUploadController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CustomerPageController;
@@ -32,6 +33,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::view('/admin/menu', 'admin.menu')->name('admin.menu');
     Route::get('/admin/konten', [AdminContentController::class, 'index'])->name('admin.content.index');
     Route::put('/admin/konten/{section}', [AdminContentController::class, 'update'])->name('admin.content.update');
+    Route::get('/admin/poster-jadwal', [AdminSchedulePosterController::class, 'index'])->name('admin.poster.index');
+    Route::put('/admin/poster-jadwal', [AdminSchedulePosterController::class, 'update'])->name('admin.poster.update');
+    Route::post('/admin/poster-jadwal/kirim', [AdminSchedulePosterController::class, 'send'])->name('admin.poster.send');
     Route::post('/admin/uploads/sign', [AdminUploadController::class, 'sign'])->name('admin.uploads.sign');
     Route::resource('/admin/gallery-albums', AdminGalleryAlbumController::class)
         ->parameters(['gallery-albums' => 'album'])

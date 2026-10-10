@@ -43,6 +43,7 @@
                 {!! $item(route('admin.dashboard', ['status' => 'pending']) . '#booking-list', 'clock', 'Booking Pending', $pending) !!}
                 {!! $item(route('admin.offline-booking.create'), 'plus-c', 'Buat Booking Offline') !!}
                 {!! $item(route('admin.schedule-blocks.index'), 'calendar', 'Kelola Jadwal') !!}
+                {!! $item(route('admin.poster.index'), 'image', 'Poster Jadwal (IG & WhatsApp)') !!}
             </div>
         </div>
 
