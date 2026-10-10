@@ -41,10 +41,15 @@
     .lb.open { display: flex; }
     .lb-box { width: min(980px, 100%); }
     .lb-media { border-radius: 20px; overflow: hidden; background: #000; }
+    .lb-media:has(.lb-open) { background: transparent; overflow: visible; }
+    .lb-media:has(.lb-open) .ratio { border-radius: 20px; overflow: hidden; }
+    .lb-box:has(.lb-open) .lb-cap { text-align: center; }
     .lb-media img { width: 100%; max-height: 78vh; object-fit: contain; display: block; margin: 0 auto; }
     .lb-media .ratio { position: relative; aspect-ratio: 16 / 9; }
     .lb-media iframe, .lb-media video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
     .lb-cap { margin-top: 12px; color: #fff; }
+    .lb-open { display: flex; width: fit-content; align-items: center; gap: 8px; margin: 12px auto 0; height: 44px; padding: 0 20px; border-radius: 99px; background: linear-gradient(90deg, #f58529, #dd2a7b 55%, #8134af); color: #fff; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .lb-open svg { width: 18px; height: 18px; }
     .lb-cap strong { display: block; font-size: 16px; }
     .lb-cap span { color: rgba(255, 255, 255, .7); font-size: 13.5px; }
     .lb-x { position: absolute; top: 16px; right: 16px; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(var(--d-glass-rgb, 255, 255, 255), .14); color: #fff; cursor: pointer; }
@@ -93,7 +98,7 @@
                 <button type="button" class="gl-item {{ $shape }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
                         data-title="{{ $g->title }}" data-desc="{{ $g->category ?: \Illuminate\Support\Str::limit($g->description, 90) }}"
                         @if ($isVideo)
-                            data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
+                            data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-link="{{ $platform === 'instagram' ? $g->video_url : '' }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
                         @else
                             data-src="{{ $g->image_url }}"
                         @endif
@@ -143,13 +148,19 @@
     function close() { lb.classList.remove('open'); media.innerHTML = ''; document.body.style.overflow = ''; }
     grid.querySelectorAll('.gl-item').forEach(function (it) {
         it.addEventListener('click', function () {
+            // Instagram di HP: langsung buka postingannya (aplikasi Instagram / tab baru).
+            if (it.dataset.platform === 'instagram' && it.dataset.link && window.matchMedia('(max-width: 820px), (pointer: coarse)').matches) {
+                window.open(it.dataset.link, '_blank', 'noopener');
+                return;
+            }
             media.innerHTML = '';
             if (it.dataset.type === 'video') {
                 var wrap = document.createElement('div'); wrap.className = 'ratio' + (it.dataset.platform === 'instagram' ? ' portrait' : '');
                 if (it.dataset.embed) {
                     var f = document.createElement('iframe');
                     f.src = it.dataset.embed + (it.dataset.embed.indexOf('?') === -1 ? '?' : '&') + 'autoplay=1';
-                    f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'; f.allowFullscreen = true;
+                    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'; f.allowFullscreen = true;
+                    f.setAttribute('scrolling', 'no');
                     wrap.appendChild(f);
                 } else if (it.dataset.file) {
                     var v = document.createElement('video'); v.controls = true; v.autoplay = true; v.src = it.dataset.file;
@@ -157,6 +168,12 @@
                     wrap.appendChild(v);
                 }
                 media.appendChild(wrap);
+                if (it.dataset.link) {
+                    var a = document.createElement('a');
+                    a.className = 'lb-open'; a.href = it.dataset.link; a.target = '_blank'; a.rel = 'noopener';
+                    a.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>Buka di Instagram';
+                    media.appendChild(a);
+                }
             } else {
                 var img = document.createElement('img'); img.src = it.dataset.src; img.alt = it.dataset.title; media.appendChild(img);
             }

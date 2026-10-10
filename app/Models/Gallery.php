@@ -137,7 +137,7 @@ class Gallery extends Model
         }
 
         if ($ig = $this->instagram_post) {
-            return "https://www.instagram.com/{$ig[0]}/{$ig[1]}/embed/captioned/";
+            return "https://www.instagram.com/{$ig[0]}/{$ig[1]}/embed/";
         }
 
         return null;
