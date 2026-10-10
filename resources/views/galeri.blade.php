@@ -16,19 +16,23 @@
 @push('head')
 <style>
     .gl-tabs { margin-bottom: 18px; }
-    .gl-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; gap: 12px; }
-    .gl-item { position: relative; aspect-ratio: 1; padding: 0; border: 0; border-radius: 18px; overflow: hidden; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; cursor: pointer; box-shadow: var(--fw-shadow); }
-    .gl-item.wide { grid-column: span 2; aspect-ratio: 2 / 1; }
-    .gl-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
-    .gl-item:hover img { transform: scale(1.04); }
-    .gl-item .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 12px 10px; background: linear-gradient(180deg, transparent, rgba(var(--d-ink-rgb, 23, 46, 33), .8)); color: #fff; font-size: 13px; font-weight: 600; text-align: left; opacity: 0; transition: opacity .2s; }
-    .gl-item:hover .cap, .gl-item:focus-visible .cap { opacity: 1; }
-    .gl-item .play { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(var(--d-ink-rgb, 23, 46, 33), .15); }
-    .gl-item .play span { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: rgba(var(--d-glass-rgb, 255, 255, 255), .94); color: var(--d-ink-green, var(--fw-green)); box-shadow: var(--fw-shadow-lg); }
+    .gl-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 210px; grid-auto-flow: dense; gap: 12px; }
+    .gl-item { position: relative; padding: 0; border: 0; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); cursor: pointer; box-shadow: 0 10px 26px rgba(var(--d-shadow-rgb, 23, 46, 33), .14); text-align: left; font: inherit; }
+    .gl-item.big { grid-column: span 2; grid-row: span 2; }
+    .gl-item.wide { grid-column: span 2; }
+    .gl-item.tall { grid-row: span 2; }
+    .gl-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.1) saturate(1.1); transition: transform .4s ease; }
+    .gl-item:hover img { transform: scale(1.05); }
+    .gl-item::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 20, 13, 0) 48%, rgba(8, 20, 13, .85) 100%); pointer-events: none; }
+    .gl-item .cap { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; color: #fff; }
+    .gl-item .cap strong { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .gl-item .cap small { display: block; margin-top: 2px; color: rgba(255, 255, 255, .78); font-size: 12px; }
+    .gl-item .badge { position: absolute; z-index: 1; top: 12px; left: 12px; padding: 4px 9px; border-radius: 9px; background: rgba(8, 20, 13, .55); color: #fff; font-size: 11px; font-weight: 600; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .gl-item .play { position: absolute; z-index: 1; top: 50%; left: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .95); color: #1f4d33; box-shadow: 0 8px 20px rgba(0, 0, 0, .35); transition: transform .2s; }
+    .gl-item:hover .play { transform: scale(1.08); }
     .gl-item .play svg { width: 22px; height: 22px; margin-left: 3px; }
-    .gl-item .vtitle { position: absolute; left: 12px; bottom: 10px; right: 12px; color: #fff; font-size: 13px; font-weight: 600; text-align: left; text-shadow: 0 1px 6px rgba(0, 0, 0, .4); }
-    .gl-ph { width: 100%; height: 100%; display: grid; place-items: center; background: linear-gradient(140deg, var(--d-btn, #1f4d33), var(--d-btn-2, #3d7d57)); color: rgba(255, 255, 255, .8); }
-
+    .gl-ph { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .35); }
+    .gl-ph svg { width: 40px; height: 40px; }
     .lb { position: fixed; inset: 0; z-index: 330; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(15, 26, 19, .88); }
     .lb.open { display: flex; }
     .lb-box { width: min(980px, 100%); }
@@ -43,9 +47,11 @@
     .lb-x svg { width: 20px; height: 20px; }
     @media (max-width: 960px) { .gl-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 820px) {
-        .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-        .gl-item { border-radius: 16px; }
-        .gl-item.wide { grid-column: span 2; aspect-ratio: 2 / 1; }
+        .gl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 120px; gap: 10px; }
+        .gl-item { border-radius: 18px; }
+        .gl-item .cap strong { font-size: 13px; }
+        .gl-item:not(.big):not(.wide) .cap small { display: none; }
+        .gl-item .play { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
         .lb { padding: 12px; }
     }
 </style>
@@ -73,8 +79,13 @@
     @else
         <div class="gl-grid" id="glGrid">
             @foreach ($items as $g)
-                @php $isVideo = $g->type === 'video'; $thumb = $isVideo ? $g->thumbnail_url : $g->image_url; @endphp
-                <button type="button" class="gl-item {{ $isVideo ? 'wide' : '' }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
+                @php
+                    $isVideo = $g->type === 'video';
+                    $thumb   = $isVideo ? $g->thumbnail_url : $g->image_url;
+                    $shape   = [0 => 'big', 3 => 'tall', 4 => 'wide', 7 => 'big'][$loop->index % 8] ?? '';
+                    if ($isVideo && $shape === '') { $shape = 'tall'; }
+                @endphp
+                <button type="button" class="gl-item {{ $shape }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
                         data-title="{{ $g->title }}" data-desc="{{ $g->category ?: \Illuminate\Support\Str::limit($g->description, 90) }}"
                         @if ($isVideo)
                             data-embed="{{ $g->embed_url }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
@@ -82,17 +93,13 @@
                             data-src="{{ $g->image_url }}"
                         @endif
                         aria-label="{{ $g->title }}">
-                    @if ($thumb)
-                        <img src="{{ $thumb }}" alt="{{ $g->title }}" loading="lazy">
-                    @else
-                        <span class="gl-ph">{!! Icons::svg($isVideo ? 'video' : 'image') !!}</span>
-                    @endif
+                    <span class="gl-ph">{!! Icons::svg($isVideo ? 'video' : 'image') !!}</span>
+                    @if ($thumb)<img src="{{ $thumb }}" alt="" loading="lazy" onerror="this.remove()">@endif
                     @if ($isVideo)
-                        <span class="play"><span>{!! Icons::svg('play') !!}</span></span>
-                        <span class="vtitle">{{ $g->title }}</span>
-                    @else
-                        <span class="cap">{{ $g->title }}</span>
+                        <span class="badge">Video</span>
+                        <span class="play">{!! Icons::svg('play') !!}</span>
                     @endif
+                    <span class="cap"><strong>{{ $g->title }}</strong>@if ($g->category)<small>{{ $g->category }}</small>@endif</span>
                 </button>
             @endforeach
         </div>

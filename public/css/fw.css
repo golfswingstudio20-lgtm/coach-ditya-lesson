@@ -345,3 +345,44 @@ html[data-theme="dark"] .fw-theme-switch { background: var(--fw-green-3); }
 html[data-theme="dark"] .fw-theme-switch::after { transform: translateX(18px); }
 html[data-theme="dark"] .hm-hero::before { filter: brightness(.8) saturate(1.05); }
 html[data-theme="dark"] .fw-footer { background: #13241a; border-top: 1px solid var(--fw-line); }
+
+/* ==========================================================================
+   KARTU FOTO (foto penuh + bayangan gelap + teks putih) — sama di terang & gelap
+   ========================================================================== */
+.fw-pc { position: relative; display: block; overflow: hidden; border-radius: 24px; background: linear-gradient(135deg, #1f4d33, #0c1f15); color: #fff; box-shadow: 0 16px 34px rgba(var(--d-shadow-rgb, 23, 46, 33), .2); isolation: isolate; }
+.fw-pc > .ph { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; filter: brightness(1.12) saturate(1.1); transition: transform .5s ease; }
+a.fw-pc:hover > .ph { transform: scale(1.04); }
+.fw-pc::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(8, 20, 13, .28) 0%, rgba(8, 20, 13, 0) 30%, rgba(8, 20, 13, .2) 52%, rgba(8, 20, 13, .9) 100%); }
+.fw-pc.side::after { background: linear-gradient(100deg, rgba(12, 34, 22, .96) 0%, rgba(12, 34, 22, .82) 48%, rgba(12, 34, 22, .12) 100%); }
+.fw-pc-top { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 8px; }
+.fw-pc-body { position: absolute; left: 18px; right: 18px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+.fw-pc h3, .fw-pc .t { margin: 0; font-family: var(--fw-serif); font-size: 22px; font-weight: 700; line-height: 1.15; color: #fff; }
+.fw-pc p { margin: 0; color: rgba(255, 255, 255, .84); font-size: 13.5px; line-height: 1.5; }
+.fw-pc-label { display: inline-flex; align-items: center; height: 26px; padding: 0 11px; border-radius: 99px; background: rgba(255, 255, 255, .94); color: #1f4d33; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.fw-pc-label.dark { background: rgba(8, 20, 13, .55); color: #fff; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.fw-pc-label.lime { background: #cde8a3; color: #14301f; }
+.fw-pc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.fw-pc-chips span { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 10px; background: rgba(255, 255, 255, .15); color: #fff; font-size: 12px; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.fw-pc-chips svg { width: 14px; height: 14px; }
+.fw-pc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.fw-pc-price { font-size: 17px; font-weight: 700; color: #fff; }
+.fw-pc-price small { font-size: 12px; font-weight: 500; color: rgba(255, 255, 255, .75); }
+.fw-pc-btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: 99px; background: #cde8a3; color: #14301f !important; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.fw-pc-btn.white { background: #fff; }
+.fw-pc-btn svg { width: 15px; height: 15px; }
+.fw-pc-play { position: absolute; top: 50%; left: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .95); color: #1f4d33; box-shadow: 0 6px 18px rgba(0, 0, 0, .35); }
+.fw-pc-play svg { width: 20px; height: 20px; margin-left: 3px; }
+.fw-pc-date { flex: 0 0 auto; width: 58px; padding: 8px 0; border-radius: 16px; background: #1f4d33; color: #fff; text-align: center; line-height: 1.1; }
+.fw-pc-date b { display: block; font-family: var(--fw-serif); font-size: 25px; }
+.fw-pc-date small { display: block; font-size: 10.5px; font-weight: 600; letter-spacing: 1px; color: #cde8a3; text-transform: uppercase; }
+html[data-theme="dark"] .fw-pc { box-shadow: 0 16px 34px rgba(0, 0, 0, .45); }
+
+/* Kartu angka dengan ikon berwarna */
+.fw-stat2 { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 18px; background: var(--fw-surface); border: 1px solid var(--fw-line); box-shadow: var(--fw-shadow); }
+.fw-stat2 .ic { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 14px; background: var(--fw-tint); color: var(--d-ink-green, var(--fw-green)); }
+.fw-stat2 .ic svg { width: 20px; height: 20px; }
+.fw-stat2 .ic.orange { background: var(--fw-orange-tint); color: var(--d-orange-ink, #a2650c); }
+.fw-stat2 .ic.blue { background: var(--fw-blue-tint); color: var(--d-blue-ink, #3b6fb6); }
+.fw-stat2 .ic.red { background: var(--fw-red-tint); color: var(--d-red-ink, #c9413a); }
+.fw-stat2 strong { display: block; font-size: 22px; font-weight: 700; line-height: 1.1; }
+.fw-stat2 span { color: var(--fw-muted); font-size: 12px; }

@@ -11,7 +11,7 @@
     $photo = \App\Support\Brand::background('public');
 
     $programs  = class_exists(\App\Models\Program::class) ? \App\Models\Program::active()->ordered()->take(3)->get() : collect();
-    $photos    = class_exists(\App\Models\Gallery::class) ? \App\Models\Gallery::active()->ordered()->take(6)->get() : collect();
+    $photos    = class_exists(\App\Models\Gallery::class) ? \App\Models\Gallery::active()->ordered()->take(5)->get() : collect();
     $events    = class_exists(\App\Models\Event::class) ? \App\Models\Event::active()->upcoming()->chronological()->take(2)->get() : collect();
     $locations = collect(\App\Support\BookingRules::activeLocations());
     $coach     = \App\Models\Coach::main();
@@ -26,29 +26,37 @@
     .fw-home-main { width: 100% !important; padding: 0 !important; }
     .hm-wrap { width: min(1180px, 100% - 48px); margin: 0 auto; }
 
-    /* HERO */
-    .hm-hero { position: relative; padding: 46px 0 64px; overflow: hidden; }
-    .hm-hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 48px; align-items: center; }
-    .hm-label { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: var(--fw-surface); border: 1px solid var(--fw-line); color: var(--d-ink-green, var(--fw-green)); font-size: 12px; font-weight: 600; }
-    .hm-label i { width: 7px; height: 7px; border-radius: 50%; background: var(--fw-green-3); }
-    .hm-title { margin-top: 18px; font-family: var(--fw-serif); font-weight: 600; font-size: clamp(38px, 5.2vw, 64px); line-height: 1.06; letter-spacing: -1px; color: var(--fw-text); }
-    .hm-title em { font-style: italic; color: var(--fw-green-3); }
-    .hm-text { margin-top: 18px; max-width: 46ch; color: var(--fw-text-2); font-size: 16px; line-height: 1.7; }
+    /* HERO: foto penuh, bayangan gelap, teks putih */
+    .hm-hero { position: relative; overflow: hidden; min-height: min(78vh, 720px); display: flex; align-items: center; color: #fff; background: #0c1f15; }
+    .hm-hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; filter: brightness(1.18) saturate(1.12); }
+    .hm-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 20, 13, .9) 0%, rgba(8, 20, 13, .66) 40%, rgba(8, 20, 13, .08) 75%), linear-gradient(180deg, rgba(8, 20, 13, .35) 0%, rgba(8, 20, 13, 0) 22%, rgba(8, 20, 13, 0) 78%, rgba(8, 20, 13, .35) 100%); }
+    .hm-hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 48px; align-items: center; padding: 70px 0 110px; }
+    .hm-label { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 99px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28); color: #fff; font-size: 12.5px; font-weight: 600; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .hm-label i { width: 7px; height: 7px; border-radius: 50%; background: #cde8a3; }
+    .hm-title { margin-top: 18px; max-width: 15ch; font-family: var(--fw-serif); font-weight: 700; font-size: clamp(40px, 5.4vw, 66px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+    .hm-title em { font-style: italic; color: #cde8a3; }
+    .hm-text { margin-top: 18px; max-width: 46ch; color: rgba(255, 255, 255, .86); font-size: 17px; line-height: 1.65; }
     .hm-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-    .hm-trust { display: flex; flex-wrap: wrap; gap: 26px; margin-top: 34px; }
-    .hm-trust div strong { display: block; font-family: var(--fw-serif); font-size: 28px; font-weight: 600; color: var(--d-ink-green, var(--fw-green)); line-height: 1; }
-    .hm-trust div span { color: var(--fw-muted); font-size: 12.5px; }
+    .hm-cta .fw-btn { height: 52px; padding: 0 26px; font-size: 15px; }
+    .hm-cta .fw-btn.lime { background: #cde8a3; color: #14301f; }
+    .hm-cta .fw-btn.glass { background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .42); color: #fff; }
+    .hm-cta .fw-btn.glass:hover { background: rgba(255, 255, 255, .22); }
 
-    .hm-visual { position: relative; }
-    .hm-photo { position: relative; aspect-ratio: 4 / 4.4; border-radius: 32px; overflow: hidden; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; box-shadow: var(--fw-shadow-lg); filter: brightness(1.3) saturate(1.1); }
-    .hm-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255, 252, 240, .12), rgba(var(--d-ink-rgb, 23, 46, 33), .25)); }
-    .hm-float { position: absolute; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 18px; background: rgba(var(--d-glass-rgb, 255, 255, 255), .95); box-shadow: var(--fw-shadow-lg); }
-    .hm-float.a { left: -26px; bottom: 54px; }
-    .hm-float.b { right: -18px; top: 34px; }
-    .hm-float .ic { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--fw-tint); color: var(--d-ink-green, var(--fw-green)); }
+    .hm-side { display: flex; flex-direction: column; gap: 12px; }
+    .hm-float { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; background: rgba(255, 255, 255, .95); color: #17261d; box-shadow: 0 24px 50px rgba(0, 0, 0, .3); }
+    html[data-theme="dark"] .hm-float { background: rgba(24, 35, 29, .95); color: #e8efe9; }
+    .hm-float .ic { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 14px; background: var(--fw-tint); color: var(--d-ink-green, var(--fw-green)); }
     .hm-float .ic svg { width: 20px; height: 20px; }
-    .hm-float strong { display: block; font-size: 14px; }
-    .hm-float span { color: var(--fw-muted); font-size: 12px; }
+    .hm-float .fw-av { width: 48px; height: 48px; border-radius: 14px; background-size: cover; background-position: center top; }
+    .hm-float small { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 1.2px; color: var(--fw-green-3); text-transform: uppercase; }
+    .hm-float strong { display: block; font-size: 15px; }
+    .hm-float span { color: var(--fw-muted); font-size: 12.5px; }
+
+    .hm-trust { position: relative; z-index: 2; margin-top: -54px; display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); max-width: 640px; padding: 16px 8px; border-radius: 22px; background: var(--fw-surface); box-shadow: 0 18px 40px rgba(var(--d-shadow-rgb, 23, 46, 33), .16); }
+    .hm-trust div { text-align: center; border-right: 1px solid var(--fw-line); }
+    .hm-trust div:last-child { border-right: 0; }
+    .hm-trust strong { display: block; font-family: var(--fw-serif); font-size: 28px; font-weight: 700; color: var(--d-ink-green, var(--fw-green)); line-height: 1.1; }
+    .hm-trust span { color: var(--fw-muted); font-size: 12.5px; }
 
     /* Section umum */
     .hm-sec { padding: 64px 0; }
@@ -64,30 +72,28 @@
     .hm-feat h3 { margin-top: 14px; font-size: 16px; font-weight: 700; }
     .hm-feat p { margin-top: 6px; color: var(--fw-muted); font-size: 14px; line-height: 1.6; }
 
-    /* Program */
-    .hm-prog { display: flex; flex-direction: column; overflow: hidden; }
-    .hm-prog-img { aspect-ratio: 16 / 10; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; }
-    .hm-prog-body { padding: 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-    .hm-prog-body h3 { font-family: var(--fw-serif); font-size: 21px; font-weight: 600; }
-    .hm-prog-body p { color: var(--fw-muted); font-size: 14px; line-height: 1.6; }
-    .hm-prog-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: auto; padding-top: 6px; color: var(--fw-muted); font-size: 12.5px; }
-    .hm-prog-meta span { display: inline-flex; align-items: center; gap: 5px; }
-    .hm-prog-meta svg { width: 15px; height: 15px; }
+    /* Program (kartu foto) */
+    .hm-prog { min-height: 340px; }
 
-    /* Galeri */
-    .hm-gal { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 200px; gap: 12px; }
-    .hm-gal a { position: relative; border-radius: 18px; overflow: hidden; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; }
-    .hm-gal a:first-child { grid-row: span 2; }
-    .hm-gal .play { position: absolute; inset: 0; display: grid; place-items: center; }
-    .hm-gal .play span { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; background: rgba(var(--d-glass-rgb, 255, 255, 255), .92); color: var(--d-ink-green, var(--fw-green)); }
-    .hm-gal .play svg { width: 20px; height: 20px; margin-left: 2px; }
+    /* Galeri (mosaik) */
+    .hm-gal { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 180px; gap: 12px; }
+    .hm-gal .fw-pc { border-radius: 20px; box-shadow: none; }
+    .hm-gal .fw-pc:first-child { grid-column: span 2; grid-row: span 2; }
+    .hm-gal .fw-pc::after { background: linear-gradient(180deg, rgba(8, 20, 13, 0) 50%, rgba(8, 20, 13, .82) 100%); }
+    .hm-gal .cap { position: absolute; left: 14px; right: 14px; bottom: 12px; font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+    .hm-gal .fw-pc:not(:first-child) .cap { font-size: 12.5px; }
 
     /* Event */
-    .hm-ev { display: flex; gap: 16px; padding: 14px; }
-    .hm-ev-img { width: 120px; flex: 0 0 120px; aspect-ratio: 4 / 5; border-radius: 14px; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; }
+    .hm-ev { display: flex; gap: 16px; padding: 12px; }
+    .hm-ev-img { position: relative; width: 132px; flex: 0 0 132px; aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); }
+    .hm-ev-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .hm-ev-img .fw-pc-date { position: absolute; left: 8px; bottom: 8px; width: 50px; padding: 6px 0; border-radius: 12px; }
+    .hm-ev-img .fw-pc-date b { font-size: 20px; }
+    .hm-ev > div:last-child { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 4px 2px; }
     .hm-ev h3 { font-size: 17px; font-weight: 700; }
     .hm-ev p { margin-top: 6px; color: var(--fw-muted); font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
     .hm-ev p svg { width: 15px; height: 15px; }
+    .hm-ev .price { margin-top: auto; padding-top: 8px; font-weight: 700; color: var(--d-ink-green, var(--fw-green)); }
 
     /* CTA */
     .hm-band { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 40px 44px; border-radius: 28px; background: var(--fw-green); color: #fff; }
@@ -97,70 +103,86 @@
     .hm-band .fw-btn { position: relative; }
 
     @media (max-width: 960px) {
-        .hm-hero-grid { grid-template-columns: 1fr; gap: 30px; }
-        .hm-float.a { left: 12px; } .hm-float.b { right: 12px; }
+        .hm-hero-grid { grid-template-columns: 1fr; }
+        .hm-side { display: none; }
+        .hm-gal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 820px) {
         .hm-wrap { width: calc(100% - 32px); }
-        /* Hero HP seperti splash screen: teks di atas, foto lapangan di bawah */
-        .hm-hero { padding: 0 0 46vh; min-height: calc(100svh - 62px - 78px); }
-        .hm-hero::before { content: ""; position: absolute; inset: 0; background: var(--hm-photo) center bottom / cover no-repeat; filter: brightness(1.45) saturate(1.15); }
-        .hm-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--d-surface-2, #f5f2e8) 0%, var(--d-surface-2, #f5f2e8) 46%, rgba(var(--d-surface2-rgb, 245, 242, 232), .7) 60%, rgba(var(--d-surface2-rgb, 245, 242, 232), 0) 82%); pointer-events: none; }
-        .hm-trust { display: none; }
-        .hm-hero-grid { position: relative; z-index: 1; padding-top: 34px; }
-        .hm-visual { display: none; }
-        .hm-title { font-size: 36px; }
-        .hm-text { font-size: 14.5px; }
-        .hm-trust { gap: 20px; margin-top: 26px; }
-        .hm-trust div strong { font-size: 24px; }
+        .hm-hero { min-height: calc(100svh - 62px - 60px); align-items: flex-end; }
+        .hm-hero-bg { object-position: 72% 60%; }
+        .hm-hero::after { background: linear-gradient(180deg, rgba(8, 20, 13, .45) 0%, rgba(8, 20, 13, .05) 28%, rgba(8, 20, 13, .3) 50%, rgba(8, 20, 13, .94) 100%); }
+        .hm-hero-grid { padding: 40px 0 76px; }
+        .hm-title { font-size: 38px; }
+        .hm-text { font-size: 15px; }
+        .hm-cta .fw-btn { flex: 1; height: 50px; padding: 0 14px; }
+        .hm-trust { margin: -40px 16px 0; padding: 14px 4px; }
+        .hm-trust strong { font-size: 24px; }
+        .hm-trust span { font-size: 11.5px; }
         .hm-sec { padding: 40px 0; }
         .hm-sec-head { flex-direction: column; align-items: flex-start; }
-        .hm-gal { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 130px; gap: 10px; }
-        .hm-gal a:first-child { grid-row: span 1; }
+        .hm-prog { min-height: 300px; }
+        .hm-gal { grid-auto-rows: 120px; gap: 10px; }
         .hm-band { flex-direction: column; align-items: flex-start; padding: 28px 24px; }
-        .hm-ev-img { width: 92px; flex-basis: 92px; }
+        .hm-ev-img { width: 104px; flex-basis: 104px; }
     }
 </style>
 @endpush
 
 @section('content')
     {{-- ================= HERO ================= --}}
-    <section class="hm-hero" style="--hm-photo: url('{{ $photo }}')">
+    <section class="hm-hero">
+        <img class="hm-hero-bg" src="{{ $photo }}" alt="" fetchpriority="high">
         <div class="hm-wrap hm-hero-grid">
             <div>
                 <span class="hm-label"><i></i>{{ $nice($hero['hero_label']) }}</span>
                 <h1 class="hm-title">{{ $nice($hero['hero_title_1']) }} {{ $nice($hero['hero_title_2']) }} <em>{{ $nice($hero['hero_highlight']) }}</em></h1>
                 <p class="hm-text">{{ $hero['hero_text'] }}</p>
                 <div class="hm-cta">
-                    <a href="{{ $ctaUrl }}" class="fw-btn">{{ $ctaLabel }} {!! Icons::svg('arrow') !!}</a>
-                    <a href="{{ route('program') }}" class="fw-btn ghost">Lihat Program</a>
-                </div>
-                <div class="hm-trust">
-                    @if ($coach?->years_experience)<div><strong>{{ $coach->years_experience }}+</strong><span>Tahun pengalaman coach</span></div>@endif
-                    @if ($locations->isNotEmpty())<div><strong>{{ $locations->count() }}</strong><span>Lokasi latihan</span></div>@endif
-                    @if ($programs->isNotEmpty())<div><strong>{{ \App\Models\Program::active()->count() }}</strong><span>Program latihan</span></div>@endif
+                    <a href="{{ $ctaUrl }}" class="fw-btn lime">{{ $ctaLabel }} {!! Icons::svg('arrow') !!}</a>
+                    <a href="{{ route('program') }}" class="fw-btn glass">Lihat Program</a>
                 </div>
             </div>
 
-            <div class="hm-visual">
-                <div class="hm-photo" style="background-image:url('{{ $photo }}')"></div>
-                <div class="hm-float b">
-                    <span class="ic">{!! Icons::svg('calendar') !!}</span>
-                    <div><strong>Booking online</strong><span>Pilih jam, bayar, selesai</span></div>
-                </div>
+            <div class="hm-side">
                 @if ($coach)
-                    <div class="hm-float a">
+                    <a href="#coach" class="hm-float">
                         @if ($coach->photo_url)
                             <span class="fw-av" style="background-image:url('{{ $coach->photo_url }}')"></span>
                         @else
                             <span class="fw-av">{{ Icons::initials($coach->name) }}</span>
                         @endif
-                        <div><strong>{{ $coach->name }}</strong><span>{{ $coach->role ?: 'Coach profesional' }}</span></div>
+                        <div><small>Coach Anda</small><strong>{{ $coach->name }}</strong><span>{{ $coach->role ?: 'Coach profesional' }}</span></div>
+                    </a>
+                @endif
+                <div class="hm-float">
+                    <span class="ic">{!! Icons::svg('calendar') !!}</span>
+                    <div><strong>Booking online</strong><span>Pilih jam, bayar, langsung main</span></div>
+                </div>
+                @if ($locations->isNotEmpty())
+                    <div class="hm-float">
+                        <span class="ic">{!! Icons::svg('pin') !!}</span>
+                        <div><strong>{{ $locations->count() }} lokasi latihan</strong><span>{{ \Illuminate\Support\Str::limit($locations->pluck('name')->implode(', '), 40) }}</span></div>
                     </div>
                 @endif
             </div>
         </div>
     </section>
+
+    @php
+        $trust = array_values(array_filter([
+            $coach?->years_experience ? [$coach->years_experience . '+', 'Tahun melatih'] : null,
+            $locations->isNotEmpty() ? [$locations->count(), 'Lokasi latihan'] : null,
+            $programs->isNotEmpty() ? [\App\Models\Program::active()->count(), 'Program'] : null,
+        ]));
+    @endphp
+    @if ($trust)
+        <div class="hm-wrap">
+            <div class="hm-trust" style="--n: {{ count($trust) }}">
+                @foreach ($trust as [$v, $l])<div><strong>{{ $v }}</strong><span>{{ $l }}</span></div>@endforeach
+            </div>
+        </div>
+    @endif
 
     {{-- ================= KEUNGGULAN ================= --}}
     <section class="hm-sec alt">
@@ -192,16 +214,15 @@
                 </div>
                 <div class="fw-grid c3">
                     @foreach ($programs as $p)
-                        <a href="{{ route('program') }}#program-{{ $p->id }}" class="fw-card hm-prog">
-                            <div class="hm-prog-img" style="background-image:url('{{ $p->image_url }}');background-position:{{ $p->image_css_position ?? 'center' }}"></div>
-                            <div class="hm-prog-body">
-                                <span class="fw-badge green" style="align-self:flex-start">{{ ucfirst($p->level) }}</span>
+                        <a href="{{ route('program') }}#program-{{ $p->id }}" class="fw-pc hm-prog">
+                            <img class="ph" src="{{ $p->image_url }}" alt="" loading="lazy" style="object-position: {{ $p->image_css_position ?? 'center' }}" onerror="this.remove()">
+                            <div class="fw-pc-top"><span class="fw-pc-label">{{ ucfirst($p->level) }}</span></div>
+                            <div class="fw-pc-body">
                                 <h3>{{ $p->name }}</h3>
-                                <p>{{ Str::limit($p->description, 110) }}</p>
-                                <div class="hm-prog-meta">
-                                    <span>{!! Icons::svg('clock') !!} 60 menit</span>
-                                    <span>{!! Icons::svg('user') !!} Private</span>
-                                    <span>{!! Icons::svg('tag') !!} {{ \App\Models\Payment::formatRupiah($price) }}/jam</span>
+                                <p>{{ Str::limit($p->description, 90) }}</p>
+                                <div class="fw-pc-foot">
+                                    <span class="fw-pc-price">{{ \App\Models\Payment::formatRupiah($price) }}<small> / jam</small></span>
+                                    <span class="fw-pc-btn">Lihat {!! Icons::svg('arrow') !!}</span>
                                 </div>
                             </div>
                         </a>
@@ -227,8 +248,13 @@
                 </div>
                 <div class="hm-gal">
                     @foreach ($photos as $g)
-                        <a href="{{ route('galeri') }}" style="background-image:url('{{ $g->thumbnail_url ?? $g->image_url }}')" aria-label="{{ $g->title }}">
-                            @if ($g->type === 'video')<span class="play"><span>{!! Icons::svg('play') !!}</span></span>@endif
+                        <a href="{{ route('galeri') }}" class="fw-pc" aria-label="{{ $g->title }}">
+                            @if ($g->thumbnail_url)<img class="ph" src="{{ $g->thumbnail_url }}" alt="" loading="lazy" onerror="this.remove()">@endif
+                            @if ($g->type === 'video')
+                                <span class="fw-pc-top"><span class="fw-pc-label dark">Video</span></span>
+                                <span class="fw-pc-play">{!! Icons::svg('play') !!}</span>
+                            @endif
+                            @if ($g->title)<span class="cap">{{ \Illuminate\Support\Str::limit($g->title, 48) }}</span>@endif
                         </a>
                     @endforeach
                 </div>
@@ -250,13 +276,18 @@
                 <div class="fw-grid c2">
                     @foreach ($events as $ev)
                         <a href="{{ route('event') }}" class="fw-card hm-ev">
-                            <div class="hm-ev-img" style="background-image:url('{{ $ev->poster_url }}')"></div>
+                            <div class="hm-ev-img">
+                                @if ($ev->poster_url)<img src="{{ $ev->poster_url }}" alt="" loading="lazy" onerror="this.remove()">@endif
+                                @if ($ev->event_date)
+                                    <span class="fw-pc-date"><small>{{ $ev->event_date->locale('id')->translatedFormat('M') }}</small><b>{{ $ev->event_date->format('d') }}</b></span>
+                                @endif
+                            </div>
                             <div>
-                                <span class="fw-badge orange-soft">{{ $ev->status_label }}</span>
+                                <span class="fw-badge orange-soft" style="align-self:flex-start">{{ $ev->status_label }}</span>
                                 <h3 style="margin-top:8px">{{ $ev->title }}</h3>
-                                <p>{!! Icons::svg('calendar') !!} {{ $ev->date_label }}</p>
-                                @if ($ev->time_range)<p>{!! Icons::svg('clock') !!} {{ $ev->time_range }}</p>@endif
+                                @if ($ev->time_range)<p>{!! Icons::svg('clock') !!} {{ $ev->date_label }} · {{ $ev->time_range }}</p>@else<p>{!! Icons::svg('calendar') !!} {{ $ev->date_label }}</p>@endif
                                 @if ($ev->location)<p>{!! Icons::svg('pin') !!} {{ $ev->location }}</p>@endif
+                                @if ($ev->price_label)<span class="price">{{ $ev->price_label }}</span>@endif
                             </div>
                         </a>
                     @endforeach

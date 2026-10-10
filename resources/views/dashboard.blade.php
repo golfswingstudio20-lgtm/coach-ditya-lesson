@@ -16,16 +16,18 @@
         ->whereDate('booking_date', '>=', $today)
         ->orderBy('booking_date')->orderBy('start_time')->first();
 
-    $stats = [
-        ['Total Booking', (clone $mine)->count(), 'calendar'],
-        ['Lesson Selesai', (clone $mine)->where('status', 'booked')->whereDate('booking_date', '<', $today)->count(), 'check-c'],
-        ['Akan Datang', (clone $mine)->whereIn('status', ['pending', 'booked'])->whereDate('booking_date', '>=', $today)->count(), 'clock'],
-        ['Coach Tersedia', max(1, \App\Models\Coach::active()->count()), 'coach'],
-    ];
 
     $pendingIds = (clone $mine)->where('status', 'pending')->whereDate('booking_date', '>=', $today)->pluck('id');
     $paidIds    = $pendingIds->isEmpty() ? collect() : \App\Models\Payment::whereIn('booking_id', $pendingIds)->where('status', 'paid')->pluck('booking_id');
     $unpaid     = $pendingIds->diff($paidIds)->count();
+
+    $stats = [
+        ['Total booking', (clone $mine)->count(), 'calendar', ''],
+        ['Akan datang', (clone $mine)->whereIn('status', ['pending', 'booked'])->whereDate('booking_date', '>=', $today)->count(), 'clock', 'orange'],
+        ['Lesson selesai', (clone $mine)->where('status', 'booked')->whereDate('booking_date', '<', $today)->count(), 'check-c', 'blue'],
+        ['Belum dibayar', $unpaid, 'wallet', 'red'],
+    ];
+    $price = \App\Models\Payment::pricePerHour();
 
     $coach   = \App\Models\Coach::main();
     $photo   = \App\Support\Brand::background('public');
@@ -44,13 +46,11 @@
     .bd-hello p { margin-top: 4px; color: var(--fw-muted); font-size: 14px; }
 
     .bd-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; margin-top: 22px; }
-    .bd-hero { position: relative; min-height: 200px; padding: 22px; border-radius: 24px; overflow: hidden; color: #fff; background: linear-gradient(100deg, rgba(23, 56, 37, .97) 0%, rgba(var(--d-green-rgb, 31, 77, 51), .9) 45%, rgba(var(--d-green-rgb, 31, 77, 51), .25) 100%), var(--bd-photo) center / cover no-repeat; box-shadow: var(--fw-shadow-lg); display: flex; flex-direction: column; justify-content: space-between; }
-    .bd-hero .tag { align-self: flex-start; padding: 5px 11px; border-radius: 99px; background: rgba(var(--d-glass-rgb, 255, 255, 255), .14); font-size: 11.5px; font-weight: 600; }
-    .bd-hero h2 { margin-top: 12px; font-family: var(--fw-serif); font-size: clamp(24px, 3vw, 30px); font-weight: 600; line-height: 1.15; max-width: 14ch; }
-    .bd-hero .info { margin-top: 10px; display: grid; gap: 4px; font-size: 13.5px; color: rgba(255, 255, 255, .85); }
-    .bd-hero .info span { display: inline-flex; align-items: center; gap: 7px; }
-    .bd-hero .info svg { width: 15px; height: 15px; }
-    .bd-hero .fw-btn { align-self: flex-start; margin-top: 16px; }
+    .bd-hero.fw-pc { min-height: 220px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
+    .bd-hero .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .bd-hero h2 { font-family: var(--fw-serif); font-size: clamp(24px, 3vw, 30px); font-weight: 700; line-height: 1.15; color: #fff; }
+    .bd-hero .fw-pc-chips { margin-top: 10px; }
+    .bd-hero .fw-pc-btn { align-self: flex-start; }
 
     .bd-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 
@@ -69,17 +69,29 @@
     .bd-coach p { margin-top: 6px; color: var(--fw-text-2); font-size: 13.5px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
     .bd-prog { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .bd-prog a { position: relative; height: 120px; border-radius: 18px; overflow: hidden; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; }
-    .bd-prog a::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(var(--d-ink-rgb, 23, 46, 33), .82)); }
-    .bd-prog span { position: absolute; z-index: 1; left: 12px; right: 12px; bottom: 10px; color: #fff; font-size: 14px; font-weight: 600; }
-    .bd-prog small { display: block; opacity: .8; font-size: 11px; font-weight: 500; }
+    .bd-prog .fw-pc { height: 230px; border-radius: 22px; }
+    .bd-prog .fw-pc h3 { font-size: 18px; }
+
+    .bd-ev { display: flex; gap: 12px; padding: 10px; }
+    .bd-ev-img { position: relative; flex: 0 0 96px; height: 116px; border-radius: 14px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); }
+    .bd-ev-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .bd-ev > div:last-child { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding: 3px 2px; }
+    .bd-ev strong { font-size: 15.5px; }
+    .bd-ev small { color: var(--fw-muted); font-size: 12.5px; }
+    .bd-ev .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+    .bd-ev .foot b { color: var(--d-ink-green, var(--fw-green)); font-weight: 600; }
 
     @media (max-width: 960px) { .bd-top, .bd-cols { grid-template-columns: minmax(0, 1fr); } }
     @media (max-width: 820px) {
         .bd-hello h1 { font-size: 24px; }
         .bd-hello .fw-av { width: 52px; height: 52px; flex-basis: 52px; }
         .bd-top { margin-top: 16px; gap: 12px; }
-        .bd-hero { min-height: 186px; padding: 18px; border-radius: 22px; }
+        .bd-hero.fw-pc { min-height: 214px; padding: 18px; border-radius: 24px; }
+        .bd-prog { display: flex; gap: 12px; overflow-x: auto; margin: 0 -16px; padding: 0 16px 6px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+        .bd-prog::-webkit-scrollbar { display: none; }
+        .bd-prog .fw-pc { flex: 0 0 210px; height: 250px; scroll-snap-align: start; }
+        .bd-stats .fw-stat2 { padding: 12px; gap: 10px; }
+        .bd-stats .fw-stat2 .ic { width: 40px; height: 40px; flex-basis: 40px; }
         .bd-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
         .bd-quick a { padding: 10px 2px; border: 0; box-shadow: none; background: transparent; font-size: 11.5px; }
         .bd-quick a:nth-child(n+5) { display: none; }
@@ -107,36 +119,41 @@
                 $nDate = Carbon::parse($next->booking_date);
                 $isToday = $nDate->isToday();
             @endphp
-            <div class="bd-hero" style="--bd-photo:url('{{ $photo }}')">
+            <div class="bd-hero fw-pc side">
+                <img class="ph" src="{{ $photo }}" alt="" onerror="this.remove()">
                 <div>
-                    <span class="tag">{{ $isToday ? 'Lesson Hari Ini' : 'Lesson Berikutnya' }}</span>
-                    <h2>{{ $next->lesson_label }}</h2>
-                    <div class="info">
-                        <span>{!! Icons::svg('calendar') !!} {{ $nDate->locale('id')->translatedFormat('l, d M Y') }}</span>
+                    <div class="row">
+                        <span class="fw-pc-label lime">{{ $isToday ? 'Lesson hari ini' : 'Lesson berikutnya' }}</span>
+                        <span class="fw-pc-label dark">{{ $next->status === 'booked' ? 'Disetujui' : 'Menunggu' }}</span>
+                    </div>
+                    <h2 style="margin-top:12px">{{ $next->lesson_label }}</h2>
+                    <div class="fw-pc-chips">
+                        <span>{!! Icons::svg('calendar') !!} {{ $nDate->locale('id')->translatedFormat('D, d M') }}</span>
                         <span>{!! Icons::svg('clock') !!} {{ substr($next->start_time, 0, 5) }} – {{ substr($next->end_time, 0, 5) }}</span>
-                        @if ($next->place_label)<span>{!! Icons::svg('pin') !!} {{ $next->place_label }}</span>@endif
+                        @if ($next->place_label)<span>{!! Icons::svg('pin') !!} {{ \Illuminate\Support\Str::limit($next->place_label, 26) }}</span>@endif
                     </div>
                 </div>
                 @if ($next->status === 'pending' && Route::has('payment.booking'))
-                    <a href="{{ route('payment.booking', $next) }}" class="fw-btn lime md">Selesaikan Pembayaran {!! Icons::svg('arrow') !!}</a>
+                    <a href="{{ route('payment.booking', $next) }}" class="fw-pc-btn">Selesaikan Pembayaran {!! Icons::svg('arrow') !!}</a>
                 @else
-                    <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}" class="fw-btn lime md">Lihat Jadwal {!! Icons::svg('arrow') !!}</a>
+                    <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}" class="fw-pc-btn white">Lihat Jadwal {!! Icons::svg('arrow') !!}</a>
                 @endif
             </div>
         @else
-            <div class="bd-hero" style="--bd-photo:url('{{ $photo }}')">
+            <div class="bd-hero fw-pc side">
+                <img class="ph" src="{{ $photo }}" alt="" onerror="this.remove()">
                 <div>
-                    <span class="tag">Lesson Today</span>
-                    <h2>Better Swing<br>Better You</h2>
-                    <div class="info"><span>Pilih jam kosong dan booking lesson per jam.</span></div>
+                    <span class="fw-pc-label lime">Lesson golf per jam</span>
+                    <h2 style="margin-top:12px">Better Swing,<br>Better You</h2>
+                    <p style="margin-top:8px">Pilih jam kosong dan booking lesson sekarang.</p>
                 </div>
-                <a href="{{ route('booking') }}" class="fw-btn lime md">Booking Sekarang {!! Icons::svg('arrow') !!}</a>
+                <a href="{{ route('booking') }}" class="fw-pc-btn">Booking Sekarang {!! Icons::svg('arrow') !!}</a>
             </div>
         @endif
 
         <div class="bd-stats">
-            @foreach ($stats as [$label, $value, $icon])
-                <div class="fw-stat"><span>{{ $label }}</span><strong>{{ $value }}</strong><i>{!! Icons::svg($icon) !!}</i></div>
+            @foreach ($stats as [$label, $value, $icon, $tone])
+                <div class="fw-stat2"><span class="ic {{ $tone }}">{!! Icons::svg($icon) !!}</span><div><strong>{{ $value }}</strong><span>{{ $label }}</span></div></div>
             @endforeach
         </div>
     </div>
@@ -183,13 +200,14 @@
             @if ($events->isNotEmpty())
                 @php $ev = $events->first(); @endphp
                 <div class="fw-section-head" style="margin-top:22px"><h2>Event Terdekat</h2><a href="{{ route('event') }}" class="fw-link">Semua</a></div>
-                <a href="{{ route('event') }}" class="fw-row">
-                    <span class="fw-av sq" style="background-image:url('{{ $ev->poster_url }}')"></span>
-                    <span class="fw-row-body">
-                        <span class="fw-row-title">{{ $ev->title }}</span>
-                        <span class="fw-row-sub">{{ $ev->date_label }} · {{ $ev->time_range }}</span>
-                    </span>
-                    <span class="fw-badge orange-soft">{{ $ev->status_label }}</span>
+                <a href="{{ route('event') }}" class="fw-card bd-ev">
+                    <span class="bd-ev-img">@if ($ev->poster_url)<img src="{{ $ev->poster_url }}" alt="" loading="lazy" onerror="this.remove()">@endif</span>
+                    <div>
+                        <span class="fw-badge orange-soft" style="align-self:flex-start">{{ $ev->status_label }}</span>
+                        <strong>{{ $ev->title }}</strong>
+                        @if ($ev->location)<small>{{ $ev->location }}</small>@endif
+                        <span class="foot"><b>{{ $ev->event_date?->locale('id')->translatedFormat('d M') }}@if ($ev->time_range) · {{ \Illuminate\Support\Str::before($ev->time_range, ' ') }}@endif</b><strong style="font-size:13.5px">{{ $ev->price_label }}</strong></span>
+                    </div>
                 </a>
             @endif
         </section>
@@ -199,8 +217,14 @@
                 <div class="fw-section-head"><h2>Program Latihan</h2><a href="{{ route('program') }}" class="fw-link">Lihat semua</a></div>
                 <div class="bd-prog">
                     @foreach ($programs as $p)
-                        <a href="{{ route('program') }}#program-{{ $p->id }}" style="background-image:url('{{ $p->image_url }}');background-position:{{ $p->image_css_position }}">
-                            <span><small>{{ ucfirst($p->level) }}</small>{{ $p->name }}</span>
+                        <a href="{{ route('program') }}#program-{{ $p->id }}" class="fw-pc">
+                            <img class="ph" src="{{ $p->image_url }}" alt="" loading="lazy" style="object-position: {{ $p->image_css_position }}" onerror="this.remove()">
+                            <div class="fw-pc-top"><span class="fw-pc-label">{{ ucfirst($p->level) }}</span></div>
+                            <div class="fw-pc-body">
+                                <h3>{{ $p->name }}</h3>
+                                <p style="font-size:12px">60 menit · Private</p>
+                                <span class="fw-pc-label lime" style="align-self:flex-start">{{ \App\Models\Payment::formatRupiah($price) }}/jam</span>
+                            </div>
                         </a>
                     @endforeach
                 </div>

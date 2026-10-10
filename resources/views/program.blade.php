@@ -19,17 +19,12 @@
 <style>
     .pg-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
     .pg-tools .fw-search { flex: 1; max-width: 360px; }
-    .pg-card { display: flex; flex-direction: column; overflow: hidden; cursor: pointer; text-align: left; padding: 0; font: inherit; color: inherit; transition: transform .2s, box-shadow .2s; }
-    .pg-card:hover { transform: translateY(-3px); box-shadow: var(--fw-shadow-lg); }
-    .pg-img { position: relative; aspect-ratio: 16 / 10; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; }
-    .pg-img .fw-badge { position: absolute; left: 12px; top: 12px; }
-    .pg-body { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 18px; }
-    .pg-body h2 { font-family: var(--fw-serif); font-size: 21px; font-weight: 600; line-height: 1.2; }
-    .pg-body p { color: var(--fw-muted); font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .pg-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: auto; padding-top: 8px; color: var(--fw-muted); font-size: 12.5px; }
+    .pg-card.fw-pc { min-height: 360px; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+    .pg-card.fw-pc:hover { transform: translateY(-3px); }
+    .pg-card p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .pg-meta { display: flex; flex-wrap: wrap; gap: 14px; color: var(--fw-muted); font-size: 12.5px; }
     .pg-meta span { display: inline-flex; align-items: center; gap: 5px; }
     .pg-meta svg { width: 15px; height: 15px; }
-
     .pg-price { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 24px; overflow: hidden; }
     .pg-price.dark { background: var(--fw-green); color: #fff; border-color: transparent; }
     .pg-price .tag { align-self: flex-start; }
@@ -49,7 +44,10 @@
     .pd.open { display: block; }
     .pd-back { position: absolute; inset: 0; background: rgba(23, 38, 29, .45); }
     .pd-box { position: absolute; left: 50%; top: 50%; width: min(560px, calc(100% - 32px)); max-height: calc(100vh - 48px); transform: translate(-50%, -50%); overflow-y: auto; border-radius: 26px; background: var(--fw-surface); box-shadow: var(--fw-shadow-lg); }
-    .pd-img { position: relative; aspect-ratio: 16 / 10; background: var(--d-bg-2, #cfd8c9) center / cover no-repeat; }
+    .pd-img { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); }
+    .pd-img > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.12) saturate(1.1); }
+    .pd-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 20, 13, .3), rgba(8, 20, 13, 0) 40%); }
+    .pd-top { z-index: 1; }
     .pd-top { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; justify-content: space-between; }
     .pd-top button { width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(var(--d-glass-rgb, 255, 255, 255), .92); color: var(--fw-text); cursor: pointer; }
     .pd-top svg { width: 19px; height: 19px; }
@@ -66,6 +64,7 @@
     .pd-coach p { margin-top: 6px; color: var(--fw-text-2); font-size: 13px; line-height: 1.55; }
     .pd-body .fw-btn { margin-top: 18px; }
     @media (max-width: 820px) {
+        .pg-card.fw-pc { min-height: 320px; }
         .pg-tools .fw-search { max-width: none; flex-basis: 100%; }
         .pd-box { left: 0; right: 0; top: auto; bottom: 0; width: 100%; max-height: 92vh; transform: none; border-radius: 26px 26px 0 0; }
     }
@@ -98,24 +97,26 @@
 
         <div class="fw-grid c3" id="pgGrid">
             @foreach ($programs as $p)
-                <a href="#program-{{ $p->id }}" class="fw-card pg-card" id="program-{{ $p->id }}" data-pd="{{ $p->id }}"
+                <a href="#program-{{ $p->id }}" class="fw-pc pg-card" id="program-{{ $p->id }}" data-pd="{{ $p->id }}"
                         data-level="{{ strtolower($p->level) }}" data-q="{{ strtolower($p->name . ' ' . $p->description) }}">
-                    <span class="pg-img" style="background-image:url('{{ $p->image_url }}');background-position:{{ $p->image_css_position }}">
-                        <span class="fw-badge green">{{ ucfirst(strtolower($p->level)) }}</span>
-                    </span>
-                    <span class="pg-body">
-                        <h2>{{ $p->name }}</h2>
+                    <img class="ph" src="{{ $p->image_url }}" alt="" loading="lazy" style="object-position: {{ $p->image_css_position }}" onerror="this.remove()">
+                    <span class="fw-pc-top"><span class="fw-pc-label">{{ ucfirst(strtolower($p->level)) }}</span></span>
+                    <span class="fw-pc-body">
+                        <h2 class="t">{{ $p->name }}</h2>
                         @if ($p->description)<p>{{ $p->description }}</p>@endif
-                        <span class="pg-meta">
-                            <span>{!! Icons::svg('clock') !!} 60 Menit</span>
-                            <span>{!! Icons::svg('user') !!} 1 Orang</span>
-                            <span>{!! Icons::svg('layers') !!} {{ ucfirst(strtolower($p->level)) }}</span>
+                        <span class="fw-pc-chips">
+                            <span>{!! Icons::svg('clock') !!} 60 menit</span>
+                            <span>{!! Icons::svg('user') !!} 1 orang</span>
+                        </span>
+                        <span class="fw-pc-foot">
+                            <span class="fw-pc-price">{{ $rp(BookingRules::pricePerHour()) }}<small> / jam</small></span>
+                            <span class="fw-pc-btn">Detail {!! Icons::svg('arrow') !!}</span>
                         </span>
                     </span>
                 </a>
-
                 <template id="pd-{{ $p->id }}">
-                    <div class="pd-img" style="background-image:url('{{ $p->image_url }}');background-position:{{ $p->image_css_position }}">
+                    <div class="pd-img">
+                        <img src="{{ $p->image_url }}" alt="" style="object-position: {{ $p->image_css_position }}" onerror="this.remove()">
                         <div class="pd-top"><button type="button" data-pd-close aria-label="Tutup">{!! Icons::svg('back') !!}</button></div>
                     </div>
                     <div class="pd-body">
