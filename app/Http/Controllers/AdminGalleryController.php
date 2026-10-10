@@ -20,31 +20,30 @@ class AdminGalleryController extends Controller
      */
     public function index(Request $request): View
     {
-        $type = in_array($request->query('type'), ['image', 'video'], true)
-            ? $request->query('type')
-            : null;
+        $album = array_key_exists((string) $request->query('album'), Gallery::ALBUMS) ? $request->query('album') : null;
+        $type  = null;
 
-        $galleries = Gallery::query()
-            ->when($type, fn ($query) => $query->where('type', $type))
-            ->ordered()
-            ->get();
+        $all       = Gallery::query()->ordered()->get();
+        $galleries = $album ? $all->filter(fn ($g) => $g->album_key === $album)->values() : $all;
 
-        $counts = [
-            'all'   => Gallery::count(),
-            'image' => Gallery::images()->count(),
-            'video' => Gallery::videos()->count(),
-        ];
+        $counts = ['all' => $all->count()];
+        foreach (array_keys(Gallery::ALBUMS) as $key) {
+            $counts[$key] = $all->filter(fn ($g) => $g->album_key === $key)->count();
+        }
 
-        return view('admin.gallery.index', compact('galleries', 'counts', 'type'));
+        return view('admin.gallery.index', compact('galleries', 'counts', 'type', 'album'));
     }
 
     /**
      * Menampilkan form tambah gallery.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        $album = array_key_exists((string) $request->query('album'), Gallery::ALBUMS) ? $request->query('album') : null;
+
         $gallery = new Gallery([
-            'type'       => 'image',
+            'album'      => $album,
+            'type'       => $album ? Gallery::ALBUMS[$album][2] : 'image',
             'status'     => 'active',
             'sort_order' => 0,
         ]);
@@ -154,6 +153,7 @@ class AdminGalleryController extends Controller
             ] : ['nullable'],
             'video_upload' => [Rule::requiredIf($needsVideoFile), 'nullable', 'file'],
             'social_url'   => ['nullable', 'url', 'max:500'],
+            'album'        => ['nullable', Rule::in(array_keys(Gallery::ALBUMS))],
         ], [
             'title.required'        => 'Judul wajib diisi.',
             'image_file.required'   => 'Pilih file foto yang akan diunggah.',
@@ -172,6 +172,7 @@ class AdminGalleryController extends Controller
             'category'    => $request->input('category'),
             'status'      => $request->input('status'),
             'sort_order'  => (int) $request->input('sort_order', 0),
+            'album'       => $request->input('album') ?: Gallery::guessAlbum($type, (string) $request->input('video_url') . ' ' . (string) $request->input('social_url')),
         ];
     }
 

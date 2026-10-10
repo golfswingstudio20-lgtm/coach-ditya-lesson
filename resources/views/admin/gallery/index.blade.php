@@ -4,11 +4,10 @@
 
 @section('content')
     @php
-        $tabs = [
-            ''      => ['label' => 'Semua', 'count' => $counts['all']],
-            'image' => ['label' => 'Foto',  'count' => $counts['image']],
-            'video' => ['label' => 'Video', 'count' => $counts['video']],
-        ];
+        $tabs = ['' => ['label' => 'Semua', 'count' => $counts['all']]];
+        foreach (\App\Models\Gallery::ALBUMS as $key => [$label]) {
+            $tabs[$key] = ['label' => $label, 'count' => $counts[$key] ?? 0];
+        }
     @endphp
 
     <section class="page-head">
@@ -19,14 +18,14 @@
 
         <div class="head-actions">
             <a href="{{ route('galeri') }}" target="_blank" rel="noopener" class="btn btn-outline">◉ Lihat halaman publik</a>
-            <a href="{{ route('admin.gallery.create') }}" class="btn btn-primary">＋ Tambah foto / video</a>
+            <a href="{{ route('admin.gallery.create', $album ? ['album' => $album] : []) }}" class="btn btn-primary">＋ Tambah{{ $album ? ' ke ' . \App\Models\Gallery::ALBUMS[$album][0] : ' foto / video' }}</a>
         </div>
     </section>
 
     <nav class="tabs">
         @foreach ($tabs as $tabType => $tab)
-            <a href="{{ route('admin.gallery.index', $tabType ? ['type' => $tabType] : []) }}"
-               class="tab {{ ($type ?? '') === $tabType ? 'active' : '' }}">
+            <a href="{{ route('admin.gallery.index', $tabType ? ['album' => $tabType] : []) }}"
+               class="tab {{ ($album ?? '') === $tabType ? 'active' : '' }}">
                 {{ $tab['label'] }}<span>{{ $tab['count'] }}</span>
             </a>
         @endforeach
@@ -34,7 +33,7 @@
 
     @if ($galleries->isEmpty())
         <div class="empty-state">
-            Belum ada {{ $type === 'video' ? 'video' : ($type === 'image' ? 'foto' : 'foto atau video') }} di galeri.
+            Belum ada isi di {{ $album ? 'folder ' . \App\Models\Gallery::ALBUMS[$album][0] : 'galeri' }}.
             <br>
             <a href="{{ route('admin.gallery.create') }}" class="btn btn-primary">＋ Tambah sekarang</a>
         </div>
@@ -63,7 +62,7 @@
 
                         <div class="badges">
                             <span class="badge type">
-                                {{ $gallery->type === 'image' ? 'Foto' : ['youtube' => 'YouTube', 'instagram' => 'Instagram'][$gallery->video_platform] ?? 'Video' }}
+                                {{ $gallery->album_label }}
                             </span>
                             <span class="badge {{ $gallery->status }}">
                                 {{ $gallery->isActive() ? 'Tampil' : 'Disembunyikan' }}

@@ -4,11 +4,25 @@
 --}}
 @php
     $type        = old('type', $gallery->type ?? 'image');
-    $videoSource = old('video_source', $gallery->video_file && ! $gallery->video_url
+    $videoSource = old('video_source', ($gallery->video_file && ! $gallery->video_url) || (! $gallery->exists && $gallery->album === 'instagram')
         ? 'upload'
         : (str_contains((string) $gallery->video_url, 'instagram.com') ? 'instagram' : 'youtube'));
     $isActive    = old('status', $gallery->status ?? 'active') === 'active';
+    $albumNow    = old('album', $gallery->album ?: ($gallery->exists ? $gallery->album_key : request('album', '')));
+    $albumIcons  = ['latihan' => '📸', 'prestasi' => '🏆', 'youtube' => '▶', 'instagram' => '◎'];
 @endphp
+
+<style>
+    .album-pick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .album-opt { position: relative; display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--d-surface, #fff); cursor: pointer; }
+    .album-opt input { position: absolute; opacity: 0; pointer-events: none; }
+    .album-opt .ic { width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; border-radius: 11px; background: var(--accent-soft); font-size: 17px; }
+    .album-opt b { display: block; font-size: 13.5px; color: var(--text); }
+    .album-opt small { display: block; font-size: 11.5px; color: var(--text-muted); line-height: 1.35; }
+    .album-opt:has(input:checked) { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(var(--d-green-rgb, 31, 77, 51), .12); }
+    .album-opt:has(input:focus-visible) { outline: 2px solid var(--lime); outline-offset: 2px; }
+    @media (max-width: 520px) { .album-pick { grid-template-columns: 1fr; } }
+</style>
 
 <form method="POST" action="{{ $action }}" enctype="multipart/form-data" class="form-card" id="galleryForm" @if (\App\Support\Uploads::directEnabled()) data-direct-upload="{{ route('admin.uploads.sign') }}" @endif>
     @csrf
@@ -38,6 +52,20 @@
             <input type="radio" name="type" id="typeVideo" value="video" @checked($type === 'video')>
             <label for="typeVideo">▶ Video</label>
         </div>
+    </div>
+
+    <div class="field">
+        <span class="field-label">Folder</span>
+        <div class="album-pick" id="albumPick">
+            @foreach (\App\Models\Gallery::ALBUMS as $key => [$label, $desc, $kind])
+                <label class="album-opt" data-kind="{{ $kind }}">
+                    <input type="radio" name="album" value="{{ $key }}" @checked($albumNow === $key)>
+                    <span class="ic">{{ $albumIcons[$key] }}</span>
+                    <span><b>{{ $label }}</b><small>{{ $desc }}</small></span>
+                </label>
+            @endforeach
+        </div>
+        <p class="field-hint">Folder dipilih otomatis sesuai jenis media, tapi bisa Anda ganti.</p>
     </div>
 
     <div class="field">
@@ -193,6 +221,28 @@
 
             document.querySelectorAll('input[name="type"], input[name="video_source"]')
                 .forEach((radio) => radio.addEventListener('change', syncFields));
+
+            // Pilih folder otomatis (kecuali admin sudah memilih sendiri)
+            let albumTouched = !!document.querySelector('input[name="album"]:checked');
+            document.querySelectorAll('input[name="album"]').forEach((r) => r.addEventListener('change', () => { albumTouched = true; }));
+            function autoAlbum(force) {
+                const cur = document.querySelector('input[name="album"]:checked');
+                const isImage = typeImage.checked;
+                const curKind = cur ? cur.closest('.album-opt').dataset.kind : null;
+                if (albumTouched && !force && cur && curKind === (isImage ? 'image' : 'video')) return;
+                let key = 'latihan';
+                if (!isImage) {
+                    const url = ($('fVideoUrl').value + ' ' + (($('fSocialUrl') || {}).value || '')).toLowerCase();
+                    key = srcInsta.checked || url.includes('instagram.com') ? 'instagram'
+                        : (!srcUpload.checked || url.includes('youtu') ? 'youtube' : 'instagram');
+                    if (!srcUpload.checked && !srcInsta.checked && url.includes('instagram.com')) key = 'instagram';
+                }
+                const el = document.querySelector('input[name="album"][value="' + key + '"]');
+                if (el) el.checked = true;
+            }
+            document.querySelectorAll('input[name="type"], input[name="video_source"]').forEach((r) => r.addEventListener('change', () => autoAlbum(false)));
+            ['fVideoUrl', 'fSocialUrl'].forEach((id) => $(id) && $(id).addEventListener('change', () => autoAlbum(false)));
+            if (!albumTouched) autoAlbum(true);
 
             [photoInput, thumbInput].forEach((input) => {
                 input.addEventListener('change', () => {

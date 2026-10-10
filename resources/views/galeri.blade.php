@@ -10,12 +10,46 @@
     $items = Gallery::active()->ordered()->get();
     $photoCount = $items->where('type', '!=', 'video')->count();
     $videoCount = $items->where('type', 'video')->count();
+
+    // Folder: isi, jumlah, dan foto sampul (item pertama yang punya gambar)
+    $folders = collect(Gallery::ALBUMS)->map(function ($meta, $key) use ($items) {
+        $list  = $items->filter(fn ($g) => $g->album_key === $key);
+        $cover = $list->first(fn ($g) => $g->type === 'video' ? $g->thumbnail_url : $g->image_url);
+
+        return [
+            'key'   => $key,
+            'label' => $meta[0],
+            'desc'  => $meta[1],
+            'count' => $list->count(),
+            'cover' => $cover ? ($cover->type === 'video' ? $cover->thumbnail_url : $cover->image_url) : null,
+        ];
+    })->filter(fn ($f) => $f['count'] > 0)->values();
+    $folderIcons = ['latihan' => 'image', 'prestasi' => 'star', 'youtube' => 'play', 'instagram' => 'video'];
     $isCustomer = auth()->check() && auth()->user()->role === 'customer';
 @endphp
 
 @push('head')
 <style>
     .gl-tabs { margin-bottom: 18px; }
+    .gl-folders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+    .gl-folder { position: relative; height: 128px; padding: 0; border: 2px solid transparent; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); color: #fff; text-align: left; font: inherit; cursor: pointer; box-shadow: 0 8px 22px rgba(var(--d-shadow-rgb, 23, 46, 33), .14); transition: transform .2s, border-color .2s; }
+    .gl-folder.ig { background: linear-gradient(135deg, #f9ce34, #ee2a7b 50%, #6228d7); }
+    .gl-folder.yt { background: linear-gradient(135deg, #b31217, #3a0b0d); }
+    .gl-folder img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.05) saturate(1.1); }
+    .gl-folder::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8, 20, 13, .15), rgba(8, 20, 13, .85)); }
+    .gl-folder:hover { transform: translateY(-2px); }
+    .gl-folder.on { border-color: #cde8a3; box-shadow: 0 0 0 3px rgba(205, 232, 163, .45), 0 10px 26px rgba(var(--d-shadow-rgb, 23, 46, 33), .2); }
+    .gl-folder .fi { position: absolute; z-index: 1; top: 12px; left: 12px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: rgba(255, 255, 255, .92); color: #1f4d33; }
+    .gl-folder .fi svg { width: 17px; height: 17px; }
+    .gl-folder .fc { position: absolute; z-index: 1; top: 12px; right: 12px; padding: 3px 9px; border-radius: 99px; background: rgba(8, 20, 13, .55); font-size: 12px; font-weight: 700; }
+    .gl-folder .fn { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; }
+    .gl-folder .fn b { display: block; font-size: 15px; }
+    .gl-folder .fn small { display: block; margin-top: 1px; color: rgba(255, 255, 255, .78); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gl-now { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 12px; }
+    .gl-now h2 { margin: 0; font-family: var(--fw-serif); font-size: 21px; }
+    .gl-now button { height: 34px; padding: 0 14px; border: 1px solid var(--fw-line-2); border-radius: 99px; background: var(--fw-surface); color: var(--fw-text); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+    @media (max-width: 960px) { .gl-folders { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 820px) { .gl-folder { height: 108px; border-radius: 18px; } .gl-folder .fn small { display: none; } .gl-now h2 { font-size: 19px; } }
     .gl-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 210px; grid-auto-flow: dense; gap: 12px; }
     .gl-item { position: relative; padding: 0; border: 0; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); cursor: pointer; box-shadow: 0 10px 26px rgba(var(--d-shadow-rgb, 23, 46, 33), .14); text-align: left; font: inherit; }
     .gl-item.big { grid-column: span 2; grid-row: span 2; }
@@ -82,11 +116,19 @@
         </div>
     </div>
 
-    <div class="fw-pills gl-tabs" id="glTabs" role="tablist">
-        <button type="button" class="fw-pill on" data-type="">Semua <small>{{ $items->count() }}</small></button>
-        <button type="button" class="fw-pill" data-type="image">Foto <small>{{ $photoCount }}</small></button>
-        <button type="button" class="fw-pill" data-type="video">Video <small>{{ $videoCount }}</small></button>
-    </div>
+    @if ($folders->count() > 1)
+        <div class="gl-folders" id="glFolders" aria-label="Folder galeri">
+            @foreach ($folders as $f)
+                <button type="button" class="gl-folder {{ $f['key'] === 'instagram' ? 'ig' : ($f['key'] === 'youtube' ? 'yt' : '') }}" data-album="{{ $f['key'] }}" data-label="{{ $f['label'] }}" aria-pressed="false">
+                    @if ($f['cover'])<img src="{{ $f['cover'] }}" alt="" loading="lazy" onerror="this.remove()">@endif
+                    <span class="fi">{!! Icons::svg($folderIcons[$f['key']]) !!}</span>
+                    <span class="fc">{{ $f['count'] }}</span>
+                    <span class="fn"><b>{{ $f['label'] }}</b><small>{{ $f['desc'] }}</small></span>
+                </button>
+            @endforeach
+        </div>
+        <div class="gl-now"><h2 id="glNow">Semua <small class="fw-muted" style="font-family:var(--fw-sans);font-size:13px">{{ $items->count() }}</small></h2><button type="button" id="glAll" hidden>Lihat semua</button></div>
+    @endif
 
     @if ($items->isEmpty())
         <div class="fw-empty"><b>Galeri masih kosong</b>Foto & video akan segera ditambahkan.</div>
@@ -100,7 +142,7 @@
                     if ($isVideo && $shape === '') { $shape = 'tall'; }
                     $platform = $g->video_platform;
                 @endphp
-                <button type="button" class="gl-item {{ $shape }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
+                <button type="button" class="gl-item {{ $shape }} {{ $platform === 'instagram' ? 'ig' : '' }}" data-album="{{ $g->album_key }}" data-type="{{ $isVideo ? 'video' : 'image' }}"
                         data-title="{{ $g->title }}" data-desc="{{ $g->category ?: \Illuminate\Support\Str::limit($g->description, 90) }}"
                         @if ($isVideo)
                             data-embed="{{ $g->embed_url }}" data-platform="{{ $platform }}" data-link="{{ $g->social_link[0] ?? '' }}" data-link-label="{{ $g->social_link[1] ?? '' }}" data-file="{{ $g->video_file_url }}" data-poster="{{ $g->image_url }}"
@@ -136,18 +178,29 @@
 (function () {
     var grid = document.getElementById('glGrid');
     if (!grid) return;
-    document.querySelectorAll('#glTabs .fw-pill').forEach(function (b) {
-        b.addEventListener('click', function () {
-            document.querySelectorAll('#glTabs .fw-pill').forEach(function (x) { x.classList.remove('on'); });
-            b.classList.add('on');
-            var shown = 0;
-            grid.querySelectorAll('.gl-item').forEach(function (it) {
-                var ok = !b.dataset.type || it.dataset.type === b.dataset.type;
-                it.hidden = !ok; if (ok) shown++;
-            });
-            document.getElementById('glEmpty').hidden = shown > 0;
+    var folders = document.querySelectorAll('#glFolders .gl-folder'), now = document.getElementById('glNow'), all = document.getElementById('glAll');
+    function show(album, label) {
+        var shown = 0;
+        grid.querySelectorAll('.gl-item').forEach(function (it) {
+            var ok = !album || it.dataset.album === album;
+            it.hidden = !ok; if (ok) shown++;
+        });
+        folders.forEach(function (f) { var on = f.dataset.album === album; f.classList.toggle('on', on); f.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        if (now) now.innerHTML = '';
+        if (now) { now.appendChild(document.createTextNode((label || 'Semua') + ' ')); var c = document.createElement('small'); c.className = 'fw-muted'; c.style.cssText = 'font-family:var(--fw-sans);font-size:13px'; c.textContent = shown; now.appendChild(c); }
+        if (all) all.hidden = !album;
+        document.getElementById('glEmpty').hidden = shown > 0;
+    }
+    folders.forEach(function (f) {
+        f.addEventListener('click', function () {
+            var off = f.classList.contains('on');
+            show(off ? '' : f.dataset.album, off ? '' : f.dataset.label);
+            if (!off && window.innerWidth <= 820) now.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
+    if (all) all.addEventListener('click', function () { show('', ''); });
+    var start = new URLSearchParams(location.search).get('folder');
+    if (start) { var sf = document.querySelector('#glFolders .gl-folder[data-album="' + start + '"]'); if (sf) show(start, sf.dataset.label); }
 
     var lb = document.getElementById('lb'), media = document.getElementById('lbMedia');
     function close() { lb.classList.remove('open'); media.innerHTML = ''; document.body.style.overflow = ''; }

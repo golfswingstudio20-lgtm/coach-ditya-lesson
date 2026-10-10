@@ -9,6 +9,14 @@ use Illuminate\Support\Str;
 
 class Gallery extends Model
 {
+    /** Folder galeri: key => [nama, keterangan, jenis media]. */
+    public const ALBUMS = [
+        'latihan'   => ['Momen Latihan', 'Suasana sesi latihan & lapangan', 'image'],
+        'prestasi'  => ['Prestasi Murid', 'Pencapaian & turnamen murid', 'image'],
+        'youtube'   => ['Video YouTube', 'Tutorial & tips dari YouTube', 'video'],
+        'instagram' => ['Video Instagram', 'Reel & video latihan', 'video'],
+    ];
+
     protected $fillable = [
         'title',
         'description',
@@ -17,6 +25,7 @@ class Gallery extends Model
         'video_url',   // link YouTube
         'video_file',  // file video hasil upload
         'social_url',  // link Instagram / YouTube tambahan untuk video upload
+        'album',       // folder: latihan | prestasi | youtube | instagram
         'category',
         'status',      // active | inactive
         'sort_order',
@@ -42,6 +51,11 @@ class Gallery extends Model
     public function scopeVideos(Builder $query): Builder
     {
         return $query->where('type', 'video');
+    }
+
+    public function scopeAlbum(Builder $query, string $album): Builder
+    {
+        return $query->where('album', $album);
     }
 
     public function scopeOrdered(Builder $query): Builder
@@ -132,6 +146,30 @@ class Gallery extends Model
         };
 
         return [$url, $label];
+    }
+
+    /** Folder yang dipakai; kalau kosong ditebak dari jenis media. */
+    public function getAlbumKeyAttribute(): string
+    {
+        if ($this->album && isset(self::ALBUMS[$this->album])) {
+            return $this->album;
+        }
+
+        return static::guessAlbum($this->type, (string) $this->video_url . ' ' . (string) $this->social_url);
+    }
+
+    public function getAlbumLabelAttribute(): string
+    {
+        return self::ALBUMS[$this->album_key][0];
+    }
+
+    public static function guessAlbum(?string $type, string $links = ''): string
+    {
+        if ($type !== 'video') {
+            return 'latihan';
+        }
+
+        return str_contains($links, 'youtu') && ! str_contains($links, 'instagram.com') ? 'youtube' : 'instagram';
     }
 
     /** youtube | instagram | file | null */
