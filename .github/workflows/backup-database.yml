@@ -1,0 +1,71 @@
+# Backup database Supabase mingguan (gratis, lewat GitHub Actions).
+#
+# Hasil: file terenkripsi "backup-YYYY-MM-DD.sql.gz.gpg" di tab Actions -> run -> Artifacts
+# (disimpan 90 hari). Tidak memakai kuota Vercel; kuota Supabase hanya beberapa MB.
+#
+# Secrets yang wajib diisi di GitHub (Settings -> Secrets and variables -> Actions),
+# nilainya SAMA dengan Environment Variables di Vercel:
+#   DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
+#   BACKUP_PASSWORD  = kata sandi bebas untuk mengunci file backup (simpan baik-baik!)
+#
+# Membuka backup (di laptop, perlu GnuPG):
+#   gpg -d backup-2026-10-12.sql.gz.gpg | gunzip > backup.sql
+name: backup-database
+
+on:
+  schedule:
+    - cron: '0 18 * * 0'   # setiap Minggu 18:00 UTC = Senin 01:00 WIB
+  workflow_dispatch:        # tombol "Run workflow" untuk backup manual
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Cek secrets
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          if [ -z "$DB_HOST" ] || [ -z "$BACKUP_PASSWORD" ]; then
+            echo "::error::Secrets DB_HOST / BACKUP_PASSWORD belum diisi (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+      - name: Pasang pg_dump (PostgreSQL 17)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common gnupg
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-17
+
+      - name: Backup & enkripsi
+        env:
+          PGHOST: ${{ secrets.DB_HOST }}
+          PGPORT: ${{ secrets.DB_PORT }}
+          PGDATABASE: ${{ secrets.DB_DATABASE }}
+          PGUSER: ${{ secrets.DB_USERNAME }}
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          PGSSLMODE: require
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          FILE="backup-$(TZ=Asia/Jakarta date +%Y-%m-%d).sql.gz"
+          /usr/lib/postgresql/17/bin/pg_dump --schema=public --no-owner --no-privileges | gzip -9 > "$FILE"
+          SIZE=$(stat -c %s "$FILE")
+          if [ "$SIZE" -lt 1000 ]; then echo "::error::Backup terlalu kecil ($SIZE byte), kemungkinan gagal."; exit 1; fi
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSWORD" --symmetric --cipher-algo AES256 -o "$FILE.gpg" "$FILE"
+          rm "$FILE"
+          echo "BACKUP_FILE=$FILE.gpg" >> "$GITHUB_ENV"
+          echo "### Backup selesai: $FILE.gpg ($(stat -c %s "$FILE.gpg") byte)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Simpan backup (90 hari)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_FILE }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 90
+          if-no-files-found: error

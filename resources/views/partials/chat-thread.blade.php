@@ -105,26 +105,46 @@
     initial.forEach(add);
     toBottom();
 
+    /*
+     * Cek pesan baru secara hemat (mengurangi pemakaian server Vercel):
+     * - cepat (4 dtk) setelah ada pesan / sedang mengetik, lalu melambat bertahap sampai 60 dtk
+     * - setelah 15 menit tanpa aktivitas: tiap 3 menit
+     * - tab tidak dilihat / HP dikunci: berhenti total, lanjut lagi saat dibuka
+     */
+    var STEPS = [4000, 4000, 6000, 10000, 15000, 30000, 60000], step = 0, timer = null, lastActive = Date.now();
+
+    function schedule() {
+        clearTimeout(timer);
+        if (document.hidden) return;
+        var wait = Date.now() - lastActive > 15 * 60000 ? 180000 : STEPS[Math.min(step, STEPS.length - 1)];
+        timer = setTimeout(poll, wait);
+    }
+    function wake() { lastActive = Date.now(); step = 0; schedule(); }
+
     function poll() {
-        if (polling) return;
+        if (polling || document.hidden) return;
         polling = true;
         fetch(root.dataset.poll + '?after=' + lastId, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (d) {
-                if (!d || !d.messages || !d.messages.length) return;
+                if (!d || !d.messages || !d.messages.length) { step++; return; }
                 var near = body.scrollHeight - body.scrollTop - body.clientHeight < 120;
                 d.messages.forEach(add);
                 if (near) toBottom();
+                step = 0; lastActive = Date.now();
             })
-            .catch(function () {})
-            .finally(function () { polling = false; });
+            .catch(function () { step++; })
+            .finally(function () { polling = false; schedule(); });
     }
 
-    var timer = setInterval(poll, 5000);
+    schedule();
     document.addEventListener('visibilitychange', function () {
-        clearInterval(timer);
-        timer = setInterval(poll, document.hidden ? 20000 : 5000);
-        if (!document.hidden) poll();
+        if (document.hidden) { clearTimeout(timer); return; }
+        lastActive = Date.now(); step = 0; poll();
+    });
+    window.addEventListener('focus', function () { if (Date.now() - lastActive > 30000) wake(); });
+    ['keydown', 'pointerdown', 'scroll'].forEach(function (ev) {
+        root.addEventListener(ev, function () { if (step > 2 || Date.now() - lastActive > 60000) wake(); else lastActive = Date.now(); }, { passive: true, capture: true });
     });
 
     function grow() { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; }
@@ -147,7 +167,7 @@
             .then(function (res) {
                 if (!res.ok) throw new Error((res.d && res.d.message) || 'Pesan gagal dikirim.');
                 input.value = ''; grow();
-                add(res.d.message); toBottom();
+                add(res.d.message); toBottom(); wake();
             })
             .catch(function (err) { errorEl.textContent = err.message || 'Pesan gagal dikirim. Coba lagi.'; errorEl.hidden = false; })
             .finally(function () { sendBtn.disabled = false; input.focus(); });
