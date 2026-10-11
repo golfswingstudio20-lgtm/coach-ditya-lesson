@@ -96,6 +96,11 @@ class Event extends Model
             return $path;
         }
 
+        // Poster contoh lama (2 MB PNG) sudah diganti versi ringan (JPG)
+        if ($path === 'images/event-poster-1.png' || $path === 'images/event-poster.png') {
+            $path = 'images/event-poster-1.jpg';
+        }
+
         if (file_exists(public_path($path))) {
             return asset($path);
         }

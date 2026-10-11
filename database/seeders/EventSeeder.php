@@ -20,7 +20,7 @@ class EventSeeder extends Seeder
         Event::create([
             'title'               => 'Golf Coaching Clinic',
             'description'         => 'Sesi coaching golf bersama coach berpengalaman dengan suasana latihan yang lebih intensif dan terarah.',
-            'poster'              => 'images/event-poster-1.png',
+            'poster'              => 'images/event-poster-1.jpg',
             'event_date'          => '2026-10-17',
             'start_time'          => '09:00',
             'end_time'            => '12:00',
