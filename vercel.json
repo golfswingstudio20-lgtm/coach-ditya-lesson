@@ -32,6 +32,10 @@
         {
             "path": "/cron/bersihkan-storage",
             "schedule": "0 19 * * *"
+        },
+        {
+            "path": "/cron/bersihkan-notifikasi",
+            "schedule": "0 20 * * *"
         }
     ]
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminGalleryAlbumController;
 use App\Http\Controllers\AdminSchedulePosterController;
 use App\Http\Controllers\AdminStorageController;
 use App\Http\Controllers\CronController;
+use App\Http\Controllers\CronNotificationController;
 use App\Http\Controllers\AdminUploadController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CustomerPageController;
@@ -29,6 +30,9 @@ Route::middleware(['auth', 'verified', 'role:customer'])->group(function () {
 
 // Vercel Cron (1x sehari): hapus file yang tidak terpakai. Diamankan dengan CRON_SECRET.
 Route::get('/cron/bersihkan-storage', [CronController::class, 'cleanup'])->name('cron.storage');
+
+// Vercel Cron (1x sehari): hapus notifikasi lebih dari 7 hari.
+Route::get('/cron/bersihkan-notifikasi', CronNotificationController::class)->name('cron.notifications');
 
 // Menu (HP): akun, halaman lain, keluar. Bisa dibuka visitor & customer.
 Route::get('/menu', [CustomerPageController::class, 'menu'])->name('menu');

@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Hosting biasa (bukan Vercel): hapus file yang tidak terpakai setiap hari jam 02:00 WIB.
 // Di Vercel, jadwal ini dijalankan oleh Vercel Cron (vercel.json -> /cron/bersihkan-storage).
 Schedule::command('storage:bersihkan')->dailyAt('02:00')->timezone('Asia/Jakarta');
+
+// Hapus notifikasi lebih dari 7 hari (di Vercel lewat /cron/bersihkan-notifikasi).
+Schedule::command('notifikasi:bersihkan')->dailyAt('03:00')->timezone('Asia/Jakarta');
