@@ -24,7 +24,7 @@
         <div class="fw-field">
             <label for="password">Password</label>
             <div class="fa-pw">
-                <input id="password" type="password" name="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
+                <input id="password" type="password" name="password" placeholder="Min. 8 karakter, huruf & angka" autocomplete="new-password" required>
                 <button type="button" data-toggle-pw aria-label="Lihat password">{!! \App\Support\Icons::svg('eye') !!}</button>
             </div>
         </div>

@@ -116,7 +116,7 @@
 
     <section class="pf-card" id="password">
         <h2>Ganti password</h2>
-        <p>Minimal 8 karakter. Perangkat lain akan otomatis keluar.</p>
+        <p>Minimal 8 karakter, berisi huruf dan angka. Perangkat lain akan otomatis keluar.</p>
 
         <form method="POST" action="{{ route('profile.password') }}">
             @csrf

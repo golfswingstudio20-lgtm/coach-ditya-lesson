@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Buat password baru</h1>
-    <p class="fw-sub">Gunakan minimal 8 karakter yang mudah Anda ingat.</p>
+    <p class="fw-sub">Minimal 8 karakter, berisi huruf dan angka, yang mudah Anda ingat.</p>
 
     @if ($errors->any())
         <div class="fw-alert err"><div>@foreach ($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div></div>

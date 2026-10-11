@@ -44,7 +44,7 @@
                 <label for="cPassword">Password</label>
                 <input type="text" name="password" id="cPassword" class="input" required minlength="8" autocomplete="new-password"
                        style="font-family: Consolas, Menlo, monospace">
-                <p class="field-hint">Minimal 8 karakter. Password akan ditampilkan sekali setelah akun dibuat.</p>
+                <p class="field-hint">Minimal 8 karakter, berisi huruf dan angka. Password akan ditampilkan sekali setelah akun dibuat.</p>
             </div>
             <div class="field">
                 <label for="cPassword2">Ulangi password</label>

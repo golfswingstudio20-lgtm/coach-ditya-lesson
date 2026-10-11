@@ -41,15 +41,12 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
+        // Aturan password untuk semua form (daftar, lupa password, profil, admin):
+        // minimal 8 karakter, ada huruf & angka, dan bukan password yang pernah bocor.
         Password::defaults(
-            fn (): ?Password => app()->isProduction()
-                ? Password::min(12)
-                    ->mixedCase()
-                    ->letters()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised()
-                : null,
+            fn (): Password => app()->isProduction()
+                ? Password::min(8)->letters()->numbers()->uncompromised()
+                : Password::min(8)->letters()->numbers(),
         );
     }
 

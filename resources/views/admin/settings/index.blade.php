@@ -986,7 +986,7 @@
             @method('PUT')
 
             <h2>Ganti password</h2>
-            <p class="st-sub">Minimal 8 karakter. Setelah diganti, login di perangkat lain akan dikeluarkan.</p>
+            <p class="st-sub">Minimal 8 karakter, berisi huruf dan angka. Setelah diganti, login di perangkat lain akan dikeluarkan.</p>
 
             <div class="st-grid-3">
                 <div class="field">

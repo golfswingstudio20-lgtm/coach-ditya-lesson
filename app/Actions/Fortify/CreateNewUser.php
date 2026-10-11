@@ -32,7 +32,7 @@ class CreateNewUser implements CreatesNewUsers
             'password' => [
                 'required',
                 'string',
-                'min:8',
+                \Illuminate\Validation\Rules\Password::defaults(),
                 'confirmed',
             ],
         ])->validate();
