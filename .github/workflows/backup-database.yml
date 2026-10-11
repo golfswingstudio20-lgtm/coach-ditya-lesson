@@ -57,6 +57,23 @@ jobs:
           set -o pipefail
           PG=/usr/lib/postgresql/17/bin
 
+          # Rapikan salah salin: spasi/baris baru, "https://", "postgresql://user@", ":port", "/path"
+          clean() { printf '%s' "$1" | tr -d '[:space:]'; }
+          PGHOST=$(clean "$PGHOST"); PGPORT=$(clean "$PGPORT"); PGUSER=$(clean "$PGUSER"); PGDATABASE=$(clean "$PGDATABASE")
+          PGHOST=${PGHOST#*://}; PGHOST=${PGHOST##*@}; PGHOST=${PGHOST%%/*}; PGHOST=${PGHOST%%:*}
+          export PGHOST PGPORT PGUSER PGDATABASE
+
+          # Cek bentuk DB_HOST tanpa menampilkan isinya
+          if ! printf '%s' "$PGHOST" | grep -Eq '^([A-Za-z0-9-]+\.)+[A-Za-z0-9-]+$'; then
+            echo "::error::DB_HOST tidak berbentuk alamat server (panjang ${#PGHOST} karakter). Isi yang benar contohnya: aws-0-ap-northeast-1.pooler.supabase.com (tanpa https://, tanpa spasi). Ambil dari Supabase > Connect > Session pooler."
+            exit 1
+          fi
+          case "$PGHOST" in
+            *pooler.supabase.com) echo "Host: Supabase pooler ✓" ;;
+            *supabase.co) ;;
+            *) echo "::warning::DB_HOST bukan alamat Supabase (bukan *.supabase.com / *.supabase.co). Pastikan yang disalin adalah DB_HOST." ;;
+          esac
+
           # Supabase: alamat langsung db.xxx.supabase.co hanya IPv6 (GitHub tidak bisa menjangkau).
           case "$PGHOST" in
             db.*.supabase.co)
