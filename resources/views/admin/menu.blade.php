@@ -73,6 +73,7 @@
         <div class="am-group">
             <h2>Sistem</h2>
             <div class="fw-menu">
+                {!! $item(route('admin.auto.index'), 'clock', 'Jadwal Otomatis (agenda, pengingat, laporan)') !!}
                 {!! $item(route('admin.storage.index'), 'layers', 'Penyimpanan (foto & video)') !!}
                 {!! $item(route('admin.settings.index'), 'settings', 'Settings (nama, logo, harga, pembayaran)') !!}
                 <button type="button" data-theme-toggle aria-label="Ganti mode terang/gelap"><span class="ic">{!! Icons::svg('moon') !!}</span><span class="lbl">Mode gelap</span><span class="fw-theme-switch" aria-hidden="true"></span></button>

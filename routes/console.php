@@ -14,3 +14,9 @@ Schedule::command('storage:bersihkan')->dailyAt('02:00')->timezone('Asia/Jakarta
 
 // Hapus notifikasi lebih dari 7 hari (di Vercel lewat /cron/bersihkan-notifikasi).
 Schedule::command('notifikasi:bersihkan')->dailyAt('03:00')->timezone('Asia/Jakarta');
+
+// Jadwal otomatis (di Vercel lewat /cron/agenda-harian, /cron/pengingat-lesson, /cron/laporan-*)
+Schedule::call(fn () => \App\Support\AutoReports::run('agenda'))->dailyAt('06:00')->timezone('Asia/Jakarta')->name('agenda-harian');
+Schedule::call(fn () => \App\Support\AutoReports::run('reminder'))->dailyAt('17:00')->timezone('Asia/Jakarta')->name('pengingat-lesson');
+Schedule::call(fn () => \App\Support\AutoReports::run('weekly'))->weeklyOn(1, '08:00')->timezone('Asia/Jakarta')->name('laporan-mingguan');
+Schedule::call(fn () => \App\Support\AutoReports::run('monthly'))->monthlyOn(1, '08:00')->timezone('Asia/Jakarta')->name('laporan-bulanan');

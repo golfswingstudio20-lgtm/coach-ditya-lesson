@@ -388,6 +388,9 @@
 
             <div class="sidebar-title">System</div>
             <div class="sidebar-section">
+                <a href="{{ route('admin.auto.index') }}" class="sidebar-link {{ request()->routeIs('admin.auto.*') ? 'active' : '' }}">
+                    <span class="sidebar-icon">{!! \App\Support\Icons::svg('clock') !!}</span> Jadwal Otomatis
+                </a>
                 <a href="{{ route('admin.storage.index') }}" class="sidebar-link {{ request()->routeIs('admin.storage.*') ? 'active' : '' }}">
                     <span class="sidebar-icon">{!! \App\Support\Icons::svg('layers') !!}</span> Penyimpanan
                 </a>

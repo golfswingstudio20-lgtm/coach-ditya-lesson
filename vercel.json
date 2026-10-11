@@ -36,6 +36,22 @@
         {
             "path": "/cron/bersihkan-notifikasi",
             "schedule": "0 20 * * *"
+        },
+        {
+            "path": "/cron/agenda-harian",
+            "schedule": "0 23 * * *"
+        },
+        {
+            "path": "/cron/pengingat-lesson",
+            "schedule": "0 10 * * *"
+        },
+        {
+            "path": "/cron/laporan-mingguan",
+            "schedule": "0 1 * * 1"
+        },
+        {
+            "path": "/cron/laporan-bulanan",
+            "schedule": "0 1 1 * *"
         }
     ]
 }

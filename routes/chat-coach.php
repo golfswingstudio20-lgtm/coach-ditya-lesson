@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminAutoController;
 use App\Http\Controllers\AdminChatController;
 use App\Http\Controllers\AdminCoachController;
 use App\Http\Controllers\AdminContentController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\AdminGalleryAlbumController;
 use App\Http\Controllers\AdminSchedulePosterController;
 use App\Http\Controllers\AdminStorageController;
 use App\Http\Controllers\CronController;
+use App\Http\Controllers\CronAutoController;
 use App\Http\Controllers\CronNotificationController;
 use App\Http\Controllers\AdminUploadController;
 use App\Http\Controllers\ChatController;
@@ -34,6 +36,11 @@ Route::get('/cron/bersihkan-storage', [CronController::class, 'cleanup'])->name(
 // Vercel Cron (1x sehari): hapus notifikasi lebih dari 7 hari.
 Route::get('/cron/bersihkan-notifikasi', CronNotificationController::class)->name('cron.notifications');
 
+// Vercel Cron: agenda harian, pengingat lesson H-1, laporan mingguan & bulanan.
+Route::get('/cron/{task}', CronAutoController::class)
+    ->whereIn('task', ['agenda-harian', 'pengingat-lesson', 'laporan-mingguan', 'laporan-bulanan'])
+    ->name('cron.auto');
+
 // Menu (HP): akun, halaman lain, keluar. Bisa dibuka visitor & customer.
 Route::get('/menu', [CustomerPageController::class, 'menu'])->name('menu');
 
@@ -47,6 +54,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::post('/admin/poster-jadwal/kirim', [AdminSchedulePosterController::class, 'send'])->name('admin.poster.send');
     Route::get('/admin/penyimpanan', [AdminStorageController::class, 'index'])->name('admin.storage.index');
     Route::post('/admin/penyimpanan/bersihkan', [AdminStorageController::class, 'clean'])->name('admin.storage.clean');
+    Route::get('/admin/jadwal-otomatis', [AdminAutoController::class, 'index'])->name('admin.auto.index');
+    Route::post('/admin/jadwal-otomatis/{job}/toggle', [AdminAutoController::class, 'toggle'])->name('admin.auto.toggle');
+    Route::post('/admin/jadwal-otomatis/{job}/kirim', [AdminAutoController::class, 'run'])->name('admin.auto.run');
     Route::post('/admin/uploads/sign', [AdminUploadController::class, 'sign'])->name('admin.uploads.sign');
     Route::resource('/admin/gallery-albums', AdminGalleryAlbumController::class)
         ->parameters(['gallery-albums' => 'album'])
