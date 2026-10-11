@@ -226,6 +226,14 @@ Route::middleware([
     Route::post('/admin/customers', [AdminCustomerController::class, 'store'])
         ->name('admin.customers.store');
 
+    Route::post('/admin/customers/{user}/reset-password', [AdminCustomerController::class, 'resetPassword'])
+        ->whereNumber('user')
+        ->name('admin.customers.reset-password');
+
+    Route::post('/admin/customers/{user}/verify-email', [AdminCustomerController::class, 'verifyEmail'])
+        ->whereNumber('user')
+        ->name('admin.customers.verify-email');
+
     Route::delete('/admin/customers/{user}', [AdminCustomerController::class, 'destroy'])
         ->whereNumber('user')
         ->name('admin.customers.destroy');

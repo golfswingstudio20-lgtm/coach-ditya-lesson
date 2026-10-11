@@ -249,6 +249,47 @@ class AdminCustomerController extends Controller
     }
 
     /**
+     * Buat password baru untuk member yang lupa password (ditampilkan sekali ke admin).
+     */
+    public function resetPassword(User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        // Mudah dibaca & diketik: tanpa huruf/angka yang mirip (0/O, 1/l/I)
+        $chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $password = '';
+        for ($i = 0; $i < 10; $i++) {
+            $password .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+
+        $user->forceFill(['password' => $password, 'remember_token' => Str::random(60)])->save();
+
+        // Keluarkan dari semua perangkat yang masih login dengan password lama
+        if (Schema::hasTable(config('session.table', 'sessions'))) {
+            DB::table(config('session.table', 'sessions'))->where('user_id', $user->id)->delete();
+        }
+
+        return redirect()
+            ->route('admin.customers.show', $user)
+            ->with('success', 'Password baru dibuat untuk ' . $user->name . '.')
+            ->with('new_account', ['email' => $user->email, 'password' => $password, 'reset' => true]);
+    }
+
+    /**
+     * Tandai email member sudah terverifikasi (kalau email verifikasi tidak sampai).
+     */
+    public function verifyEmail(User $user): RedirectResponse
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        if (! $user->email_verified_at) {
+            $user->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        return back()->with('success', 'Email ' . $user->email . ' ditandai terverifikasi. Member sudah bisa booking.');
+    }
+
+    /**
      * Detail customer offline (dikelompokkan berdasarkan nomor HP).
      */
     public function offline(Request $request): View|RedirectResponse

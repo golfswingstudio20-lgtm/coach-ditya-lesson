@@ -31,7 +31,7 @@
 
     @if (session('new_account'))
         <section class="form-card" style="margin-bottom: 16px; border-color: rgba(var(--d-green-rgb, 31, 77, 51), 0.45)">
-            <h2 style="font-size: 16px; font-weight: 900">Akun berhasil dibuat</h2>
+            <h2 style="font-size: 16px; font-weight: 900">{{ ! empty(session('new_account')['reset']) ? 'Password baru dibuat' : 'Akun berhasil dibuat' }}</h2>
             <p class="field-hint" style="margin: 4px 0 12px">
                 Berikan data login ini ke customer. Password hanya ditampilkan <strong>sekali</strong>, setelah halaman ditutup tidak bisa dilihat lagi.
                 Sarankan customer mengganti password setelah login pertama.
@@ -44,6 +44,10 @@
                     data-text="Email: {{ session('new_account')['email'] }}&#10;Password: {{ session('new_account')['password'] }}&#10;Login: {{ route('login') }}">
                 Salin data login
             </button>
+            @if ($waUrl)
+                <a class="btn btn-primary" style="margin-top: 12px" target="_blank" rel="noopener"
+                   href="{{ $waUrl . (str_contains($waUrl, '?') ? '&' : '?') . 'text=' . rawurlencode('Halo ' . $user->name . ', ini data login ' . \App\Support\Brand::name() . ":\nEmail: " . session('new_account')['email'] . "\nPassword: " . session('new_account')['password'] . "\nLogin: " . route('login') . "\n\nSilakan ganti password setelah masuk (menu Profil).") }}">☎ Kirim via WhatsApp</a>
+            @endif
         </section>
     @endif
 
@@ -86,6 +90,22 @@
                 <a href="mailto:{{ $user->email }}" class="btn btn-outline">✉ Kirim email</a>
                 <a href="{{ route('admin.offline-booking.create') }}" class="btn btn-ghost">＋ Buat booking untuk member ini</a>
             </div>
+
+            <div class="profile-actions" style="margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line)">
+                <form method="POST" action="{{ route('admin.customers.reset-password', $user) }}"
+                      onsubmit="return confirm('Buat password baru untuk {{ $user->name }}? Password lama tidak berlaku lagi dan member akan keluar dari semua perangkat.')">
+                    @csrf
+                    <button type="submit" class="btn btn-outline">🔑 Buat password baru</button>
+                </form>
+                @unless ($user->email_verified_at)
+                    <form method="POST" action="{{ route('admin.customers.verify-email', $user) }}"
+                          onsubmit="return confirm('Tandai email {{ $user->email }} sudah terverifikasi?')">
+                        @csrf
+                        <button type="submit" class="btn btn-outline">✓ Tandai email terverifikasi</button>
+                    </form>
+                @endunless
+            </div>
+            <p class="field-hint" style="margin-top: 6px">Untuk member yang lupa password atau tidak menerima email verifikasi.</p>
         </aside>
 
         <div>
