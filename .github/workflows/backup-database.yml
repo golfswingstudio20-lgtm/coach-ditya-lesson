@@ -51,12 +51,41 @@ jobs:
           PGUSER: ${{ secrets.DB_USERNAME }}
           PGPASSWORD: ${{ secrets.DB_PASSWORD }}
           PGSSLMODE: require
+          PGCONNECT_TIMEOUT: '20'
           BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
         run: |
+          set -o pipefail
+          PG=/usr/lib/postgresql/17/bin
+
+          # Supabase: alamat langsung db.xxx.supabase.co hanya IPv6 (GitHub tidak bisa menjangkau).
+          case "$PGHOST" in
+            db.*.supabase.co)
+              echo "::error::DB_HOST memakai alamat langsung (db.xxx.supabase.co) yang tidak bisa dijangkau GitHub. Ganti secret DB_HOST dengan host 'Session pooler' dari Supabase > Connect (contoh: aws-0-ap-northeast-1.pooler.supabase.com) dan DB_USERNAME menjadi postgres.<project-ref>."
+              exit 1 ;;
+          esac
+
+          # Pooler mode transaksi (6543) tidak cocok untuk pg_dump: pakai mode sesi (5432) di host yang sama.
+          if [ "$PGPORT" = "6543" ]; then
+            echo "::notice::DB_PORT 6543 (transaction pooler) diganti ke 5432 (session pooler) untuk backup."
+            export PGPORT=5432
+          fi
+          [ -z "$PGPORT" ] && export PGPORT=5432
+          [ -z "$PGDATABASE" ] && export PGDATABASE=postgres
+
+          # Tes koneksi dulu supaya pesan error jelas
+          if ! $PG/psql -tAc "select 'Terhubung ke PostgreSQL ' || current_setting('server_version')" 2> conn.err; then
+            echo "::error::Tidak bisa terhubung ke database: $(tr '\n' ' ' < conn.err | cut -c1-400)"
+            exit 1
+          fi
+
           FILE="backup-$(TZ=Asia/Jakarta date +%Y-%m-%d).sql.gz"
-          /usr/lib/postgresql/17/bin/pg_dump --schema=public --no-owner --no-privileges | gzip -9 > "$FILE"
+          if ! $PG/pg_dump --schema=public --no-owner --no-privileges 2> dump.err | gzip -9 > "$FILE"; then
+            echo "::error::pg_dump gagal: $(tr '\n' ' ' < dump.err | cut -c1-400)"
+            exit 1
+          fi
           SIZE=$(stat -c %s "$FILE")
           if [ "$SIZE" -lt 1000 ]; then echo "::error::Backup terlalu kecil ($SIZE byte), kemungkinan gagal."; exit 1; fi
+
           gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSWORD" --symmetric --cipher-algo AES256 -o "$FILE.gpg" "$FILE"
           rm "$FILE"
           echo "BACKUP_FILE=$FILE.gpg" >> "$GITHUB_ENV"
