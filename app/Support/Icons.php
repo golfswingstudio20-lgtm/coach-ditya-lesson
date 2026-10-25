@@ -5,7 +5,7 @@ namespace App\Support;
 use Illuminate\Support\HtmlString;
 
 /**
- * Ikon garis (24x24) untuk tampilan Fairway. Pakai: {!! \App\Support\Icons::svg('calendar') !!}
+ * Ikon garis + isi hijau muda (duotone, 24x24) untuk tampilan Coach Ditya Lesson. Pakai: {!! \App\Support\Icons::svg('calendar') !!}
  */
 class Icons
 {
@@ -17,7 +17,7 @@ class Icons
         'plus'     => '<path d="M12 5v14M5 12h14"/>',
         'plus-c'   => '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
         'flag'     => '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
-        'golf'     => '<path d="M12 18V3l7 3.5L12 10"/><path d="M5 19c0-1.7 3.1-3 7-3s7 1.3 7 3-3.1 2-7 2-7-.3-7-2z"/>',
+        'golf'     => '<path d="M10 19.5V3.5l8 3.5-8 3.5"/><ellipse cx="10" cy="19.5" rx="6.5" ry="2"/><circle cx="18" cy="17.5" r="1.7"/>',
         'image'    => '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
         'video'    => '<rect x="2.5" y="5" width="14" height="14" rx="3"/><path d="m16.5 10 5-3v10l-5-3"/>',
         'play'     => '<path d="M8 5.5v13l11-6.5z"/>',
@@ -79,14 +79,72 @@ class Icons
         'tag'      => '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
     ];
 
+    /** Lapisan isi (duotone) untuk ikon: bentuk tertutup yang diwarnai hijau muda di belakang garis. */
+    private const FILLS = [
+        'home'     => '<path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5L12 4z"/>',
+        'grid'     => '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+        'calendar' => '<rect x="3" y="4.5" width="18" height="16.5" rx="3"/>',
+        'cal-check'=> '<rect x="3" y="4.5" width="18" height="16.5" rx="3"/>',
+        'plus-c'   => '<circle cx="12" cy="12" r="9"/>',
+        'flag'     => '<path d="M5 4h11l-2 4 2 4H5z"/>',
+        'golf'     => '<path d="M10 3.5l8 3.5-8 3.5z"/><ellipse cx="10" cy="19.5" rx="6.5" ry="2"/><circle cx="18" cy="17.5" r="1.7"/>',
+        'image'    => '<rect x="3" y="4" width="18" height="16" rx="3"/>',
+        'video'    => '<rect x="2.5" y="5" width="14" height="14" rx="3"/><path d="m16.5 10 5-3v10l-5-3z"/>',
+        'star'     => '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+        'phone'    => '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+        'mail'     => '<rect x="3" y="5" width="18" height="14" rx="3"/>',
+        'pin'      => '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/>',
+        'user'     => '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0z"/>',
+        'users'    => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0z"/>',
+        'coach'    => '<circle cx="12" cy="6" r="3"/><path d="M6 21v-5a6 6 0 0 1 12 0v5z"/>',
+        'clock'    => '<circle cx="12" cy="12" r="9"/>',
+        'history'  => '<circle cx="12" cy="12" r="9"/>',
+        'chat'     => '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
+        'bell'     => '<path d="M6 16V11a6 6 0 1 1 12 0v5l2 2H4z"/>',
+        'card'     => '<rect x="2.5" y="5" width="19" height="14" rx="3"/>',
+        'wallet'   => '<path d="M3 6a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+        'help'     => '<circle cx="12" cy="12" r="9"/>',
+        'info'     => '<circle cx="12" cy="12" r="9"/>',
+        'logout'   => '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3z"/>',
+        'login'    => '<path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3z"/>',
+        'settings' => '<circle cx="12" cy="12" r="7.5"/>',
+        'moon'     => '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/>',
+        'sun'      => '<circle cx="12" cy="12" r="4"/>',
+        'check-c'  => '<circle cx="12" cy="12" r="9"/>',
+        'search'   => '<circle cx="11" cy="11" r="7"/>',
+        'filter'   => '<path d="M4 5h16l-6 7.5V19l-4 2v-8.5z"/>',
+        'edit'     => '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/>',
+        'trash'    => '<path d="M6 7l1 13h10l1-13z"/>',
+        'share'    => '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/>',
+        'heart'    => '<path d="M12 20s-7.5-4.6-9-9.3C1.9 7.2 4.3 4 7.6 4c2 0 3.4 1.1 4.4 2.6C13 5.1 14.4 4 16.4 4c3.3 0 5.7 3.2 4.6 6.7-1.5 4.7-9 9.3-9 9.3z"/>',
+        'trophy'   => '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/>',
+        'award'    => '<circle cx="12" cy="9" r="6"/>',
+        'send'     => '<path d="M22 2 15 22l-4-9-9-4z"/>',
+        'dashboard'=> '<rect x="3" y="3" width="8" height="10" rx="2"/><rect x="13" y="11" width="8" height="10" rx="2"/>',
+        'lock'     => '<rect x="4" y="10" width="16" height="11" rx="3"/>',
+        'shield'   => '<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6z"/>',
+        'eye'      => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>',
+        'copy'     => '<rect x="8" y="8" width="13" height="13" rx="3"/>',
+        'whatsapp' => '<path d="M20.5 12a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.2-4.2A8.5 8.5 0 1 1 20.5 12z"/>',
+        'megaphone'=> '<path d="M3 10v4a1 1 0 0 0 1 1h3l6 4V5L7 9H4a1 1 0 0 0-1 1z"/>',
+        'target'   => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>',
+        'layers'   => '<path d="m12 3 9 5-9 5-9-5z"/>',
+        'receipt'  => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/>',
+        'block'    => '<circle cx="12" cy="12" r="9"/>',
+        'tag'      => '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/>',
+    ];
+
     public static function svg(string $name, string $class = ''): HtmlString
     {
         $paths = self::PATHS[$name] ?? self::PATHS['info'];
         $fill  = $name === 'play' ? 'currentColor' : 'none';
+        $under = isset(self::FILLS[$name])
+            ? '<g class="cdl-ic-fill" fill="currentColor" fill-opacity=".28" stroke="none">' . self::FILLS[$name] . '</g>'
+            : '';
 
         return new HtmlString(
-            '<svg viewBox="0 0 24 24" fill="' . $fill . '" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"'
-            . ($class ? ' class="' . e($class) . '"' : '') . ' aria-hidden="true">' . $paths . '</svg>'
+            '<svg viewBox="0 0 24 24" fill="' . $fill . '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+            . ' class="cdl-ic' . ($class ? ' ' . e($class) : '') . '" aria-hidden="true">' . $under . $paths . '</svg>'
         );
     }
 

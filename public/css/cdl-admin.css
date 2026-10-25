@@ -76,7 +76,7 @@ body.fw-admin.cdl .sidebar-badge { border: 1.5px solid #14141A; background: #E9A
 body.fw-admin.cdl .sidebar-divider { background: rgba(20, 20, 26, .2); }
 
 /* ---------- Judul halaman: putih bergaris hitam ---------- */
-body.fw-admin.cdl .page-head h1 {
+body.fw-admin.cdl :is(.page-head h1, .db-welcome h1) {
     font-family: "Lilita One", system-ui, sans-serif;
     font-weight: 400;
     letter-spacing: .01em;

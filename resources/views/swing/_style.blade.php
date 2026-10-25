@@ -11,7 +11,7 @@
     .sw-card h2 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 20px; letter-spacing: .01em; }
     .sw-card p { font-size: 14.5px; line-height: 1.45; color: #14141A; font-weight: 500; }
     .sw-hero { display: flex; gap: 12px; align-items: center; }
-    .sw-hero .ic { width: 64px; height: 64px; flex: 0 0 64px; display: grid; place-items: center; border-radius: 18px; border: 2.5px solid #14141A; background: #22A04B; color: #fff; }
+    .sw-hero .ic { width: 64px; height: 64px; flex: 0 0 64px; display: grid; place-items: center; border-radius: 18px; border: 2.5px solid #14141A; background: #FFFFFF; color: #17803A; }
     .sw-hero .ic svg { width: 32px; height: 32px; }
     .sw-list { display: grid; gap: 8px; }
     .sw-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 2px solid rgba(20, 20, 26, .2); border-radius: 16px; background: #EAF8EF; color: #14141A; }

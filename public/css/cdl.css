@@ -184,3 +184,31 @@ body.cdl .fw-pc h3, body.cdl .fw-pc h2 { font-family: "Lilita One", system-ui, s
 
 /* Semua tulisan di dalam kartu berwarna hitam */
 body.cdl :is(.fw-card, .fw-row, .fw-menu, .fw-stat, .fw-empty, .fw-pc-body, .cdl-ink-card) :is(p, small, li, label, .fw-muted, .fw-sub, .fw-meta) { color: #14141A; }
+
+/* ---------- Ikon: selalu hijau (garis hijau tua + isi hijau muda) ---------- */
+body.cdl svg.cdl-ic { color: #17803A; }
+body.cdl svg.cdl-ic .cdl-ic-fill { color: #22A04B; fill-opacity: .38; }
+/* Di atas permukaan hijau, ikon diberi bulatan mint supaya tetap terlihat */
+body.cdl :is(.fw-btn:not(.ghost):not(.white):not(.soft):not(.lime):not(.dark):not(.danger), .cdl-tile.green, .btn-primary, .sidebar-link.active, .upcoming-card, .toast) svg.cdl-ic {
+    padding: 3px;
+    border-radius: 50%;
+    background: #DDF3E4;
+    box-shadow: 0 0 0 2px #14141A;
+}
+body.cdl .cdl-tile.green svg.cdl-ic { padding: 6px; }
+body.cdl .mt-item svg.cdl-ic { color: #17803A; }
+
+/* ---------- Tulisan: santai & bulat, tidak kaku ---------- */
+body.cdl { font-synthesis: none; -webkit-font-smoothing: antialiased; }
+body.cdl { font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+:where(body.cdl) :where(button, input, select, textarea) { font-family: inherit; }
+:where(body.cdl) :where(p, li, td, small, label) { font-weight: 500; line-height: 1.5; }
+:where(body.cdl) :where(strong, b, th) { font-weight: 600; }
+body.cdl :is(h1, h2, h3, h4, .fw-h1, .fw-h2, .fw-serif, .fw-pc-price, .fw-stat strong, .brand, .fw-brand-text, .cdl-title) {
+    font-family: "Lilita One", "Fredoka", system-ui, sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: .01em;
+}
+body.cdl :is(em, i, .fw-hl) { font-style: normal; }
+body.cdl :is(.fw-eyebrow, .sidebar-title, .program-level, .eyebrow) { letter-spacing: .04em; font-weight: 600; }

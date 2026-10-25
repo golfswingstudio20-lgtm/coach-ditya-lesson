@@ -64,7 +64,7 @@
             background: rgba(var(--d-glass-rgb, 255, 255, 255), .97);
             -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
             box-shadow: 0 -8px 30px rgba(var(--d-shadow-rgb, 23, 46, 33), .08);
-            font-family: Inter, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+            font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
         }
         .mt-item {
             position: relative; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px;
