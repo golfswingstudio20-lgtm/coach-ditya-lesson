@@ -86,6 +86,8 @@ class AdminSwingAnalysisController extends Controller
             'id'       => $analysis->id,
             'redirect' => route('admin.swing.show', $analysis),
             'capture_url' => route('admin.swing.capture', $analysis),
+            'video_sign_url' => route('admin.swing.video.sign', $analysis),
+            'video_attach_url' => route('admin.swing.video.attach', $analysis),
         ]);
     }
 
@@ -98,6 +100,40 @@ class AdminSwingAnalysisController extends Controller
         return $saved
             ? response()->json(['ok' => true] + $saved)
             : response()->json(['ok' => false, 'message' => 'Capture gagal disimpan (maksimal 12 gambar per analisis).'], 422);
+    }
+
+    public function videoSign(Request $request, SwingAnalysis $analysis): JsonResponse
+    {
+        $request->validate(['filename' => ['required', 'string', 'max:255']]);
+
+        try {
+            return response()->json(SwingAnalysisStore::signVideo($analysis, $request->input('filename')));
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Video tidak bisa disimpan: ' . $e->getMessage()], 409);
+        }
+    }
+
+    public function videoAttach(Request $request, SwingAnalysis $analysis): JsonResponse
+    {
+        $request->validate(['path' => ['required', 'string', 'max:255']]);
+
+        return SwingAnalysisStore::attachVideo($analysis, $request->input('path'))
+            ? response()->json(['ok' => true])
+            : response()->json(['ok' => false, 'message' => 'Path video tidak valid.'], 422);
+    }
+
+    public function videoDestroy(SwingAnalysis $analysis): RedirectResponse
+    {
+        SwingAnalysisStore::deleteVideo($analysis);
+
+        return back()->with('success', 'Video swing dihapus. Hasil analisis tetap tersimpan.');
+    }
+
+    public function destroy(SwingAnalysis $analysis): RedirectResponse
+    {
+        SwingAnalysisStore::deleteAll($analysis);
+
+        return redirect()->route('admin.swing.index')->with('success', 'Analisis swing dihapus.');
     }
 
     public function show(SwingAnalysis $analysis): View

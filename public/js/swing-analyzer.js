@@ -32,11 +32,12 @@ function init(app) {
         stepUpload: $('#sw-step-upload'), stepProcess: $('#sw-step-process'), pct: $('#sw-pct'),
         ring: $('#sw-ring'), status: $('#sw-status'), error: $('#sw-error'), steps: app.querySelectorAll('[data-step]'),
         checks: app.querySelectorAll('[data-chk]'), fileInfo: $('#sw-fileinfo'), canvas: $('#sw-canvas'),
-        user: $('#sw-user'),
+        user: $('#sw-user'), keep: $('#sw-keep'),
     };
     const storeUrl = app.getAttribute('data-store-url');
     const csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
     let objectUrl = null;
+    let currentFile = null;
 
     function showError(msg) {
         el.error.textContent = msg;
@@ -68,6 +69,7 @@ function init(app) {
 
         if (objectUrl) URL.revokeObjectURL(objectUrl);
         objectUrl = URL.createObjectURL(f);
+        currentFile = f;
         el.video.src = objectUrl;
         el.video.muted = true;
         el.video.playsInline = true;
@@ -117,6 +119,7 @@ function init(app) {
             const phaseTimes = result.phases.map((ph) => ({ key: ph.key, name: ph.name, t: frames[ph.index].t }));
             for (const ph of result.phases) {
                 ph.image = await snapshot(el.video, el.canvas, frames[ph.index]);
+                ph.t = Math.round(frames[ph.index].t * 1000) / 1000;
                 delete ph.index;
             }
 
@@ -124,6 +127,7 @@ function init(app) {
             const body = {
                 camera_view: view, handedness: hand, score: result.score, duration_ms: Math.round(el.video.duration * 1000),
                 frames: frames.length, insight: result.insight, metrics: result.metrics, phases: result.phases, tips: result.tips,
+                pose: compactPose(frames),
             };
             // Admin: analisis untuk customer yang dipilih (kosong = untuk coach sendiri)
             if (el.user) body.user_id = el.user.value ? Number(el.user.value) : null;
@@ -149,10 +153,15 @@ function init(app) {
             const mod = await import(new URL('swing-studio.js' + ver, import.meta.url).href);
             el.stepProcess.hidden = true;
             setStep(3);
-            mod.openStudio({
+            const studioApi = await mod.openStudio({
                 root: studio, src: objectUrl, frames, width: W, height: H, view, hand, phases: phaseTimes,
                 score: result.score, resultUrl: json.redirect, captureUrl: json.capture_url || null, csrf,
             });
+
+            // Simpan video ke server (langsung ke Supabase) supaya bisa diputar ulang dari halaman hasil
+            if (el.keep && el.keep.checked && currentFile && json.video_sign_url) {
+                saveVideo(currentFile, json, csrf, (t) => studioApi.status(t));
+            }
         } catch (e) {
             console.error(e);
             el.stepProcess.hidden = true;
@@ -162,6 +171,64 @@ function init(app) {
             showError(e && e.message ? e.message : 'Analisis gagal. Coba video lain.');
         }
     });
+}
+
+/* ---------------- Simpan video & pose ---------------- */
+
+// Titik tubuh yang dipakai Studio Video saat diputar ulang
+export const POSE_KEYS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+const VIDEO_MAX_MB = 50;
+
+function compactPose(frames) {
+    return frames.filter((f) => f.pose).slice(0, 400).map((f) => {
+        const row = [Math.round(f.t * 1000) / 1000];
+        POSE_KEYS.forEach((k) => {
+            const p = f.pose[k];
+            row.push(Math.round(p.x * 10000) / 10000, Math.round(p.y * 10000) / 10000, Math.round((p.v ?? 1) * 100) / 100);
+        });
+        return row;
+    });
+}
+
+async function saveVideo(file, json, csrf, say) {
+    if (file.size > VIDEO_MAX_MB * 1048576) {
+        say('Video lebih dari ' + VIDEO_MAX_MB + ' MB, tidak disimpan untuk diputar ulang. Hasil analisis tetap tersimpan.');
+        return;
+    }
+    try {
+        say('Menyimpan video untuk diputar ulang…');
+        const sign = await fetch(json.video_sign_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+            credentials: 'same-origin',
+            body: JSON.stringify({ filename: file.name || 'swing.mp4' }),
+        });
+        const d = await sign.json().catch(() => ({}));
+        if (!sign.ok || !d.upload_url) throw new Error(d.message || 'Link upload gagal dibuat.');
+
+        await new Promise((resolve, reject) => {
+            const x = new XMLHttpRequest();
+            x.open('PUT', d.upload_url);
+            x.setRequestHeader('Content-Type', file.type || 'video/mp4');
+            x.setRequestHeader('cache-control', 'max-age=31536000');
+            x.setRequestHeader('x-upsert', 'false');
+            x.upload.onprogress = (e) => { if (e.lengthComputable) say('Menyimpan video untuk diputar ulang… ' + Math.round((e.loaded / e.total) * 100) + '%'); };
+            x.onload = () => (x.status >= 200 && x.status < 300 ? resolve() : reject(new Error('Upload video ditolak (' + x.status + ').')));
+            x.onerror = () => reject(new Error('Koneksi terputus saat menyimpan video.'));
+            x.send(file);
+        });
+
+        const att = await fetch(json.video_attach_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+            credentials: 'same-origin',
+            body: JSON.stringify({ path: d.path }),
+        });
+        if (!att.ok) throw new Error('Video ter-upload tapi gagal ditautkan.');
+        say('✓ Video tersimpan. Bisa diputar ulang dari halaman hasil.');
+    } catch (e) {
+        say('Video tidak tersimpan: ' + (e.message || 'gagal') + ' Hasil analisis tetap aman.');
+    }
 }
 
 /* ---------------- MediaPipe ---------------- */

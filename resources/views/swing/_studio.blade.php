@@ -1,5 +1,5 @@
-{{-- Studio Video Golf Analyzer (dibuka otomatis setelah analisis selesai). Dipakai customer & admin. --}}
-@php use App\Support\Icons; @endphp
+{{-- Studio Video Golf Analyzer. $mode: 'create' (setelah analisis) atau 'replay' (putar ulang dari halaman hasil). --}}
+@php use App\Support\Icons; $mode = $mode ?? 'create'; @endphp
 <style>
     .st[hidden] { display: none !important; }
     .st { display: grid; gap: 12px; padding: 16px; background: #DDF3E4; border: 2.5px solid #14141A; border-radius: 20px; box-shadow: 3px 3px 0 #14141A; color: #14141A; }
@@ -28,13 +28,17 @@
     .st-cap a { color: #14141A; text-decoration: underline; }
     .st-foot { display: flex; gap: 10px; flex-wrap: wrap; }
     .st-foot a { text-decoration: none; }
+    .st-btn[hidden] { display: none !important; }
+    .st-status { padding: 8px 12px; border: 2px dashed #14141A; border-radius: 12px; background: #FFFFFF; font-size: 12.5px; font-weight: 600; }
 </style>
 
 <section class="st" data-studio hidden>
     <div>
         <h2>Studio Video Swing</h2>
-        <p class="st-sub">Putar pelan, jeda, gambar garis & sudut, lalu capture. Hasil analisis sudah tersimpan.</p>
+        <p class="st-sub">Putar pelan, jeda, nyalakan garis yang dibutuhkan, gambar sendiri, lalu capture.</p>
     </div>
+
+    <p class="st-status" id="st-status" hidden></p>
 
     <div class="st-stage" id="st-stage">
         <video id="st-video" playsinline muted preload="auto"></video>
@@ -70,13 +74,24 @@
     </div>
 
     <div class="st-group">
-        <b>GARIS OTOMATIS</b>
+        <b>GARIS (KLIK UNTUK MENYALAKAN)</b>
         <div class="st-bar">
-            <button type="button" class="st-btn" data-show="skel">{!! Icons::svg('user') !!} Rangka</button>
-            <button type="button" class="st-btn" data-show="angles">{!! Icons::svg('target') !!} Sudut tubuh</button>
-            <button type="button" class="st-btn" data-show="path">{!! Icons::svg('refresh') !!} Jejak stick</button>
-            <button type="button" class="st-btn" data-show="plane">{!! Icons::svg('flag') !!} Plane & alignment</button>
-            <button type="button" class="st-btn" data-show="ball">{!! Icons::svg('golf') !!} Bola</button>
+            <button type="button" class="st-btn" data-show="coach" data-needs-pose>{!! Icons::svg('flag') !!} Garis Coach</button>
+            <button type="button" class="st-btn" data-show="skel" data-needs-pose>{!! Icons::svg('user') !!} Rangka</button>
+            <button type="button" class="st-btn" data-show="angles" data-needs-pose>{!! Icons::svg('target') !!} Sudut tubuh</button>
+            <button type="button" class="st-btn" data-show="path" data-needs-pose>{!! Icons::svg('refresh') !!} Jejak tangan</button>
+        </div>
+    </div>
+
+    <div class="st-group">
+        <b>SHOT TRACER (JEJAK BOLA)</b>
+        <div class="st-bar">
+            <button type="button" class="st-btn" id="st-trace-auto">{!! Icons::svg('golf') !!} Tracer otomatis</button>
+            <button type="button" class="st-btn" data-tool="trace-end">{!! Icons::svg('pin') !!} Tandai ujung bola</button>
+            <button type="button" class="st-btn" data-tool="trace-apex">{!! Icons::svg('arrow') !!} Tandai puncak</button>
+            <button type="button" class="st-btn" data-tool="ball">{!! Icons::svg('target') !!} Posisi bola</button>
+            <button type="button" class="st-btn" data-show="tracer">{!! Icons::svg('eye') !!} Tampilkan</button>
+            <button type="button" class="st-btn" id="st-trace-clear">{!! Icons::svg('trash') !!} Hapus tracer</button>
         </div>
     </div>
 
@@ -86,9 +101,8 @@
             <button type="button" class="st-btn" data-tool="line">{!! Icons::svg('edit') !!} Garis</button>
             <button type="button" class="st-btn" data-tool="angle">{!! Icons::svg('target') !!} Sudut 3 titik</button>
             <button type="button" class="st-btn" data-tool="circle">{!! Icons::svg('plus-c') !!} Lingkaran</button>
-            <button type="button" class="st-btn" data-tool="ball">{!! Icons::svg('pin') !!} Tandai bola</button>
             <button type="button" class="st-btn" id="st-undo">↶ Batal</button>
-            <button type="button" class="st-btn" id="st-clear">{!! Icons::svg('trash') !!} Hapus semua</button>
+            <button type="button" class="st-btn" id="st-clear">{!! Icons::svg('trash') !!} Hapus gambar</button>
         </div>
     </div>
 
@@ -96,9 +110,10 @@
 
     <div class="st-foot">
         <button type="button" class="st-btn big primary" id="st-capture">{!! Icons::svg('image') !!} Capture</button>
-        <button type="button" class="st-btn big" id="st-track">{!! Icons::svg('golf') !!} Lacak Bola (beta)</button>
-        <a href="#" class="st-btn big" id="st-result">{!! Icons::svg('star') !!} Lihat Hasil Lengkap</a>
-        <a href="{{ url()->current() }}" class="st-btn big">{!! Icons::svg('video') !!} Analisis Video Lain</a>
+        @if ($mode === 'create')
+            <a href="#" class="st-btn big" id="st-result">{!! Icons::svg('star') !!} Lihat Hasil Lengkap</a>
+            <a href="{{ url()->current() }}" class="st-btn big">{!! Icons::svg('video') !!} Analisis Video Lain</a>
+        @endif
     </div>
 
     <div class="st-gallery" id="st-gallery" hidden></div>

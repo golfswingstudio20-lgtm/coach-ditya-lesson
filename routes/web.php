@@ -123,6 +123,23 @@ Route::middleware([
         ->whereNumber('analysis')
         ->middleware('throttle:40,1')
         ->name('swing.capture');
+
+    Route::post('/swing/{analysis}/video/sign', [SwingAnalysisController::class, 'videoSign'])
+        ->whereNumber('analysis')
+        ->middleware('throttle:20,1')
+        ->name('swing.video.sign');
+
+    Route::post('/swing/{analysis}/video', [SwingAnalysisController::class, 'videoAttach'])
+        ->whereNumber('analysis')
+        ->name('swing.video.attach');
+
+    Route::delete('/swing/{analysis}/video', [SwingAnalysisController::class, 'videoDestroy'])
+        ->whereNumber('analysis')
+        ->name('swing.video.destroy');
+
+    Route::delete('/swing/{analysis}', [SwingAnalysisController::class, 'destroy'])
+        ->whereNumber('analysis')
+        ->name('swing.destroy');
 });
 
 
@@ -287,6 +304,22 @@ Route::middleware([
         ->whereNumber('analysis')
         ->middleware('throttle:60,1')
         ->name('admin.swing.capture');
+
+    Route::post('/admin/swing/{analysis}/video/sign', [AdminSwingAnalysisController::class, 'videoSign'])
+        ->whereNumber('analysis')
+        ->name('admin.swing.video.sign');
+
+    Route::post('/admin/swing/{analysis}/video', [AdminSwingAnalysisController::class, 'videoAttach'])
+        ->whereNumber('analysis')
+        ->name('admin.swing.video.attach');
+
+    Route::delete('/admin/swing/{analysis}/video', [AdminSwingAnalysisController::class, 'videoDestroy'])
+        ->whereNumber('analysis')
+        ->name('admin.swing.video.destroy');
+
+    Route::delete('/admin/swing/{analysis}', [AdminSwingAnalysisController::class, 'destroy'])
+        ->whereNumber('analysis')
+        ->name('admin.swing.destroy');
 
     /*
     |--------------------------------------------------------------------------

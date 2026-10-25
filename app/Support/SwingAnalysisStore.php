@@ -37,6 +37,9 @@ class SwingAnalysisStore
             'phases.*.score'    => ['required', 'integer', 'min:0', 'max:100'],
             'phases.*.note'     => ['nullable', 'string', 'max:200'],
             'phases.*.image'    => ['nullable', 'string', 'max:400000'],
+            'phases.*.t'        => ['nullable', 'numeric', 'min:0', 'max:120'],
+            'pose'              => ['nullable', 'array', 'max:400'],
+            'pose.*'            => ['array', 'max:48'],
             'tips'              => ['nullable', 'array', 'max:8'],
             'tips.*.title'      => ['required', 'string', 'max:60'],
             'tips.*.text'       => ['required', 'string', 'max:220'],
@@ -64,6 +67,7 @@ class SwingAnalysisStore
             ], $data['metrics'])),
             'tips'        => array_values($data['tips'] ?? []),
             'phases'      => [],
+            'pose_data'   => self::cleanPose($data['pose'] ?? null),
         ]);
 
         $phases = [];
@@ -73,6 +77,7 @@ class SwingAnalysisStore
                 'name'  => $phase['name'],
                 'score' => (int) $phase['score'],
                 'note'  => $phase['note'] ?? null,
+                't'     => isset($phase['t']) ? round((float) $phase['t'], 3) : null,
                 'image' => self::storeImage($phase['image'] ?? null, $analysis, $phase['key']),
             ];
         }
@@ -80,6 +85,90 @@ class SwingAnalysisStore
         $analysis->update(['phases' => $phases]);
 
         return $analysis;
+    }
+
+    /**
+     * Data pose ringkas untuk memutar ulang garis di Studio Video:
+     * tiap frame = [detik, x,y,v untuk 13 titik tubuh (hidung, bahu, siku, pergelangan, pinggul, lutut, kaki)].
+     */
+    private static function cleanPose(?array $pose): ?array
+    {
+        if (! $pose) {
+            return null;
+        }
+
+        $out = [];
+        foreach (array_slice($pose, 0, 400) as $row) {
+            if (! is_array($row) || count($row) !== 40) {
+                continue;
+            }
+            $out[] = array_map(fn ($v) => round((float) $v, 4), array_values($row));
+        }
+
+        return $out ?: null;
+    }
+
+    /** Link upload video langsung ke Supabase (video tidak lewat server website). */
+    public static function signVideo(SwingAnalysis $analysis, string $filename): array
+    {
+        if (! Uploads::directEnabled()) {
+            throw new \RuntimeException('Penyimpanan video belum aktif di server.');
+        }
+
+        return Uploads::sign('swing/videos', $filename);
+    }
+
+    /** Pasang video yang sudah ter-upload ke hasil analisis (video lama dihapus). */
+    public static function attachVideo(SwingAnalysis $analysis, string $path): bool
+    {
+        if (! preg_match('#^swing/videos/[0-9a-fA-F-]{36}\.(mp4|mov|m4v|webm|3gp|bin)$#', $path)) {
+            return false;
+        }
+
+        $old = $analysis->video_path;
+        $analysis->update(['video_path' => $path]);
+
+        if ($old && $old !== $path) {
+            self::deleteFiles([$old]);
+        }
+
+        return true;
+    }
+
+    public static function deleteVideo(SwingAnalysis $analysis): void
+    {
+        if ($analysis->video_path) {
+            self::deleteFiles([$analysis->video_path]);
+            $analysis->update(['video_path' => null]);
+        }
+    }
+
+    /** Hapus analisis beserta semua file-nya (gambar tahapan, capture, video). */
+    public static function deleteAll(SwingAnalysis $analysis): void
+    {
+        $paths = array_merge(
+            array_column($analysis->phases ?? [], 'image'),
+            array_column($analysis->captures ?? [], 'image'),
+            [$analysis->video_path]
+        );
+
+        self::deleteFiles($paths);
+        $analysis->delete();
+    }
+
+    private static function deleteFiles(array $paths): void
+    {
+        $paths = array_values(array_filter($paths));
+
+        if (! $paths) {
+            return;
+        }
+
+        try {
+            Storage::disk('public')->delete($paths);
+        } catch (\Throwable $e) {
+            Log::warning('Gagal menghapus file swing: ' . $e->getMessage());
+        }
     }
 
     /** Simpan satu capture dari Studio Video (frame + garis/sudut). Maksimal 12 per analisis. */
