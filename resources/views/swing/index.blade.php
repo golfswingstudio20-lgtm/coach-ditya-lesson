@@ -44,7 +44,7 @@
     <section class="sw-card cdl-ink-card">
         <div style="display:flex;justify-content:space-between;align-items:center">
             <h2>Analisis Terakhir</h2>
-            @if ($total)<a href="{{ route('swing.history') }}" style="color:#17803A;font-weight:700;font-size:14px">Lihat Semua</a>@endif
+            @if ($total)<a href="{{ route('swing.history') }}" style="color:#14141A;font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:3px">Lihat Semua</a>@endif
         </div>
         @forelse ($recent as $a)
             @php $tone = SwingAnalysis::toneFor((int) $a->score); @endphp

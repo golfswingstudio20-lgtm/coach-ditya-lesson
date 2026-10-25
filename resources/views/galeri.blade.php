@@ -64,7 +64,7 @@
     .gl-item .cap strong { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .gl-item .cap small { display: block; margin-top: 2px; color: rgba(255, 255, 255, .78); font-size: 12px; }
     .gl-item .badge { position: absolute; z-index: 1; top: 12px; left: 12px; padding: 4px 9px; border-radius: 9px; background: rgba(8, 20, 13, .55); color: #fff; font-size: 11px; font-weight: 600; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-    .gl-item .play { position: absolute; z-index: 1; top: 50%; left: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .95); color: #1f4d33; box-shadow: 0 8px 20px rgba(0, 0, 0, .35); transition: transform .2s; }
+    .gl-item .play { position: absolute; z-index: 1; top: 50%; left: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; display: grid; place-items: center; border-radius: 50%; background: rgba(255, 255, 255, .95); color: #14141A; box-shadow: 0 8px 20px rgba(0, 0, 0, .35); transition: transform .2s; }
     .gl-item:hover .play { transform: scale(1.08); }
     .gl-item .play svg { width: 22px; height: 22px; margin-left: 3px; }
     .gl-ph { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .35); }
@@ -86,7 +86,7 @@
     .ig-box { width: min(400px, 100%); max-height: calc(100svh - 190px); margin: 0 auto; overflow-y: auto; border-radius: 16px; background: #fff; -webkit-overflow-scrolling: touch; }
     .ig-box .instagram-media { margin: 0 !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
     .ig-box iframe { position: static !important; width: 100% !important; min-width: 0 !important; }
-    .ig-loading { padding: 60px 20px; text-align: center; color: #555; font-size: 14px; }
+    .ig-loading { padding: 60px 20px; text-align: center; color: #14141A; font-size: 14px; }
     .lb:has(.ig-box) { align-items: flex-start; padding-top: 64px; overflow-y: auto; }
     .lb-media img { width: 100%; max-height: 78vh; object-fit: contain; display: block; margin: 0 auto; }
     .lb-media .ratio { position: relative; aspect-ratio: 16 / 9; }

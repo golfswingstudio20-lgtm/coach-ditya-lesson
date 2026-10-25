@@ -35,7 +35,7 @@
                 @foreach ([50, 80] as $g)
                     @php $gy = $H - $pad - $g / 100 * ($H - 2 * $pad); @endphp
                     <line x1="{{ $pad }}" x2="{{ $W - $pad }}" y1="{{ $gy }}" y2="{{ $gy }}" stroke="#14141A" stroke-opacity=".15" stroke-dasharray="4 4"/>
-                    <text x="{{ $W - $pad }}" y="{{ $gy - 4 }}" font-size="10" text-anchor="end" fill="#3F4A44">{{ $g }}</text>
+                    <text x="{{ $W - $pad }}" y="{{ $gy - 4 }}" font-size="10" text-anchor="end" fill="#14141A">{{ $g }}</text>
                 @endforeach
                 <polyline points="{{ $line }}" fill="none" stroke="#22A04B" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
                 @foreach ($pts as $p)

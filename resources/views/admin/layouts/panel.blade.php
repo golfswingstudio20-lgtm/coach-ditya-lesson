@@ -293,9 +293,10 @@
         }
     </style>
 
+    <link rel="stylesheet" href="{{ asset('css/cdl-admin.css') }}?v={{ substr(md5((string) @filemtime(public_path('css/cdl-admin.css'))), 0, 8) }}">
     @stack('styles')
 </head>
-<body class="fw-admin">
+<body class="fw-admin cdl">
 
 <div class="admin-page" id="adminPage">
 
@@ -379,6 +380,11 @@
                 <a href="{{ route('admin.customers.index') }}" class="sidebar-link {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
                     <span class="sidebar-icon">{!! \App\Support\Icons::svg('users') !!}</span> Customer
                 </a>
+                @if (Route::has('admin.swing.index'))
+                    <a href="{{ route('admin.swing.index') }}" class="sidebar-link {{ request()->routeIs('admin.swing.*') ? 'active' : '' }}">
+                        <span class="sidebar-icon">{!! \App\Support\Icons::svg('video') !!}</span> AI Swing Analysis
+                    </a>
+                @endif
                 @php $chatUnread = class_exists(\App\Models\ChatMessage::class) && \Illuminate\Support\Facades\Schema::hasTable('chat_messages') ? \App\Models\ChatMessage::unreadForAdmin() : 0; @endphp
                 <a href="{{ route('admin.chat.index') }}" class="sidebar-link {{ request()->routeIs('admin.chat.*') ? 'active' : '' }}">
                     <span class="sidebar-icon">{!! \App\Support\Icons::svg('chat') !!}</span> Chat Member

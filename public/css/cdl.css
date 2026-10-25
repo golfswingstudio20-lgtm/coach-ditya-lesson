@@ -15,8 +15,8 @@ html[data-theme="dark"] body.fw.cdl {
     --fw-line: #14141A;
     --fw-line-2: #14141A;
     --fw-text: #14141A;
-    --fw-text-2: #262F2A;
-    --fw-muted: #3F4A44;
+    --fw-text-2: #14141A;
+    --fw-muted: #14141A;
     --fw-green: #22A04B;
     --fw-green-2: #1B8A3F;
     --fw-green-3: #17803A;
@@ -32,11 +32,12 @@ html[data-theme="dark"] body.fw.cdl {
     --fw-sans: "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     --cdl-ink: #14141A;
     --cdl-outline: 2.5px solid #14141A;
-    --d-ink-green: #17803A;
+    --d-ink-green: #14141A;
+    --d-ink-green-2: #14141A;
     --d-surface: #DDF3E4;
     --d-bg: #7CC8EC;
     --d-bg-2: #CDEBD7;
-    --d-muted: #3F4A44;
+    --d-muted: #14141A;
     --d-btn: #22A04B;
     --d-glass-rgb: 221, 243, 228;
     background: #7CC8EC;
@@ -65,7 +66,7 @@ body.cdl .fw-h2, body.cdl .fw-section-head h2, body.cdl .fw-card-head h2, body.c
 body.cdl .fw-section-head h2 { font-size: 20px; color: #14141A; }
 body.cdl .fw-hl { font-style: normal; color: #FFE08A; }
 body.cdl .fw-eyebrow { color: #14141A; }
-body.cdl .fw-sub, body.cdl .fw-muted { color: #2F3A34; }
+body.cdl .fw-sub, body.cdl .fw-muted { color: #14141A; }
 
 /* ---------- Kartu & daftar ---------- */
 body.cdl .fw-card, body.cdl .fw-stat, body.cdl .fw-menu, body.cdl .fw-row, body.cdl .fw-empty {
@@ -144,7 +145,7 @@ body.cdl .fw-pc h3, body.cdl .fw-pc h2 { font-family: "Lilita One", system-ui, s
         -webkit-backdrop-filter: none; backdrop-filter: none;
         font-family: "Fredoka", system-ui, sans-serif;
     }
-    body.cdl .mt-item { color: #3F4A44; font-weight: 500; font-size: 11.5px; }
+    body.cdl .mt-item { color: #14141A; font-weight: 500; font-size: 11.5px; }
     body.cdl .mt-item.on { color: #17803A; font-weight: 700; }
     body.cdl .mt-item.on .mt-ico {
         width: 26px; height: 26px; margin-top: 0; border-radius: 0;
@@ -174,9 +175,12 @@ body.cdl .fw-pc h3, body.cdl .fw-pc h2 { font-family: "Lilita One", system-ui, s
 .cdl-tile.green { background: #22A04B; color: #FFFFFF; }
 .cdl-tile.small { height: 92px; font-size: 13px; }
 .cdl-tile.small svg { color: #22A04B; }
-.cdl-price { font-family: "Lilita One", system-ui, sans-serif; color: #17803A; letter-spacing: .01em; }
-.cdl-ph { border: 2px dashed #6B7A70; border-radius: 14px; display: grid; place-items: center; text-align: center; color: #3F4A44; font-size: 11px; font-weight: 600; }
+.cdl-price { font-family: "Lilita One", system-ui, sans-serif; color: #14141A; letter-spacing: .01em; }
+.cdl-ph { border: 2px dashed #6B7A70; border-radius: 14px; display: grid; place-items: center; text-align: center; color: #14141A; font-size: 11px; font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
     body.cdl .fw-btn, .cdl-tile { transition: none; }
 }
+
+/* Semua tulisan di dalam kartu berwarna hitam */
+body.cdl :is(.fw-card, .fw-row, .fw-menu, .fw-stat, .fw-empty, .fw-pc-body, .cdl-ink-card) :is(p, small, li, label, .fw-muted, .fw-sub, .fw-meta) { color: #14141A; }

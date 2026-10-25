@@ -17,16 +17,16 @@
         .fa-tag { margin-top: 10px; font-family: "Lilita One", system-ui, sans-serif; font-size: 21px; color: #14141A; transform: rotate(-3deg); }
         .fa-card { width: min(440px, 100%); margin-top: 22px; padding: 22px 20px; }
         .fa-card h1 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 27px; letter-spacing: .01em; color: #14141A; }
-        .fa-card .fw-sub { margin-bottom: 18px; color: #2F3A34; }
+        .fa-card .fw-sub { margin-bottom: 18px; color: #14141A; }
         .fa-card form { display: grid; gap: 15px; }
         .fa-pw { position: relative; }
         .fa-pw input { padding-right: 52px !important; }
-        .fa-pw button { position: absolute; right: 4px; top: 50%; width: 44px; height: 44px; transform: translateY(-50%); display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: #3F4A44; cursor: pointer; }
+        .fa-pw button { position: absolute; right: 4px; top: 50%; width: 44px; height: 44px; transform: translateY(-50%); display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: #14141A; cursor: pointer; }
         .fa-pw button svg { width: 19px; height: 19px; }
         .fa-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
         .fa-row label { display: inline-flex; align-items: center; gap: 8px; color: #14141A; cursor: pointer; }
         .fa-row input[type=checkbox] { width: 18px; height: 18px; accent-color: #22A04B; }
-        .fa-alt { margin-top: 18px; text-align: center; color: #2F3A34; font-size: 14.5px; }
+        .fa-alt { margin-top: 18px; text-align: center; color: #14141A; font-size: 14.5px; }
         .fa .fw-btn.block { height: 54px; font-size: 16.5px; letter-spacing: .04em; }
         @media (min-width: 900px) {
             .fa { padding-top: 26px; }

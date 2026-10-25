@@ -1330,10 +1330,12 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap">
     <link rel="stylesheet" href="{{ asset('css/fw.css') }}?v={{ substr(md5((string) @filemtime(public_path('css/fw.css'))), 0, 8) }}">
     @include('partials.theme-script')
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Lilita+One&display=swap">
+    <link rel="stylesheet" href="{{ asset('css/cdl-admin.css') }}?v={{ substr(md5((string) @filemtime(public_path('css/cdl-admin.css'))), 0, 8) }}">
 </head>
 
 
-<body>
+<body class="fw-admin cdl cdl-offline">
 
 <div class="page">
 

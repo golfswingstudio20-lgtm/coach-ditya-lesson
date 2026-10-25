@@ -11,17 +11,17 @@
 @push('head')
 <style>
     .sw-steps { display: flex; gap: 8px; }
-    .sw-steps span { flex: 1; padding: 8px 4px; text-align: center; border: 2px solid #14141A; border-radius: 12px; background: #fff; font-size: 12.5px; font-weight: 700; color: #3F4A44; }
+    .sw-steps span { flex: 1; padding: 8px 4px; text-align: center; border: 2px solid #14141A; border-radius: 12px; background: #fff; font-size: 12.5px; font-weight: 700; color: #14141A; }
     .sw-steps span.on { background: #22A04B; color: #fff; }
     .sw-drop { display: grid; place-items: center; gap: 8px; padding: 26px 14px; border: 2.5px dashed #14141A; border-radius: 18px; background: #EAF8EF; text-align: center; cursor: pointer; }
     .sw-drop svg { width: 40px; height: 40px; color: #17803A; }
     .sw-drop strong { font-size: 16px; }
-    .sw-drop small { color: #3F4A44; font-size: 13px; }
+    .sw-drop small { color: #14141A; font-size: 13px; }
     .sw-pick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .sw-pick label.fw-btn { cursor: pointer; }
     .sw-pick input, .sw-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     .sw-video { width: 100%; max-height: 360px; border-radius: 16px; border: 2.5px solid #14141A; background: #000; }
-    .sw-file { font-size: 12.5px; color: #3F4A44; text-align: center; word-break: break-all; }
+    .sw-file { font-size: 12.5px; color: #14141A; text-align: center; word-break: break-all; }
     .sw-field { display: grid; gap: 6px; }
     .sw-field span { font-weight: 700; font-size: 14px; }
     .sw-err { padding: 10px 12px; border: 2.5px solid #14141A; border-radius: 14px; background: #FFC7C2; font-size: 14px; font-weight: 600; }
@@ -29,7 +29,7 @@
         background: conic-gradient(#22A04B calc(var(--p) * 1%), #fff 0); border: 3px solid #14141A; transition: background .3s; }
     .sw-ring b { width: 112px; height: 112px; display: grid; place-items: center; border-radius: 50%; border: 3px solid #14141A; background: #DDF3E4; font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 32px; }
     .sw-status { text-align: center; font-weight: 600; }
-    .sw-chk { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #6B766F; }
+    .sw-chk { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; font-size: 14px; font-weight: 600; color: #14141A; }
     .sw-chk i { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%; border: 2px solid #9AA59E; display: grid; place-items: center; font-style: normal; font-size: 12px; }
     .sw-chk.now { color: #14141A; background: #EAF8EF; }
     .sw-chk.now i { border-color: #22A04B; border-top-color: transparent; animation: sw-spin .8s linear infinite; }

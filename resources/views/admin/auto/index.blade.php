@@ -27,7 +27,7 @@
         .ao-switch { flex: 0 0 auto; width: 46px; height: 26px; border: 0; border-radius: 99px; background: #c9cfc6; position: relative; cursor: pointer; }
         .ao-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .2s; }
         .ao-switch.on { background: #3d7d57; } .ao-switch.on::after { left: 23px; }
-        .ao-msg { margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #e7f5dc; color: #17261d; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; max-height: 260px; overflow: auto; font-family: inherit; }
+        .ao-msg { margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #e7f5dc; color: #14141A; font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; max-height: 260px; overflow: auto; font-family: inherit; }
         html[data-theme="dark"] .ao-msg { background: #1d3325; color: #e8efe9; }
         .ao-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
         .ao-last { color: var(--text-muted); font-size: 11.5px; line-height: 1.5; }

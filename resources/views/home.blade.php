@@ -49,7 +49,7 @@
     .hm-cta .fw-btn.glass:hover { background: rgba(255, 255, 255, .22); }
 
     .hm-side { display: flex; flex-direction: column; gap: 12px; }
-    .hm-float { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; background: rgba(255, 255, 255, .95); color: #17261d; box-shadow: 0 24px 50px rgba(0, 0, 0, .3); }
+    .hm-float { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; background: rgba(255, 255, 255, .95); color: #14141A; box-shadow: 0 24px 50px rgba(0, 0, 0, .3); }
     html[data-theme="dark"] .hm-float { background: rgba(24, 35, 29, .95); color: #e8efe9; }
     .hm-float .ic { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 14px; background: var(--fw-tint); color: var(--d-ink-green, var(--fw-green)); }
     .hm-float .ic svg { width: 20px; height: 20px; }

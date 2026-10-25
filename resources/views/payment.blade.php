@@ -53,7 +53,7 @@
     .ep-step h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .ep-qr { display: grid; justify-items: center; gap: 10px; padding: 16px; border-radius: 18px; background: #fff; border: 1px solid var(--fw-line); }
     .ep-qr img { width: min(260px, 100%); height: auto; border-radius: 10px; cursor: zoom-in; }
-    .ep-qr a { color: #1f4d33; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+    .ep-qr a { color: #14141A; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
     .ep-qr a svg { width: 16px; height: 16px; }
     .ep-acc { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--fw-line); background: var(--fw-surface); }
     .ep-acc b { min-width: 58px; height: 36px; padding: 0 8px; display: grid; place-items: center; border-radius: 10px; background: var(--fw-blue-tint); color: var(--d-blue-ink, var(--fw-blue)); font-size: 11.5px; text-transform: uppercase; }

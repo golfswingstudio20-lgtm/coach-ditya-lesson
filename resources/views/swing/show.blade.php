@@ -23,23 +23,23 @@
     .sw-result { display: flex; align-items: center; gap: 16px; }
     .sw-big { width: 120px; height: 120px; flex: 0 0 120px; border-radius: 50%; border: 3px solid #14141A; display: grid; place-items: center; }
     .sw-big b { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #14141A; background: #fff; display: grid; place-items: center; text-align: center; font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 34px; line-height: .9; }
-    .sw-big b small { display: block; font-family: "Fredoka", system-ui, sans-serif; font-size: 12px; color: #3F4A44; }
+    .sw-big b small { display: block; font-family: "Fredoka", system-ui, sans-serif; font-size: 12px; color: #14141A; }
     .sw-diff { font-size: 13px; font-weight: 700; }
-    .sw-diff.up { color: #17803A; } .sw-diff.down { color: #C8372F; }
+    .sw-diff.up, .sw-diff.down { color: #14141A; }
     .sw-bar { height: 10px; border-radius: 99px; border: 2px solid #14141A; background: #fff; overflow: hidden; margin-top: 6px; }
     .sw-bar i { display: block; height: 100%; background: #22A04B; }
     .sw-bar i.mid { background: #E9A23B; } .sw-bar i.low { background: #E8453C; }
     .sw-metric { padding: 10px 12px; border: 2px solid rgba(20, 20, 26, .2); border-radius: 16px; background: #EAF8EF; }
     .sw-metric .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .sw-metric strong { font-size: 15px; }
-    .sw-metric small { display: block; margin-top: 6px; color: #3F4A44; font-size: 13px; }
+    .sw-metric small { display: block; margin-top: 6px; color: #14141A; font-size: 13px; }
     .sw-phases { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
     .sw-phase { border: 2.5px solid #14141A; border-radius: 16px; overflow: hidden; background: #fff; }
     .sw-phase .img { aspect-ratio: 3 / 4; background: #14141A center / cover no-repeat; display: grid; place-items: center; color: #9AA59E; }
     .sw-phase .img svg { width: 32px; height: 32px; }
     .sw-phase .txt { padding: 8px 10px; display: grid; gap: 3px; }
     .sw-phase .txt strong { font-size: 13.5px; display: flex; justify-content: space-between; gap: 6px; }
-    .sw-phase .txt small { font-size: 12px; color: #3F4A44; line-height: 1.3; }
+    .sw-phase .txt small { font-size: 12px; color: #14141A; line-height: 1.3; }
     .sw-insight { background: #FFE9B8; }
     .sw-coach { background: #EAF8EF; }
 </style>
@@ -81,7 +81,7 @@
             @php $mt = SwingAnalysis::toneFor((int) $m['score']); @endphp
             <div class="sw-metric">
                 <div class="top">
-                    <strong>{{ $m['label'] }}@if (isset($m['value']) && $m['value'] !== null && $m['unit']) <span style="font-weight:500;color:#3F4A44">· {{ rtrim(rtrim(number_format((float) $m['value'], 1, ',', ''), '0'), ',') }}{{ $m['unit'] }}</span>@endif</strong>
+                    <strong>{{ $m['label'] }}@if (isset($m['value']) && $m['value'] !== null && $m['unit']) <span style="font-weight:500;color:#14141A">· {{ rtrim(rtrim(number_format((float) $m['value'], 1, ',', ''), '0'), ',') }}{{ $m['unit'] }}</span>@endif</strong>
                     <span class="sw-tag {{ $mt }}">{{ $m['score'] >= 80 ? 'Baik' : 'Perlu Evaluasi' }}</span>
                 </div>
                 <div class="sw-bar"><i class="{{ $mt }}" style="width: {{ (int) $m['score'] }}%"></i></div>
@@ -134,6 +134,6 @@
         <a href="{{ route('booking') }}" class="fw-btn block dark">Booking Lesson dengan Coach</a>
     @endif
 
-    <p style="font-size:12px;text-align:center;color:#2F3A34">Hasil AI adalah perkiraan dari video 2D. Untuk evaluasi lengkap, latihan langsung bersama Coach Ditya.</p>
+    <p style="font-size:12px;text-align:center;color:#14141A">Hasil AI adalah perkiraan dari video 2D. Untuk evaluasi lengkap, latihan langsung bersama Coach Ditya.</p>
 </div>
 @endsection

@@ -55,7 +55,7 @@
 
     .hm-hello { display: flex; align-items: center; gap: 12px; padding: 16px; }
     .hm-hello h1 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 25px; letter-spacing: .01em; }
-    .hm-hello p { margin-top: 6px; font-size: 14.5px; font-weight: 500; line-height: 1.4; color: #2F3A34; }
+    .hm-hello p { margin-top: 6px; font-size: 14.5px; font-weight: 500; line-height: 1.4; color: #14141A; }
     .hm-hello .pic { width: 88px; height: 96px; flex: 0 0 88px; border-radius: 16px; border: 2.5px solid #14141A; background: #FFFFFF center / cover no-repeat; display: grid; place-items: center; color: #17803A; }
     .hm-hello .pic svg { width: 40px; height: 40px; }
 
@@ -71,16 +71,16 @@
     .hm-lesson .ph { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 12px; border: 2px solid #14141A; background: #FFFFFF center / cover no-repeat; display: grid; place-items: center; color: #17803A; }
     .hm-lesson .ph svg { width: 30px; height: 30px; }
     .hm-lesson strong { display: block; font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 17px; letter-spacing: .01em; }
-    .hm-lesson small { display: block; margin-top: 2px; color: #2F3A34; font-size: 13px; }
+    .hm-lesson small { display: block; margin-top: 2px; color: #14141A; font-size: 13px; }
     .hm-lesson .cdl-price { display: block; margin-top: 3px; font-size: 18px; }
     .hm-lesson .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .hm-lesson .more { display: inline-flex; align-items: center; gap: 4px; color: #17803A; font-size: 14px; font-weight: 700; }
+    .hm-lesson .more { display: inline-flex; align-items: center; gap: 4px; color: #14141A; text-decoration: underline; text-underline-offset: 3px; font-size: 14px; font-weight: 700; }
     .hm-lesson .more svg { width: 16px; height: 16px; }
 
     .hm-swing { display: flex; align-items: center; gap: 12px; padding: 14px; }
     .hm-swing .ring { width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center; border-radius: 50%; border: 5px solid #22A04B; background: #FFFFFF; font-family: "Lilita One", system-ui, sans-serif; font-size: 20px; }
     .hm-swing strong { display: block; font-size: 15px; }
-    .hm-swing small { color: #2F3A34; font-size: 13px; }
+    .hm-swing small { color: #14141A; font-size: 13px; }
 
     @media (min-width: 821px) { .fw-main.narrow { width: min(560px, 100% - 48px); } }
 </style>

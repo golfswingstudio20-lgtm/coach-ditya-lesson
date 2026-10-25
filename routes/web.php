@@ -14,6 +14,7 @@ use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\AdminScheduleBlockController;
 use App\Http\Controllers\AdminOfflineBookingController;
+use App\Http\Controllers\AdminSwingAnalysisController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
@@ -257,6 +258,18 @@ Route::middleware([
     Route::delete('/admin/customers/{user}', [AdminCustomerController::class, 'destroy'])
         ->whereNumber('user')
         ->name('admin.customers.destroy');
+
+    // AI Swing Analysis (Golf Analyzer) - coach melihat hasil & memberi catatan
+    Route::get('/admin/swing', [AdminSwingAnalysisController::class, 'index'])
+        ->name('admin.swing.index');
+
+    Route::get('/admin/swing/{analysis}', [AdminSwingAnalysisController::class, 'show'])
+        ->whereNumber('analysis')
+        ->name('admin.swing.show');
+
+    Route::put('/admin/swing/{analysis}/catatan', [AdminSwingAnalysisController::class, 'updateNote'])
+        ->whereNumber('analysis')
+        ->name('admin.swing.note');
 
     /*
     |--------------------------------------------------------------------------

@@ -51,6 +51,7 @@
             <h2>Member</h2>
             <div class="fw-menu">
                 {!! $item(route('admin.customers.index'), 'users', 'Customer') !!}
+                @if (Route::has('admin.swing.index')){!! $item(route('admin.swing.index'), 'video', 'AI Swing Analysis') !!}@endif
                 {!! $item(route('admin.chat.index'), 'chat', 'Chat Member', $chatNew) !!}
                 {!! $item(route('notifications.index'), 'bell', 'Notifikasi', $unread) !!}
             </div>
