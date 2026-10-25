@@ -539,28 +539,39 @@ export function openStudio(o) {
         return actx.getImageData(0, 0, AW, AH).data;
     }
 
-    // Cari bola: benda kecil, bulat, putih di tanah dekat kaki pada posisi setup
+    // Cari bola: benda kecil, bulat, putih di tanah di depan/antara kaki pada posisi setup.
+    // Area & ukuran bola dihitung dari tinggi badan golfer di video itu, jadi ikut jarak kamera & posisi golfer.
     async function detectBall() {
         const p = poseAt(phaseT.setup ?? 0);
         if (!p) return;
         await vwSeek(phaseT.setup ?? 0);
         const d = grab();
         const ank = mid(p[27], p[28]), wr = mid(p[15], p[16]);
-        const stance = Math.abs(p[27].x - p[28].x);
-        const bodyH = Math.abs(ank.y - p[0].y) || 0.6;
+        const bodyPx = Math.max(40, Math.abs(ank.y - p[0].y) * AH); // tinggi kepala->kaki (piksel analisis)
+        const ankX = ank.x * AW, ankY = ank.y * AH;
         let x1, x2;
         if (o.view === 'down_the_line') {
-            const far = wr.x + (wr.x - ank.x) * 1.6;
-            x1 = Math.min(ank.x, far) - 0.03; x2 = Math.max(ank.x, far) + 0.03;
+            // Kamera samping/serong: bola di depan kaki, searah tangan menjulur (bisa jauh untuk driver)
+            const side = Math.sign(wr.x - ank.x) || 1;
+            const a = ankX - side * bodyPx * 0.15, b = ankX + side * bodyPx * 1.35;
+            x1 = Math.min(a, b); x2 = Math.max(a, b);
         } else {
-            x1 = Math.min(p[27].x, p[28].x) - stance * 0.25; x2 = Math.max(p[27].x, p[28].x) + stance * 0.25;
+            // Kamera depan: bola di antara / sedikit di luar kedua kaki
+            const lo = Math.min(p[27].x, p[28].x) * AW, hi = Math.max(p[27].x, p[28].x) * AW;
+            const pad = Math.max(bodyPx * 0.2, (hi - lo) * 0.4);
+            x1 = lo - pad; x2 = hi + pad;
         }
-        const y1 = ank.y - bodyH * 0.06, y2 = Math.min(0.995, ank.y + bodyH * 0.16);
-        const X1 = Math.max(0, Math.floor(x1 * AW)), X2 = Math.min(AW - 1, Math.ceil(x2 * AW));
-        const Y1 = Math.max(0, Math.floor(y1 * AH)), Y2 = Math.min(AH - 1, Math.ceil(y2 * AH));
-        // Sepatu (sering putih) tidak boleh dianggap bola
-        const shoeR = Math.max(0.025, bodyH * 0.07);
-        const nearShoe = (x, y) => [p[27], p[28]].some((q) => Math.hypot(x - q.x, (y - q.y) / ratio) < shoeR);
+        // Perspektif: bola yang jauh dari kaki terlihat lebih tinggi dari mata kaki
+        const X1 = Math.max(0, Math.floor(x1)), X2 = Math.min(AW - 1, Math.ceil(x2));
+        const Y1 = Math.max(0, Math.floor(ankY - bodyPx * 0.4)), Y2 = Math.min(AH - 1, Math.ceil(ankY + bodyPx * 0.25));
+        // Ukuran bola kira-kira 3% tinggi badan
+        const minA = Math.max(2, Math.pow(bodyPx * 0.007, 2)), maxA = Math.pow(bodyPx * 0.08, 2);
+        // Sepatu & sarung tangan (sering putih) tidak boleh dianggap bola
+        // (kamera depan: bola di antara kaki, jadi zona sepatu dibatasi lebar kuda-kuda)
+        const stancePx = Math.abs(p[27].x - p[28].x) * AW;
+        const shoeR = o.view === 'down_the_line' ? bodyPx * 0.13 : Math.min(bodyPx * 0.1, stancePx * 0.4), handR = bodyPx * 0.12;
+        const nearShoe = (x, y) => [p[27], p[28]].some((q) => Math.hypot(x - q.x * AW, y - q.y * AH) < shoeR)
+            || Math.hypot(x - wr.x * AW, y - wr.y * AH) < handR;
         const white = (i) => { const r = d[i], g = d[i + 1], b = d[i + 2]; const mn = Math.min(r, g, b), mx = Math.max(r, g, b); return mn >= 150 && mx - mn <= 70; };
         const seen = new Uint8Array(AW * AH);
         const guess = guessBall();
@@ -570,10 +581,10 @@ export function openStudio(o) {
                 const k = y * AW + x;
                 if (seen[k] || !white(k * 4)) continue;
                 const stack = [k]; seen[k] = 1;
-                let n = 0, sx = 0, sy = 0, mnx = x, mxx = x, mny = y, mxy = y;
-                while (stack.length && n < 600) {
+                let n = 0, sx = 0, sy = 0, lum = 0, mnx = x, mxx = x, mny = y, mxy = y;
+                while (stack.length && n < 2000) {
                     const q = stack.pop(), qx = q % AW, qy = (q / AW) | 0;
-                    n++; sx += qx; sy += qy;
+                    n++; sx += qx; sy += qy; lum += d[q * 4] + d[q * 4 + 1] + d[q * 4 + 2];
                     mnx = Math.min(mnx, qx); mxx = Math.max(mxx, qx); mny = Math.min(mny, qy); mxy = Math.max(mxy, qy);
                     for (const nk of [q - 1, q + 1, q - AW, q + AW]) {
                         if (nk < 0 || nk >= AW * AH || seen[nk] || Math.abs((nk % AW) - qx) > 1) continue;
@@ -583,11 +594,14 @@ export function openStudio(o) {
                     }
                 }
                 const bw = mxx - mnx + 1, bh = mxy - mny + 1;
-                if (n < 3 || n > 400 || bw / bh > 2.6 || bh / bw > 2.6 || n / (bw * bh) < 0.4) continue;
-                const cx = (sx / n + 0.5) / AW, cy = (sy / n + 0.5) / AH;
-                if (nearShoe(cx, cy)) continue;
+                if (n < minA || n > maxA || bw / bh > 2.4 || bh / bw > 2.4 || n / (bw * bh) < 0.45) continue;
+                const px = sx / n + 0.5, py = sy / n + 0.5;
+                if (nearShoe(px, py)) continue;
+                const cx = px / AW, cy = py / AH;
+                // Utamakan yang paling putih & bulat; jarak ke perkiraan hanya penentu kecil
+                const bright = lum / n / 3 / 255;
                 const dist = Math.hypot(cx - guess.x, (cy - guess.y) / ratio);
-                const score = dist - Math.min(n, 120) * 0.0004;
+                const score = (1 - bright) + (1 - n / (bw * bh)) * 0.3 + dist * 0.6;
                 if (!best || score < best.score) best = { x: cx, y: cy, score };
             }
         }
