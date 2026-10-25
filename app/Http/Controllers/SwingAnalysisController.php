@@ -45,7 +45,21 @@ class SwingAnalysisController extends Controller
             'ok'       => true,
             'id'       => $analysis->id,
             'redirect' => route('swing.show', $analysis),
+            'capture_url' => route('swing.capture', $analysis),
         ]);
+    }
+
+    /** Simpan capture dari Studio Video milik customer sendiri. */
+    public function capture(Request $request, SwingAnalysis $analysis): JsonResponse
+    {
+        abort_unless($request->user()->id === $analysis->user_id, 404);
+
+        $request->validate(['image' => ['required', 'string', 'max:1000000']]);
+        $saved = SwingAnalysisStore::addCapture($analysis, $request->input('image'));
+
+        return $saved
+            ? response()->json(['ok' => true] + $saved)
+            : response()->json(['ok' => false, 'message' => 'Capture gagal disimpan (maksimal 12 gambar per analisis).'], 422);
     }
 
     public function show(Request $request, SwingAnalysis $analysis): View

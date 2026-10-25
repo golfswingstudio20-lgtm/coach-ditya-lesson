@@ -102,6 +102,8 @@
         <p style="font-size:12.5px;text-align:center">Jangan tutup halaman ini. Proses sekitar 20–60 detik.</p>
     </section>
 
+    @include('swing._studio')
+
     <canvas id="sw-canvas" hidden></canvas>
 </div>
 @endsection

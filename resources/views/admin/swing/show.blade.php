@@ -121,6 +121,20 @@
                 </div>
             @endif
 
+            @if (! empty($analysis->captures))
+                <div class="section-card">
+                    <div class="section-card-head"><h2>Capture dari Studio Video</h2></div>
+                    <div class="sa-phases" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+                        @foreach ($analysis->captures as $cap)
+                            @php $cimg = SwingAnalysis::imageUrl($cap['image'] ?? null); @endphp
+                            @if ($cimg)
+                                <a href="{{ $cimg }}" target="_blank" rel="noopener" class="sa-phase" style="display:block"><img src="{{ $cimg }}" alt="Capture swing" style="width:100%;display:block" loading="lazy"></a>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <div class="section-card">
                 <div class="section-card-head"><h2>Detail penilaian</h2></div>
                 @foreach ($analysis->metrics ?? [] as $m)

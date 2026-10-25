@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * metrics: [{key, label, score, value, unit, note}]
  * phases:  [{key, name, score, note, image}]   image = path di disk public (boleh null)
  * tips:    [{title, text}]
+ * captures: [{image, at}]   gambar dari Studio Video (frame + garis/sudut)
  */
 class SwingAnalysis extends Model
 {
@@ -26,7 +27,7 @@ class SwingAnalysis extends Model
 
     protected $fillable = [
         'user_id', 'camera_view', 'handedness', 'score', 'metrics', 'phases', 'tips',
-        'insight', 'duration_ms', 'frames', 'coach_note',
+        'insight', 'duration_ms', 'frames', 'coach_note', 'captures',
     ];
 
     protected function casts(): array
@@ -35,6 +36,7 @@ class SwingAnalysis extends Model
             'metrics' => 'array',
             'phases'  => 'array',
             'tips'    => 'array',
+            'captures' => 'array',
         ];
     }
 

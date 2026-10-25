@@ -82,8 +82,29 @@ class SwingAnalysisStore
         return $analysis;
     }
 
+    /** Simpan satu capture dari Studio Video (frame + garis/sudut). Maksimal 12 per analisis. */
+    public static function addCapture(SwingAnalysis $analysis, string $dataUrl): ?array
+    {
+        $captures = $analysis->captures ?? [];
+
+        if (count($captures) >= 12) {
+            return null;
+        }
+
+        $path = self::storeImage($dataUrl, $analysis, 'cap-' . (count($captures) + 1) . '-' . substr(md5(uniqid('', true)), 0, 6), 700000);
+
+        if (! $path) {
+            return null;
+        }
+
+        $captures[] = ['image' => $path, 'at' => now()->toIso8601String()];
+        $analysis->update(['captures' => $captures]);
+
+        return ['path' => $path, 'url' => SwingAnalysis::imageUrl($path), 'count' => count($captures)];
+    }
+
     /** Simpan gambar JPEG kecil (data URL dari canvas). Gagal simpan tidak menggagalkan hasil. */
-    private static function storeImage(?string $dataUrl, SwingAnalysis $analysis, string $key): ?string
+    private static function storeImage(?string $dataUrl, SwingAnalysis $analysis, string $key, int $maxBytes = 300000): ?string
     {
         if (! $dataUrl || ! preg_match('#^data:image/(jpeg|jpg|webp|png);base64,([A-Za-z0-9+/=]+)$#', $dataUrl, $m)) {
             return null;
@@ -91,7 +112,7 @@ class SwingAnalysisStore
 
         $bytes = base64_decode($m[2], true);
 
-        if ($bytes === false || strlen($bytes) > 300000 || @getimagesizefromstring($bytes) === false) {
+        if ($bytes === false || strlen($bytes) > $maxBytes || @getimagesizefromstring($bytes) === false) {
             return null;
         }
 

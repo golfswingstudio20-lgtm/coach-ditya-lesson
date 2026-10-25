@@ -118,6 +118,11 @@ Route::middleware([
     Route::get('/swing/{analysis}', [SwingAnalysisController::class, 'show'])
         ->whereNumber('analysis')
         ->name('swing.show');
+
+    Route::post('/swing/{analysis}/capture', [SwingAnalysisController::class, 'capture'])
+        ->whereNumber('analysis')
+        ->middleware('throttle:40,1')
+        ->name('swing.capture');
 });
 
 
@@ -277,6 +282,11 @@ Route::middleware([
     Route::put('/admin/swing/{analysis}/catatan', [AdminSwingAnalysisController::class, 'updateNote'])
         ->whereNumber('analysis')
         ->name('admin.swing.note');
+
+    Route::post('/admin/swing/{analysis}/capture', [AdminSwingAnalysisController::class, 'capture'])
+        ->whereNumber('analysis')
+        ->middleware('throttle:60,1')
+        ->name('admin.swing.capture');
 
     /*
     |--------------------------------------------------------------------------

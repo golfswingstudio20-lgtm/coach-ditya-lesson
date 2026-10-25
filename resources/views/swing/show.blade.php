@@ -108,6 +108,20 @@
         </section>
     @endif
 
+    @if (! empty($analysis->captures))
+        <section class="sw-card cdl-ink-card">
+            <h2>Capture dari Studio Video</h2>
+            <div class="sw-phases">
+                @foreach ($analysis->captures as $cap)
+                    @php $cimg = SwingAnalysis::imageUrl($cap['image'] ?? null); @endphp
+                    @if ($cimg)
+                        <a href="{{ $cimg }}" target="_blank" rel="noopener" class="sw-phase" style="display:block"><img src="{{ $cimg }}" alt="Capture swing" style="width:100%;display:block" loading="lazy"></a>
+                    @endif
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     @if (! empty($analysis->tips))
         <section class="sw-card cdl-ink-card">
             <h2>Rekomendasi Latihan</h2>

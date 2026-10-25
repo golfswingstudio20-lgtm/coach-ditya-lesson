@@ -122,6 +122,8 @@
             <p class="sw-note">Jangan tutup halaman ini. Proses sekitar 20–60 detik.</p>
         </section>
 
+        @include('swing._studio')
+
         <canvas id="sw-canvas" hidden></canvas>
     </div>
 @endsection

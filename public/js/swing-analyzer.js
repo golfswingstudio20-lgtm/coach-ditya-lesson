@@ -114,6 +114,7 @@ function init(app) {
             const result = analyse(frames, W, H, view, hand);
 
             setProgress(88, 'Menyiapkan hasil analisis…', 4);
+            const phaseTimes = result.phases.map((ph) => ({ key: ph.key, name: ph.name, t: frames[ph.index].t }));
             for (const ph of result.phases) {
                 ph.image = await snapshot(el.video, el.canvas, frames[ph.index]);
                 delete ph.index;
@@ -135,8 +136,23 @@ function init(app) {
             const json = await res.json().catch(() => ({}));
             if (!res.ok || !json.redirect) throw new Error(json.message || 'Hasil gagal disimpan (kode ' + res.status + '). Coba lagi.');
 
-            setProgress(100, 'Selesai! Membuka hasil…', 5);
-            window.location.href = json.redirect;
+            const studio = app.querySelector('[data-studio]');
+            if (!studio) {
+                setProgress(100, 'Selesai! Membuka hasil…', 5);
+                window.location.href = json.redirect;
+                return;
+            }
+
+            // Buka Studio Video: slow motion, garis & sudut, capture, plane, bola
+            setProgress(100, 'Selesai! Membuka Studio Video…', 5);
+            const ver = new URL(import.meta.url).search;
+            const mod = await import(new URL('swing-studio.js' + ver, import.meta.url).href);
+            el.stepProcess.hidden = true;
+            setStep(3);
+            mod.openStudio({
+                root: studio, src: objectUrl, frames, width: W, height: H, view, hand, phases: phaseTimes,
+                score: result.score, resultUrl: json.redirect, captureUrl: json.capture_url || null, csrf,
+            });
         } catch (e) {
             console.error(e);
             el.stepProcess.hidden = true;
