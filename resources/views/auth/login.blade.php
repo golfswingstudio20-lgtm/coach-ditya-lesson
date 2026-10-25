@@ -29,10 +29,11 @@
             <label><input type="checkbox" name="remember" value="1"> Ingat saya</label>
             @if (Route::has('password.request'))<a href="{{ route('password.request') }}" class="fw-link">Lupa password?</a>@endif
         </div>
-        <button type="submit" class="fw-btn block">Masuk {!! \App\Support\Icons::svg('arrow') !!}</button>
+        <button type="submit" class="fw-btn block dark">LOGIN</button>
     </form>
 
     @if (Route::has('register'))
-        <p class="fa-alt">Belum punya akun? <a href="{{ route('register') }}" class="fw-link">Daftar sekarang</a></p>
+        <p class="fa-alt">Belum punya akun?</p>
+        <a href="{{ route('register') }}" class="fw-btn block ghost" style="margin-top: 10px">DAFTAR</a>
     @endif
 @endsection

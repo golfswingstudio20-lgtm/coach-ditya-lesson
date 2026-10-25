@@ -1,0 +1,182 @@
+/* ==========================================================================
+   Coach Ditya Lesson - tema "Biru Langit" (gaya kartun)
+   Dipakai halaman visitor & customer (body.cdl). Admin panel tidak memakai ini.
+   Latar biru langit, kartu mint bergaris hitam tebal, tombol hijau, judul Lilita One.
+   ========================================================================== */
+
+html.fw-html:has(body.cdl) { background: #7CC8EC; }
+
+body.fw.cdl,
+html[data-theme="dark"] body.fw.cdl {
+    --fw-bg: #7CC8EC;
+    --fw-bg-2: #6BBCE3;
+    --fw-surface: #DDF3E4;
+    --fw-surface-2: #CDEBD7;
+    --fw-line: #14141A;
+    --fw-line-2: #14141A;
+    --fw-text: #14141A;
+    --fw-text-2: #262F2A;
+    --fw-muted: #3F4A44;
+    --fw-green: #22A04B;
+    --fw-green-2: #1B8A3F;
+    --fw-green-3: #17803A;
+    --fw-tint: #C9E8D3;
+    --fw-tint-2: #E6F6EC;
+    --fw-lime: #B3E0C1;
+    --fw-lime-2: #9CD4AE;
+    --fw-radius: 20px;
+    --fw-radius-sm: 14px;
+    --fw-shadow: 3px 3px 0 #14141A;
+    --fw-shadow-lg: 4px 4px 0 #14141A;
+    --fw-serif: "Lilita One", "Fredoka", system-ui, sans-serif;
+    --fw-sans: "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --cdl-ink: #14141A;
+    --cdl-outline: 2.5px solid #14141A;
+    --d-ink-green: #17803A;
+    --d-surface: #DDF3E4;
+    --d-bg: #7CC8EC;
+    --d-bg-2: #CDEBD7;
+    --d-muted: #3F4A44;
+    --d-btn: #22A04B;
+    --d-glass-rgb: 221, 243, 228;
+    background: #7CC8EC;
+    color: #14141A;
+    font-family: var(--fw-sans);
+    font-size: 15.5px;
+}
+
+/* Mode gelap tidak dipakai di tema ini */
+body.cdl .fw-theme-btn, body.cdl .fw-theme-switch, body.cdl [data-theme-toggle] { display: none !important; }
+html[data-theme="dark"] body.cdl img:not([src$=".svg"]) { filter: none; }
+
+/* ---------- Judul: putih bergaris hitam ala kartun ---------- */
+.cdl-title, body.cdl .fw-h1, body.cdl .fw-pagehead h1 {
+    font-family: "Lilita One", system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: .01em;
+    color: #FFFFFF;
+    text-shadow: 3px 3px 0 #14141A, -1.5px -1.5px 0 #14141A, 1.5px -1.5px 0 #14141A, -1.5px 1.5px 0 #14141A, 1.5px 1.5px 0 #14141A;
+}
+body.cdl .fw-h2, body.cdl .fw-section-head h2, body.cdl .fw-card-head h2, body.cdl .fw-card-head h3, body.cdl .fw-serif {
+    font-family: "Lilita One", system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: .01em;
+}
+body.cdl .fw-section-head h2 { font-size: 20px; color: #14141A; }
+body.cdl .fw-hl { font-style: normal; color: #FFE08A; }
+body.cdl .fw-eyebrow { color: #14141A; }
+body.cdl .fw-sub, body.cdl .fw-muted { color: #2F3A34; }
+
+/* ---------- Kartu & daftar ---------- */
+body.cdl .fw-card, body.cdl .fw-stat, body.cdl .fw-menu, body.cdl .fw-row, body.cdl .fw-empty {
+    background: var(--fw-surface);
+    border: var(--cdl-outline);
+    border-radius: var(--fw-radius);
+    box-shadow: var(--fw-shadow);
+}
+body.cdl .fw-menu a, body.cdl .fw-menu button { border-bottom-color: rgba(20, 20, 26, .15); }
+body.cdl .fw-menu a:hover, body.cdl .fw-menu button:hover { background: var(--fw-surface-2); }
+body.cdl .fw-menu .ic, body.cdl .fw-av { background: #FFFFFF; border: 2px solid #14141A; color: #17803A; }
+body.cdl .fw-stat strong, body.cdl .fw-pc-price { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; }
+
+/* ---------- Tombol ---------- */
+body.cdl .fw-btn {
+    border: var(--cdl-outline);
+    background: #22A04B;
+    color: #FFFFFF;
+    font-weight: 600;
+    box-shadow: 3px 3px 0 #14141A;
+    transition: transform .08s ease, box-shadow .08s ease, background .15s;
+}
+body.cdl .fw-btn:hover { background: #1B8A3F; }
+body.cdl .fw-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #14141A; }
+body.cdl .fw-btn.ghost, body.cdl .fw-btn.white, body.cdl .fw-btn.soft, body.cdl .fw-btn.lime {
+    background: var(--fw-surface);
+    color: #14141A;
+    border: var(--cdl-outline);
+}
+body.cdl .fw-btn.ghost:hover, body.cdl .fw-btn.white:hover, body.cdl .fw-btn.soft:hover, body.cdl .fw-btn.lime:hover { background: var(--fw-surface-2); color: #14141A; }
+body.cdl .fw-btn.dark { background: #14141A; color: #FFFFFF; }
+body.cdl .fw-btn.danger { background: #FFE3E0; color: #B42318; }
+body.cdl .fw-link { color: #14141A; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+/* ---------- Pilihan / tab ---------- */
+body.cdl .fw-pill { border: 2px solid #14141A; background: var(--fw-surface); color: #14141A; font-weight: 600; }
+body.cdl .fw-pill.on, body.cdl .fw-pill[aria-selected="true"], body.cdl input:checked + .fw-pill { background: #14141A; border-color: #14141A; color: #FFFFFF; }
+body.cdl .fw-seg { background: var(--fw-surface); border: 2px solid #14141A; }
+body.cdl .fw-seg .on { background: #14141A; color: #FFFFFF; }
+body.cdl .fw-badge { border: 1.5px solid #14141A; font-weight: 600; }
+
+/* ---------- Form ---------- */
+body.cdl .fw-field > label, body.cdl .fw-label { color: #14141A; font-weight: 600; font-size: 14px; }
+body.cdl .fw-input, body.cdl .fw-field input[type=text], body.cdl .fw-field input[type=email], body.cdl .fw-field input[type=password],
+body.cdl .fw-field input[type=number], body.cdl .fw-field input[type=date], body.cdl .fw-field input[type=time], body.cdl .fw-field input[type=tel],
+body.cdl .fw-field input[type=search], body.cdl .fw-field select, body.cdl .fw-field textarea, body.cdl .fw-search input {
+    background: #FFFFFF;
+    border: 2px solid #14141A;
+    border-radius: 14px;
+    color: #14141A;
+}
+body.cdl .fw-input:focus, body.cdl .fw-field input:focus, body.cdl .fw-field select:focus, body.cdl .fw-field textarea:focus, body.cdl .fw-search input:focus {
+    border-color: #17803A;
+    box-shadow: 0 0 0 3px rgba(34, 160, 75, .3);
+}
+body.cdl .fw-alert { border: 2px solid #14141A; border-radius: 14px; }
+
+/* ---------- Navbar atas (laptop) & footer ---------- */
+body.cdl .fw-nav { background: var(--fw-surface); border-bottom: var(--cdl-outline); box-shadow: none; }
+body.cdl .fw-nav-link { color: #14141A; font-weight: 500; }
+body.cdl .fw-nav-link.on, body.cdl .fw-nav-link[aria-current="page"] { background: #14141A; color: #FFFFFF; }
+body.cdl .fw-brand-text { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; }
+body.cdl .fw-footer { background: var(--fw-surface); border-top: var(--cdl-outline); color: #14141A; }
+
+/* ---------- Kartu foto program/event ---------- */
+body.cdl .fw-pc { border: var(--cdl-outline); box-shadow: 3px 3px 0 #14141A; }
+body.cdl .fw-pc h3, body.cdl .fw-pc h2 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; letter-spacing: .01em; }
+
+/* ---------- Menu bawah (HP) ---------- */
+@media (max-width: 820px) {
+    body.cdl .mt-bar {
+        background: #DDF3E4;
+        border-top: 2.5px solid #14141A;
+        border-radius: 0;
+        box-shadow: none;
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        font-family: "Fredoka", system-ui, sans-serif;
+    }
+    body.cdl .mt-item { color: #3F4A44; font-weight: 500; font-size: 11.5px; }
+    body.cdl .mt-item.on { color: #17803A; font-weight: 700; }
+    body.cdl .mt-item.on .mt-ico {
+        width: 26px; height: 26px; margin-top: 0; border-radius: 0;
+        background: transparent; color: #17803A; box-shadow: none;
+    }
+    body.cdl .mt-item.on .mt-ico svg { width: 25px; height: 25px; stroke-width: 2.4; }
+    body.cdl .mt-dot { box-shadow: 0 0 0 2px #DDF3E4; }
+}
+
+/* ---------- Komponen bersama halaman baru ---------- */
+.cdl-ink-card {
+    background: var(--fw-surface, #DDF3E4);
+    border: 2.5px solid #14141A;
+    border-radius: 20px;
+    box-shadow: 3px 3px 0 #14141A;
+}
+.cdl-tile {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    border: 2.5px solid #14141A; border-radius: 18px; background: #DDF3E4; color: #14141A;
+    font-weight: 600; text-align: center; line-height: 1.2; text-decoration: none;
+    transition: transform .08s ease, box-shadow .08s ease;
+}
+.cdl-tile:active { transform: translate(2px, 2px); }
+.cdl-tile svg { width: 26px; height: 26px; }
+.cdl-tile.big { height: 104px; font-size: 15px; box-shadow: 3px 3px 0 #14141A; }
+.cdl-tile.big svg { width: 34px; height: 34px; }
+.cdl-tile.green { background: #22A04B; color: #FFFFFF; }
+.cdl-tile.small { height: 92px; font-size: 13px; }
+.cdl-tile.small svg { color: #22A04B; }
+.cdl-price { font-family: "Lilita One", system-ui, sans-serif; color: #17803A; letter-spacing: .01em; }
+.cdl-ph { border: 2px dashed #6B7A70; border-radius: 14px; display: grid; place-items: center; text-align: center; color: #3F4A44; font-size: 11px; font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+    body.cdl .fw-btn, .cdl-tile { transition: none; }
+}

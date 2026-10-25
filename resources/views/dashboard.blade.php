@@ -1,8 +1,9 @@
-{{-- Beranda customer (setelah login). --}}
+{{-- Beranda customer (setelah login) - tema Biru Langit. --}}
 @extends('layouts.fw')
 
 @section('title', 'Beranda')
 @section('no_footer', true)
+@section('main_class', 'narrow')
 
 @php
     use App\Support\Icons;
@@ -16,219 +17,160 @@
         ->whereDate('booking_date', '>=', $today)
         ->orderBy('booking_date')->orderBy('start_time')->first();
 
-
     $pendingIds = (clone $mine)->where('status', 'pending')->whereDate('booking_date', '>=', $today)->pluck('id');
     $paidIds    = $pendingIds->isEmpty() ? collect() : \App\Models\Payment::whereIn('booking_id', $pendingIds)->where('status', 'paid')->pluck('booking_id');
     $unpaid     = $pendingIds->diff($paidIds)->count();
 
-    $stats = [
-        ['Total booking', (clone $mine)->count(), 'calendar', ''],
-        ['Akan datang', (clone $mine)->whereIn('status', ['pending', 'booked'])->whereDate('booking_date', '>=', $today)->count(), 'clock', 'orange'],
-        ['Lesson selesai', (clone $mine)->where('status', 'booked')->whereDate('booking_date', '<', $today)->count(), 'check-c', 'blue'],
-        ['Belum dibayar', $unpaid, 'wallet', 'red'],
-    ];
-    $price = \App\Models\Payment::pricePerHour();
+    $nextAmount = null;
+    if ($next) {
+        $nextAmount = \App\Models\Payment::where('booking_id', $next->id)->value('amount');
+        if (! $nextAmount) {
+            $mins = abs(Carbon::parse($next->start_time)->diffInMinutes(Carbon::parse($next->end_time)));
+            $nextAmount = method_exists($next, 'isCourse') && $next->isCourse()
+                ? \App\Support\BookingRules::coursePrice()
+                : (int) round(max(60, $mins) / 60 * \App\Models\Payment::pricePerHour());
+        }
+    }
 
-    $coach   = \App\Models\Coach::main();
-    $photo   = \App\Support\Brand::background('public');
-    $hour    = (int) now()->format('H');
-    $greet   = $hour < 11 ? 'Selamat pagi' : ($hour < 15 ? 'Selamat siang' : ($hour < 18 ? 'Selamat sore' : 'Selamat malam'));
-    $chatNew = class_exists(\App\Models\ChatMessage::class) ? \App\Models\ChatMessage::unreadForMember($user->id) : 0;
-    $events  = \App\Models\Event::active()->upcoming()->chronological()->take(1)->get();
-    $programs = \App\Models\Program::active()->ordered()->take(4)->get();
+    $coach      = \App\Models\Coach::main();
+    $firstName  = \Illuminate\Support\Str::of($user->name)->before(' ')->limit(18, '');
+    $unread     = $user->unreadNotifications()->count();
+    $hasSwing   = Route::has('swing.index');
+    $lastSwing  = $hasSwing && class_exists(\App\Models\SwingAnalysis::class)
+        ? rescue(fn () => \App\Models\SwingAnalysis::where('user_id', $user->id)->latest()->first(), null, false)
+        : null;
 @endphp
 
 @push('head')
 <style>
-    .bd-hello { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-    .bd-hello small { color: var(--fw-muted); font-size: 14px; }
-    .bd-hello h1 { margin-top: 2px; font-family: var(--fw-serif); font-size: clamp(26px, 3.4vw, 36px); font-weight: 600; letter-spacing: -.4px; }
-    .bd-hello p { margin-top: 4px; color: var(--fw-muted); font-size: 14px; }
+    .hm { display: grid; gap: 14px; }
+    .hm-top { display: flex; align-items: center; gap: 10px; }
+    .hm-logo { width: 52px; height: 52px; flex: 0 0 52px; display: grid; place-items: center; border-radius: 50%; border: 2.5px solid #14141A; background: #FFFFFF; overflow: hidden; color: #17803A; }
+    .hm-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .hm-logo svg { width: 26px; height: 26px; }
+    .hm-brand { flex: 1; font-size: 26px; line-height: .95; }
+    .hm-bell { position: relative; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 14px; border: 2.5px solid #14141A; background: #DDF3E4; color: #14141A; box-shadow: 2px 2px 0 #14141A; }
+    .hm-bell svg { width: 22px; height: 22px; }
+    .hm-bell b { position: absolute; top: -7px; right: -7px; min-width: 20px; height: 20px; padding: 0 5px; display: grid; place-items: center; border-radius: 99px; border: 2px solid #14141A; background: #E8453C; color: #fff; font-size: 11px; }
 
-    .bd-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; margin-top: 22px; }
-    .bd-hero.fw-pc { min-height: 220px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
-    .bd-hero .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .bd-hero h2 { font-family: var(--fw-serif); font-size: clamp(24px, 3vw, 30px); font-weight: 700; line-height: 1.15; color: #fff; }
-    .bd-hero .fw-pc-chips { margin-top: 10px; }
-    .bd-hero .fw-pc-btn { align-self: flex-start; }
+    .hm-hello { display: flex; align-items: center; gap: 12px; padding: 16px; }
+    .hm-hello h1 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 25px; letter-spacing: .01em; }
+    .hm-hello p { margin-top: 6px; font-size: 14.5px; font-weight: 500; line-height: 1.4; color: #2F3A34; }
+    .hm-hello .pic { width: 88px; height: 96px; flex: 0 0 88px; border-radius: 16px; border: 2.5px solid #14141A; background: #FFFFFF center / cover no-repeat; display: grid; place-items: center; color: #17803A; }
+    .hm-hello .pic svg { width: 40px; height: 40px; }
 
-    .bd-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .hm-big { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .hm-small { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 
-    .bd-quick { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-    .bd-quick a { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px; border-radius: 18px; background: var(--fw-surface); border: 1px solid var(--fw-line); box-shadow: var(--fw-shadow); color: var(--fw-text-2); font-size: 12.5px; font-weight: 500; text-align: center; }
-    .bd-quick a:hover { border-color: rgba(var(--d-green-rgb, 31, 77, 51), .35); color: var(--d-ink-green, var(--fw-green)); }
-    .bd-quick .ic { position: relative; width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%; background: var(--fw-tint); color: var(--d-ink-green, var(--fw-green)); }
-    .bd-quick .ic svg { width: 21px; height: 21px; }
-    .bd-quick .ic b { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 4px; display: grid; place-items: center; border-radius: 99px; background: var(--fw-red); color: #fff; font-size: 10px; box-shadow: 0 0 0 2px var(--d-surface, #fff); }
+    .hm-alert { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 2.5px solid #14141A; border-radius: 16px; background: #FFE9B8; color: #14141A; font-size: 14px; font-weight: 500; }
+    .hm-alert svg { width: 22px; height: 22px; flex: 0 0 22px; }
 
-    .bd-cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; }
-    .bd-coach { display: flex; gap: 16px; align-items: center; padding: 18px; }
-    .bd-coach .fw-av { width: 72px; height: 72px; flex-basis: 72px; border-radius: 20px; font-size: 24px; }
-    .bd-coach strong { display: block; font-size: 16px; }
-    .bd-coach small { color: var(--fw-muted); font-size: 13px; }
-    .bd-coach p { margin-top: 6px; color: var(--fw-text-2); font-size: 13.5px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .hm-lesson { padding: 14px; display: grid; gap: 10px; }
+    .hm-lesson h2 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 20px; letter-spacing: .01em; }
+    .hm-lesson .row { display: flex; gap: 12px; align-items: center; padding: 10px; border: 2px solid rgba(20, 20, 26, .2); border-radius: 16px; background: #EAF8EF; }
+    .hm-lesson .ph { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 12px; border: 2px solid #14141A; background: #FFFFFF center / cover no-repeat; display: grid; place-items: center; color: #17803A; }
+    .hm-lesson .ph svg { width: 30px; height: 30px; }
+    .hm-lesson strong { display: block; font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 17px; letter-spacing: .01em; }
+    .hm-lesson small { display: block; margin-top: 2px; color: #2F3A34; font-size: 13px; }
+    .hm-lesson .cdl-price { display: block; margin-top: 3px; font-size: 18px; }
+    .hm-lesson .foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .hm-lesson .more { display: inline-flex; align-items: center; gap: 4px; color: #17803A; font-size: 14px; font-weight: 700; }
+    .hm-lesson .more svg { width: 16px; height: 16px; }
 
-    .bd-prog { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .bd-prog .fw-pc { height: 230px; border-radius: 22px; }
-    .bd-prog .fw-pc h3 { font-size: 18px; }
+    .hm-swing { display: flex; align-items: center; gap: 12px; padding: 14px; }
+    .hm-swing .ring { width: 58px; height: 58px; flex: 0 0 58px; display: grid; place-items: center; border-radius: 50%; border: 5px solid #22A04B; background: #FFFFFF; font-family: "Lilita One", system-ui, sans-serif; font-size: 20px; }
+    .hm-swing strong { display: block; font-size: 15px; }
+    .hm-swing small { color: #2F3A34; font-size: 13px; }
 
-    .bd-ev { display: flex; gap: 12px; padding: 10px; }
-    .bd-ev-img { position: relative; flex: 0 0 96px; height: 116px; border-radius: 14px; overflow: hidden; background: linear-gradient(135deg, #1f4d33, #0c1f15); }
-    .bd-ev-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-    .bd-ev > div:last-child { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding: 3px 2px; }
-    .bd-ev strong { font-size: 15.5px; }
-    .bd-ev small { color: var(--fw-muted); font-size: 12.5px; }
-    .bd-ev .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-    .bd-ev .foot b { color: var(--d-ink-green, var(--fw-green)); font-weight: 600; }
-
-    @media (max-width: 960px) { .bd-top, .bd-cols { grid-template-columns: minmax(0, 1fr); } }
-    @media (max-width: 820px) {
-        .bd-hello h1 { font-size: 24px; }
-        .bd-hello .fw-av { width: 52px; height: 52px; flex-basis: 52px; }
-        .bd-top { margin-top: 16px; gap: 12px; }
-        .bd-hero.fw-pc { min-height: 214px; padding: 18px; border-radius: 24px; }
-        .bd-prog { display: flex; gap: 12px; overflow-x: auto; margin: 0 -16px; padding: 0 16px 6px; scroll-snap-type: x mandatory; scrollbar-width: none; }
-        .bd-prog::-webkit-scrollbar { display: none; }
-        .bd-prog .fw-pc { flex: 0 0 210px; height: 250px; scroll-snap-align: start; }
-        .bd-stats .fw-stat2 { padding: 12px; gap: 10px; }
-        .bd-stats .fw-stat2 .ic { width: 40px; height: 40px; flex-basis: 40px; }
-        .bd-quick { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-        .bd-quick a { padding: 10px 2px; border: 0; box-shadow: none; background: transparent; font-size: 11.5px; }
-        .bd-quick a:nth-child(n+5) { display: none; }
-    }
+    @media (min-width: 821px) { .fw-main.narrow { width: min(560px, 100% - 48px); } }
 </style>
 @endpush
 
 @section('content')
-    <div class="bd-hello">
-        <div>
-            <small>Halo,</small>
-            <h1>{{ $user->name }}</h1>
-            <p>{{ $greet }}! {{ \App\Support\Content::get('member_greet') }}</p>
-        </div>
-        <a href="{{ Route::has('menu') ? route('menu') : route('profile.edit') }}" class="fw-av lg" aria-label="Menu akun">{{ Icons::initials($user->name) }}</a>
+<div class="hm">
+    <div class="hm-top">
+        <span class="hm-logo">
+            @if ($logo = \App\Support\Brand::logoUrl())<img src="{{ $logo }}" alt="">@else{!! Icons::svg('golf') !!}@endif
+        </span>
+        <span class="hm-brand cdl-title">COACH DITYA<br>LESSON</span>
+        <a href="{{ Route::has('notifications.index') ? route('notifications.index') : route('menu') }}" class="hm-bell" aria-label="Notifikasi">
+            {!! Icons::svg('bell') !!}@if ($unread)<b>{{ $unread > 9 ? '9+' : $unread }}</b>@endif
+        </a>
     </div>
 
     @if (session('status') || session('success'))
-        <div class="fw-alert ok" style="margin-top:16px">{{ session('status') ?? session('success') }}</div>
+        <div class="fw-alert ok">{{ session('status') ?? session('success') }}</div>
     @endif
 
-    <div class="bd-top">
-        @if ($next)
-            @php
-                $nDate = Carbon::parse($next->booking_date);
-                $isToday = $nDate->isToday();
-            @endphp
-            <div class="bd-hero fw-pc side">
-                <img class="ph" src="{{ $photo }}" alt="" onerror="this.remove()">
-                <div>
-                    <div class="row">
-                        <span class="fw-pc-label lime">{{ $isToday ? 'Lesson hari ini' : 'Lesson berikutnya' }}</span>
-                        <span class="fw-pc-label dark">{{ $next->status === 'booked' ? 'Disetujui' : 'Menunggu' }}</span>
-                    </div>
-                    <h2 style="margin-top:12px">{{ $next->lesson_label }}</h2>
-                    <div class="fw-pc-chips">
-                        <span>{!! Icons::svg('calendar') !!} {{ $nDate->locale('id')->translatedFormat('D, d M') }}</span>
-                        <span>{!! Icons::svg('clock') !!} {{ substr($next->start_time, 0, 5) }} – {{ substr($next->end_time, 0, 5) }}</span>
-                        @if ($next->place_label)<span>{!! Icons::svg('pin') !!} {{ \Illuminate\Support\Str::limit($next->place_label, 26) }}</span>@endif
-                    </div>
-                </div>
-                @if ($next->status === 'pending' && Route::has('payment.booking'))
-                    <a href="{{ route('payment.booking', $next) }}" class="fw-pc-btn">Selesaikan Pembayaran {!! Icons::svg('arrow') !!}</a>
-                @else
-                    <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}" class="fw-pc-btn white">Lihat Jadwal {!! Icons::svg('arrow') !!}</a>
-                @endif
-            </div>
-        @else
-            <div class="bd-hero fw-pc side">
-                <img class="ph" src="{{ $photo }}" alt="" onerror="this.remove()">
-                <div>
-                    <span class="fw-pc-label lime">Lesson golf per jam</span>
-                    <h2 style="margin-top:12px">{!! \App\Support\Content::html('member_banner_title') !!}</h2>
-                    <p style="margin-top:8px">{{ \App\Support\Content::get('member_banner_text') }}</p>
-                </div>
-                <a href="{{ route('booking') }}" class="fw-pc-btn">Booking Sekarang {!! Icons::svg('arrow') !!}</a>
-            </div>
-        @endif
-
-        <div class="bd-stats">
-            @foreach ($stats as [$label, $value, $icon, $tone])
-                <div class="fw-stat2"><span class="ic {{ $tone }}">{!! Icons::svg($icon) !!}</span><div><strong>{{ $value }}</strong><span>{{ $label }}</span></div></div>
-            @endforeach
+    <section class="hm-hello cdl-ink-card">
+        <div style="flex:1;min-width:0">
+            <h1>Halo, {{ $firstName }}!</h1>
+            <p>Saatnya tingkatkan permainan golf kamu bersama Coach Ditya.</p>
         </div>
+        @if ($coach && $coach->photo_url)
+            <span class="pic" style="background-image:url('{{ $coach->photo_url }}')" role="img" aria-label="Foto {{ $coach->name }}"></span>
+        @else
+            <span class="pic" aria-hidden="true">{!! Icons::svg('golf') !!}</span>
+        @endif
+    </section>
+
+    <div class="hm-big">
+        <a href="{{ route('booking') }}" class="cdl-tile big">{!! Icons::svg('calendar') !!}Booking Lesson</a>
+        <a href="{{ $hasSwing ? route('swing.index') : route('booking') }}" class="cdl-tile big green">{!! Icons::svg('video') !!}AI Swing Analysis</a>
+    </div>
+
+    <div class="hm-small">
+        <a href="{{ route('program') }}" class="cdl-tile small">{!! Icons::svg('star') !!}Program<br>Latihan</a>
+        <a href="{{ $hasSwing ? route('swing.history') : route('jadwal') }}" class="cdl-tile small">{!! Icons::svg('search') !!}Riwayat<br>Analisis</a>
+        <a href="{{ Route::has('menu') ? route('menu') : route('profile.edit') }}" class="cdl-tile small">{!! Icons::svg('user') !!}Profil<br>Saya</a>
     </div>
 
     @if ($unpaid > 0)
-        <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}" class="fw-alert warn" style="margin:16px 0 0;align-items:center">
+        <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}" class="hm-alert">
             {!! Icons::svg('wallet') !!}
-            <span style="flex:1">Ada <b>{{ $unpaid }}</b> booking menunggu pembayaran. Selesaikan sebelum batas waktu agar jadwal tidak hilang.</span>
+            <span style="flex:1">Ada <b>{{ $unpaid }}</b> booking menunggu pembayaran. Selesaikan sebelum batas waktu.</span>
             {!! Icons::svg('chev', 'fw-chev') !!}
         </a>
     @endif
 
-    <section class="fw-section">
-        <div class="fw-section-head"><h2>Quick Action</h2></div>
-        <div class="bd-quick">
-            <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}"><span class="ic">{!! Icons::svg('cal-check') !!}</span>Jadwal</a>
-            <a href="{{ route('booking') }}"><span class="ic">{!! Icons::svg('plus-c') !!}</span>Booking</a>
-            <a href="{{ route('chat') }}"><span class="ic">{!! Icons::svg('chat') !!}@if ($chatNew)<b>{{ $chatNew }}</b>@endif</span>Chat Coach</a>
-            <a href="{{ Route::has('menu') ? route('menu') : route('profile.edit') }}"><span class="ic">{!! Icons::svg('menu') !!}</span>Menu</a>
-            <a href="{{ route('program') }}"><span class="ic">{!! Icons::svg('star') !!}</span>Program</a>
-            <a href="{{ route('galeri') }}"><span class="ic">{!! Icons::svg('image') !!}</span>Galeri</a>
+    <section class="hm-lesson cdl-ink-card">
+        <h2>Lesson Terdekat</h2>
+        @if ($next)
+            @php $nDate = Carbon::parse($next->booking_date); @endphp
+            <a href="{{ $next->status === 'pending' && Route::has('payment.booking') ? route('payment.booking', $next) : (Route::has('jadwal') ? route('jadwal') : route('booking')) }}" class="row">
+                <span class="ph" @if (\App\Support\Brand::background('public')) style="background-image:url('{{ \App\Support\Brand::background('public') }}')" @endif>@unless (\App\Support\Brand::background('public')){!! Icons::svg('golf') !!}@endunless</span>
+                <span style="flex:1;min-width:0">
+                    <strong>{{ $next->lesson_label }}</strong>
+                    <small>{{ $coach->name ?? 'Coach Ditya' }} · {{ $nDate->locale('id')->translatedFormat('D, d M') }} · {{ substr($next->start_time, 0, 5) }}</small>
+                    <span class="cdl-price">{{ \App\Models\Payment::formatRupiah((int) $nextAmount) }}</span>
+                </span>
+                <span class="fw-badge {{ $next->status === 'booked' ? 'green' : 'orange-soft' }}">{{ $next->status === 'booked' ? 'Disetujui' : 'Menunggu' }}</span>
+            </a>
+        @else
+            <div class="row">
+                <span class="ph">{!! Icons::svg('golf') !!}</span>
+                <span style="flex:1;min-width:0">
+                    <strong>Belum ada lesson</strong>
+                    <small>Pilih jadwal latihan bersama Coach Ditya.</small>
+                    <span class="cdl-price">{{ \App\Models\Payment::formatRupiah(\App\Models\Payment::pricePerHour()) }}/jam</span>
+                </span>
+            </div>
+        @endif
+        <div class="foot">
+            @unless ($next)<a href="{{ route('booking') }}" class="fw-btn sm">Booking Sekarang</a>@else<span></span>@endunless
+            <a href="{{ Route::has('jadwal') ? route('jadwal') : route('booking') }}" class="more">Lihat Semua {!! Icons::svg('chev') !!}</a>
         </div>
     </section>
 
-    <div class="bd-cols fw-section">
-        <section>
-            <div class="fw-section-head"><h2>Coach Anda</h2><a href="{{ route('home') }}#coach" class="fw-link">Profil lengkap</a></div>
-            @if ($coach)
-                <a href="{{ route('home') }}#coach" class="fw-card bd-coach">
-                    @if ($coach->photo_url)
-                        <span class="fw-av" style="background-image:url('{{ $coach->photo_url }}')"></span>
-                    @else
-                        <span class="fw-av">{{ Icons::initials($coach->name) }}</span>
-                    @endif
-                    <div style="min-width:0">
-                        <strong>{{ $coach->name }}</strong>
-                        <small>{{ $coach->role ?: 'Coach profesional' }}@if ($coach->years_experience) · {{ $coach->years_experience }}+ tahun @endif</small>
-                        @if ($coach->bio)<p>{{ $coach->bio }}</p>@endif
-                    </div>
-                    {!! Icons::svg('chev', 'fw-chev') !!}
-                </a>
-            @endif
-
-            @if ($events->isNotEmpty())
-                @php $ev = $events->first(); @endphp
-                <div class="fw-section-head" style="margin-top:22px"><h2>Event Terdekat</h2><a href="{{ route('event') }}" class="fw-link">Semua</a></div>
-                <a href="{{ route('event') }}" class="fw-card bd-ev">
-                    <span class="bd-ev-img">@if ($ev->poster_url)<img src="{{ $ev->poster_url }}" alt="" loading="lazy" onerror="this.remove()">@endif</span>
-                    <div>
-                        <span class="fw-badge orange-soft" style="align-self:flex-start">{{ $ev->status_label }}</span>
-                        <strong>{{ $ev->title }}</strong>
-                        @if ($ev->location)<small>{{ $ev->location }}</small>@endif
-                        <span class="foot"><b>{{ $ev->event_date?->locale('id')->translatedFormat('d M') }}@if ($ev->time_range) · {{ \Illuminate\Support\Str::before($ev->time_range, ' ') }}@endif</b><strong style="font-size:13.5px">{{ $ev->price_label }}</strong></span>
-                    </div>
-                </a>
-            @endif
-        </section>
-
-        @if ($programs->isNotEmpty())
-            <section>
-                <div class="fw-section-head"><h2>Program Latihan</h2><a href="{{ route('program') }}" class="fw-link">Lihat semua</a></div>
-                <div class="bd-prog">
-                    @foreach ($programs as $p)
-                        <a href="{{ route('program') }}#program-{{ $p->id }}" class="fw-pc">
-                            <img class="ph" src="{{ $p->image_url }}" alt="" loading="lazy" style="object-position: {{ $p->image_css_position }}" onerror="this.remove()">
-                            <div class="fw-pc-top"><span class="fw-pc-label">{{ ucfirst($p->level) }}</span></div>
-                            <div class="fw-pc-body">
-                                <h3>{{ $p->name }}</h3>
-                                <p style="font-size:12px">60 menit · Private</p>
-                                <span class="fw-pc-label lime" style="align-self:flex-start">{{ \App\Models\Payment::formatRupiah($price) }}/jam</span>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-    </div>
+    @if ($hasSwing)
+        <a href="{{ $lastSwing ? route('swing.show', $lastSwing) : route('swing.index') }}" class="hm-swing cdl-ink-card">
+            <span class="ring">{{ $lastSwing ? $lastSwing->score : '?' }}</span>
+            <span style="flex:1;min-width:0">
+                <strong>{{ $lastSwing ? 'Skor swing terakhir' : 'Coba AI Swing Analysis' }}</strong>
+                <small>{{ $lastSwing ? $lastSwing->created_at->locale('id')->translatedFormat('d M Y') . ' · ' . $lastSwing->grade_label : 'Upload video swing, dapatkan skor & saran latihan.' }}</small>
+            </span>
+            {!! Icons::svg('chev', 'fw-chev') !!}
+        </a>
+    @endif
+</div>
 @endsection

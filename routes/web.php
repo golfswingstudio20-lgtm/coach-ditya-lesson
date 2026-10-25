@@ -17,6 +17,7 @@ use App\Http\Controllers\AdminOfflineBookingController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SwingAnalysisController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -97,6 +98,25 @@ Route::middleware([
 
     Route::get('/payment/booking/{booking}/proof', [PaymentController::class, 'proof'])
         ->name('payment.booking.proof');
+
+
+    // AI Swing Analysis (Golf Analyzer) - analisis video di browser, server menyimpan hasilnya
+    Route::get('/swing', [SwingAnalysisController::class, 'index'])
+        ->name('swing.index');
+
+    Route::get('/swing/baru', [SwingAnalysisController::class, 'create'])
+        ->name('swing.create');
+
+    Route::post('/swing', [SwingAnalysisController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('swing.store');
+
+    Route::get('/swing/riwayat', [SwingAnalysisController::class, 'history'])
+        ->name('swing.history');
+
+    Route::get('/swing/{analysis}', [SwingAnalysisController::class, 'show'])
+        ->whereNumber('analysis')
+        ->name('swing.show');
 });
 
 

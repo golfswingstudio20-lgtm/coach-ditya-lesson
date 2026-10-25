@@ -33,11 +33,11 @@
         ];
     } elseif ($mtRole === 'customer') {
         $mtTabs = [
-            ['Beranda', route('dashboard'), 'home', $mtIs('dashboard', 'home'), 0],
-            ['Jadwal', $mtHas('jadwal') ? route('jadwal') : route('booking'), 'cal-check', $mtIs('jadwal'), 0],
-            ['Booking', route('booking'), 'plus-c', $mtIs('booking', 'payment', 'payment.*'), 0],
-            ['Chat', route('chat'), 'chat', $mtIs('chat'), $mtChat],
-            ['Menu', $mtHas('menu') ? route('menu') : route('profile.edit'), 'menu', $mtIs('menu', 'profile.*', 'notifications.*', 'program', 'galeri', 'event', 'contact'), $mtUnread],
+            ['Home', route('dashboard'), 'home', $mtIs('dashboard', 'home'), 0],
+            ['Lesson', route('booking'), 'calendar', $mtIs('booking', 'payment', 'payment.*'), 0],
+            ['Analisis', $mtHas('swing.index') ? route('swing.index') : route('booking'), 'video', $mtIs('swing.*'), 0],
+            ['Riwayat', $mtHas('jadwal') ? route('jadwal') : route('booking'), 'history', $mtIs('jadwal'), 0],
+            ['Profil', $mtHas('menu') ? route('menu') : route('profile.edit'), 'user', $mtIs('menu', 'profile.*', 'notifications.*', 'chat', 'program', 'galeri', 'event', 'contact'), $mtUnread + $mtChat],
         ];
     } else {
         $mtTabs = [

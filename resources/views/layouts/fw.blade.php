@@ -9,7 +9,7 @@
     @include('partials.fw-head')
     @stack('head')
 </head>
-<body class="fw @yield('body_class')">
+<body class="fw cdl @yield('body_class')">
     @unless (View::hasSection('no_nav'))
         @include('partials.fw-navbar')
     @endunless

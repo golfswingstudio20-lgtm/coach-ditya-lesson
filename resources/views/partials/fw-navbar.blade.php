@@ -11,6 +11,7 @@
         $fnLinks = array_filter([
             ['Beranda', route('dashboard'), $fnIs('dashboard', 'home')],
             ['Booking', route('booking'), $fnIs('booking', 'payment', 'payment.*')],
+            $fnHas('swing.index') ? ['AI Swing', route('swing.index'), $fnIs('swing.*')] : null,
             $fnHas('jadwal') ? ['Jadwal Saya', route('jadwal'), $fnIs('jadwal')] : null,
             ['Program', route('program'), $fnIs('program')],
             ['Galeri', route('galeri'), $fnIs('galeri')],
