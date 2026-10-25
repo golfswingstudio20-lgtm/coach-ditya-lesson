@@ -117,10 +117,10 @@
      | STATISTIK
      * --------------------------------------------------------------- */
     $stats = [
-        ['class' => 'pending',  'icon' => '◷', 'label' => 'Pending booking',   'value' => $bookings->where('status', 'pending')->count(), 'note' => 'Menunggu persetujuan'],
-        ['class' => 'booked',   'icon' => '✓', 'label' => 'Booked aktif',      'value' => $bookings->where('status', 'booked')->count(),  'note' => 'Sudah dikonfirmasi'],
-        ['class' => 'customer', 'icon' => '♟', 'label' => 'Total customer',    'value' => User::where('role', 'customer')->count(),      'note' => 'Member terdaftar'],
-        ['class' => 'gallery',  'icon' => '▧', 'label' => 'Gallery',           'value' => $hasGallery ? \App\Models\Gallery::count() : 0, 'note' => 'Foto & video'],
+        ['class' => 'pending',  'icon' => 'clock', 'label' => 'Pending booking',   'value' => $bookings->where('status', 'pending')->count(), 'note' => 'Menunggu persetujuan'],
+        ['class' => 'booked',   'icon' => 'cal-check', 'label' => 'Booked aktif',      'value' => $bookings->where('status', 'booked')->count(),  'note' => 'Sudah dikonfirmasi'],
+        ['class' => 'customer', 'icon' => 'users', 'label' => 'Total customer',    'value' => User::where('role', 'customer')->count(),      'note' => 'Member terdaftar'],
+        ['class' => 'gallery',  'icon' => 'image', 'label' => 'Gallery',           'value' => $hasGallery ? \App\Models\Gallery::count() : 0, 'note' => 'Foto & video'],
     ];
 
     $todayBlocks = $hasBlocks
@@ -248,6 +248,14 @@
         .db-modal-foot a { background: var(--d-btn, #1f4d33); color: #fff; border: 0; }
         .db-modal-foot button { background: var(--d-surface, #fff); color: var(--d-text, #17261d); border: 1px solid var(--d-line-solid, #cfd6d2); }
 
+        /* Ikon tema Biru Langit */
+        .db-stat-icon, .db-stat-icon.pending, .db-stat-icon.booked, .db-stat-icon.customer, .db-stat-icon.gallery { background: #FFFFFF; border: 2.5px solid #14141A; box-shadow: 2px 2px 0 #14141A; }
+        .db-stat-icon svg { width: 26px; height: 26px; }
+        .db-stat, .db-clock { background: #DDF3E4; border: 2.5px solid #14141A; box-shadow: 3px 3px 0 #14141A; color: #14141A; }
+        .db-stat strong { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 30px; }
+        .db-hi { display: inline-grid; place-items: center; width: 48px; height: 48px; margin-right: 12px; vertical-align: -10px; border-radius: 50%; background: #FFFFFF; border: 2.5px solid #14141A; box-shadow: 2px 2px 0 #14141A; text-shadow: none; }
+        .db-hi svg { width: 28px; height: 28px; }
+        .db-clock svg, .db-alert svg, .db-verify-alert svg { width: 17px; height: 17px; vertical-align: -3px; }
         @media (max-width: 1250px) { .db-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
         @media (max-width: 1050px) {
             .db-grid { grid-template-columns: minmax(0, 1fr); }
@@ -263,19 +271,19 @@
     {{-- ================= SAMBUTAN ================= --}}
     <section class="db-welcome">
         <div>
-            <h1>Selamat Datang, {{ auth()->user()->name ?? 'Admin' }} 👋</h1>
+            <h1><span class="db-hi">{!! \App\Support\Icons::svg('golf') !!}</span>Selamat Datang, {{ auth()->user()->name ?? 'Admin' }}</h1>
             <p>Kelola pemesanan lesson, pembayaran, dan jadwal Golf Booking Lesson.</p>
         </div>
 
         <div class="db-clock">
-            <span>▣ <span id="currentDate">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</span></span>
-            <span>◷ <span id="currentTime">{{ now()->format('H:i:s') }}</span> WIB</span>
+            <span>{!! \App\Support\Icons::svg('calendar') !!} <span id="currentDate">{{ now()->locale('id')->translatedFormat('l, d F Y') }}</span></span>
+            <span>{!! \App\Support\Icons::svg('clock') !!} <span id="currentTime">{{ now()->format('H:i:s') }}</span> WIB</span>
         </div>
     </section>
 
     @if ($todayBlocks->isNotEmpty())
         <div class="db-alert">
-            ⊘ Hari ini ada jadwal yang ditutup:
+            {!! \App\Support\Icons::svg('block') !!} Hari ini ada jadwal yang ditutup:
             @foreach ($todayBlocks as $block)
                 <strong>{{ $block->time_label }}</strong> ({{ $block->reason }}){{ $loop->last ? '.' : ',' }}
             @endforeach
@@ -285,7 +293,7 @@
 
     @if ($verifyCount > 0)
         <div class="db-verify-alert">
-            ◷ Ada <strong>{{ $verifyCount }}</strong> pembayaran QRIS / transfer yang menunggu verifikasi.
+            {!! \App\Support\Icons::svg('clock') !!} Ada <strong>{{ $verifyCount }}</strong> pembayaran QRIS / transfer yang menunggu verifikasi.
             Pilih filter <strong>Perlu verifikasi</strong>, cek mutasi rekening, lalu konfirmasi di panel detail.
         </div>
     @endif
@@ -294,7 +302,7 @@
     <section class="db-stats">
         @foreach ($stats as $stat)
             <div class="db-stat">
-                <span class="db-stat-icon {{ $stat['class'] }}">{{ $stat['icon'] }}</span>
+                <span class="db-stat-icon {{ $stat['class'] }}">{!! \App\Support\Icons::svg($stat['icon']) !!}</span>
                 <div>
                     <span>{{ $stat['label'] }}</span>
                     <strong>{{ $stat['value'] }}</strong>

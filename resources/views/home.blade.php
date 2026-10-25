@@ -137,6 +137,57 @@
         .hm-band { flex-direction: column; align-items: flex-start; padding: 28px 24px; }
         .hm-ev-img { width: 104px; flex-basis: 104px; }
     }
+    /* ===== Tema Biru Langit: hero kartun, tanpa foto gelap ===== */
+    body.cdl .hm-hero { background: #7CC8EC; color: #14141A; min-height: 0; }
+    body.cdl .hm-hero-bg { display: none; }
+    body.cdl .hm-hero::after { display: none; }
+    body.cdl .hm-hero::before { content: ""; position: absolute; left: -10%; right: -10%; bottom: -60px; height: 140px; border-radius: 50%; background: #3BB55A; border-top: 3px solid #14141A; }
+    body.cdl .hm-hero-grid { padding: 36px 0 120px; }
+    body.cdl .hm-art { display: none; }
+    body.cdl .hm-art .cdl-golfer { max-width: 340px; margin: 0 auto; }
+    body.cdl .hm-art-d { display: block; }
+    body.cdl .hm-label { background: #DDF3E4; border: 2px solid #14141A; color: #14141A; box-shadow: 2px 2px 0 #14141A; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    body.cdl .hm-label i { background: #22A04B; }
+    body.cdl .hm-title {
+        font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; letter-spacing: .01em; line-height: 1.02; color: #FFFFFF;
+        text-shadow: 3px 3px 0 #14141A, -1.5px -1.5px 0 #14141A, 1.5px -1.5px 0 #14141A, -1.5px 1.5px 0 #14141A, 1.5px 1.5px 0 #14141A;
+    }
+    body.cdl .hm-title em { font-style: normal; color: #FFE08A; }
+    body.cdl .hm-text { color: #14141A; font-weight: 500; }
+    body.cdl .hm-cta .fw-btn.lime { background: #22A04B; color: #FFFFFF; }
+    body.cdl .hm-cta .fw-btn.glass { background: #DDF3E4; color: #14141A; border: 2.5px solid #14141A; }
+    body.cdl .hm-cta .fw-btn.glass:hover { background: #CDEBD7; }
+    body.cdl .hm-float { background: #DDF3E4; color: #14141A; border: 2.5px solid #14141A; box-shadow: 3px 3px 0 #14141A; }
+    body.cdl .hm-float .ic { background: #FFFFFF; border: 2px solid #14141A; }
+    body.cdl .hm-float .fw-av { border: 2px solid #14141A; }
+    body.cdl .hm-float small { color: #14141A; }
+    body.cdl .hm-trust { background: #DDF3E4; border: 2.5px solid #14141A; box-shadow: 3px 3px 0 #14141A; }
+    body.cdl .hm-trust div { border-right-color: rgba(20, 20, 26, .2); }
+    body.cdl .hm-trust strong { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; color: #14141A; }
+    body.cdl .hm-sec.alt { background: #6BBCE3; border-top: 2.5px solid #14141A; border-bottom: 2.5px solid #14141A; }
+    body.cdl .hm-sec-head .fw-h2 { color: #FFFFFF; text-shadow: 2.5px 2.5px 0 #14141A, -1.2px -1.2px 0 #14141A, 1.2px -1.2px 0 #14141A, -1.2px 1.2px 0 #14141A, 1.2px 1.2px 0 #14141A; }
+    body.cdl .hm-sec-head p, body.cdl .hm-sec-head .fw-eyebrow { color: #14141A; }
+    body.cdl .hm-feat, body.cdl .hm-sec.alt .hm-feat { background: #DDF3E4; border: 2.5px solid #14141A; box-shadow: 3px 3px 0 #14141A; }
+    body.cdl .hm-feat .ic { background: #FFFFFF; border: 2px solid #14141A; }
+    body.cdl .hm-feat h3 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; font-size: 19px; }
+    body.cdl .hm-feat p { color: #14141A; }
+    body.cdl .hm-ev h3 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; }
+    body.cdl .hm-ev p, body.cdl .hm-ev .price { color: #14141A; }
+    body.cdl .hm-band { background: #DDF3E4; color: #14141A; border: 2.5px solid #14141A; box-shadow: 4px 4px 0 #14141A; }
+    body.cdl .hm-band::before { background: rgba(34, 160, 75, .15); }
+    body.cdl .hm-band h2 { font-family: "Lilita One", system-ui, sans-serif; font-weight: 400; color: #14141A; }
+    body.cdl .hm-band p { color: #14141A; }
+    body.cdl .hm-band .fw-hl { color: #17803A; }
+    body.cdl .hm-gal .fw-pc, body.cdl .hm-ev-img { border: 2.5px solid #14141A; }
+    @media (max-width: 960px) {
+        body.cdl .hm-art-m { display: block; margin-bottom: 6px; }
+    }
+    @media (max-width: 820px) {
+        body.cdl .hm-hero { min-height: 0; align-items: flex-start; }
+        body.cdl .hm-hero-grid { padding: 14px 0 96px; }
+        body.cdl .hm-art .cdl-golfer { max-width: 280px; }
+        body.cdl .hm-title { font-size: 40px; }
+    }
 </style>
 @endpush
 
@@ -148,6 +199,7 @@
         {!! $edit('hero', 'light float') !!}
         <div class="hm-wrap hm-hero-grid">
             <div>
+                <div class="hm-art hm-art-m">@include('partials.cdl-golfer')</div>
                 <span class="hm-label"><i></i>{{ $nice($hero['hero_label']) }}</span>
                 <h1 class="hm-title">{{ $nice($hero['hero_title_1']) }} {{ $nice($hero['hero_title_2']) }} <em>{{ $nice($hero['hero_highlight']) }}</em></h1>
                 <p class="hm-text">{{ $hero['hero_text'] }}</p>
@@ -158,6 +210,7 @@
             </div>
 
             <div class="hm-side">
+                <div class="hm-art hm-art-d">@include('partials.cdl-golfer')</div>
                 @if ($coach)
                     <a href="#coach" class="hm-float">
                         @if ($coach->photo_url)
