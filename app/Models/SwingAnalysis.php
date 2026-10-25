@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * phases:  [{key, name, score, note, image}]   image = path di disk public (boleh null)
  * tips:    [{title, text}]
  * captures: [{image, at}]   gambar dari Studio Video (frame + garis/sudut)
- * video_path: video swing di Supabase (boleh null), pose_data: titik tubuh ringkas untuk garis saat diputar ulang
  */
 class SwingAnalysis extends Model
 {
@@ -28,7 +27,7 @@ class SwingAnalysis extends Model
 
     protected $fillable = [
         'user_id', 'camera_view', 'handedness', 'score', 'metrics', 'phases', 'tips',
-        'insight', 'duration_ms', 'frames', 'coach_note', 'captures', 'video_path', 'pose_data',
+        'insight', 'duration_ms', 'frames', 'coach_note', 'captures',
     ];
 
     protected function casts(): array
@@ -38,7 +37,6 @@ class SwingAnalysis extends Model
             'phases'  => 'array',
             'tips'    => 'array',
             'captures' => 'array',
-            'pose_data' => 'array',
         ];
     }
 
@@ -65,24 +63,6 @@ class SwingAnalysis extends Model
     public function getViewLabelAttribute(): string
     {
         return self::VIEWS[$this->camera_view] ?? $this->camera_view;
-    }
-
-    /** Data untuk membuka Studio Video dari halaman hasil (putar ulang). */
-    public function studioPayload(?string $captureUrl): ?array
-    {
-        if (! $this->video_path) {
-            return null;
-        }
-
-        return [
-            'src'        => self::imageUrl($this->video_path),
-            'remote'     => true,
-            'pose'       => $this->pose_data ?? [],
-            'view'       => $this->camera_view,
-            'hand'       => $this->handedness,
-            'phases'     => collect($this->phases ?? [])->filter(fn ($p) => isset($p['t']))->map(fn ($p) => ['key' => $p['key'], 't' => $p['t']])->values()->all(),
-            'captureUrl' => $captureUrl,
-        ];
     }
 
     /** URL gambar tahapan dari disk public (Supabase di Vercel, lokal di laptop). */

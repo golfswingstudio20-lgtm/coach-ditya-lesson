@@ -31,9 +31,6 @@
         .sa-phase .txt { padding: 8px 9px; }
         .sa-phase .txt strong { display: flex; justify-content: space-between; gap: 6px; font-size: 12.5px; color: #14141A; }
         .sa-phase .txt small { display: block; margin-top: 3px; color: var(--text-muted); font-size: 11.5px; line-height: 1.3; }
-        .sa-more summary { cursor: pointer; padding: 10px 12px; border: 2px solid #14141A; border-radius: 14px; background: #FFFFFF; font-weight: 600; list-style: none; }
-        .sa-more summary::-webkit-details-marker { display: none; }
-        .sa-more[open] summary { margin-bottom: 10px; background: #EAF8EF; }
         .sa-insight { padding: 12px 14px; border: 2px solid #14141A; border-radius: 14px; background: #FFE9B8; color: #14141A; font-size: 13.5px; line-height: 1.5; }
         .sa-tips { display: grid; gap: 8px; }
         .sa-tips div { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--d-surface-2, #f8f7f2); font-size: 13px; }
@@ -102,14 +99,6 @@
         </div>
 
         <div>
-            <div style="margin-bottom:16px;display:grid;gap:16px">
-                @include('swing._replay', [
-                    'captureUrl'     => route('admin.swing.capture', $analysis),
-                    'deleteVideoUrl' => route('admin.swing.video.destroy', $analysis),
-                    'deleteUrl'      => route('admin.swing.destroy', $analysis),
-                ])
-            </div>
-
             @if ($analysis->insight)
                 <div class="sa-insight" style="margin-bottom:16px"><b>Insight AI:</b> {{ $analysis->insight }}</div>
             @endif
@@ -117,8 +106,6 @@
             @if (! empty($analysis->phases))
                 <div class="section-card">
                     <div class="section-card-head"><h2>Tahapan swing</h2></div>
-                    <details class="sa-more">
-                    <summary>Lihat gambar tahapan swing</summary>
                     <div class="sa-phases">
                         @foreach ($analysis->phases as $ph)
                             @php $img = SwingAnalysis::imageUrl($ph['image'] ?? null); @endphp
@@ -131,15 +118,12 @@
                             </div>
                         @endforeach
                     </div>
-                    </details>
                 </div>
             @endif
 
             @if (! empty($analysis->captures))
                 <div class="section-card">
                     <div class="section-card-head"><h2>Capture dari Studio Video</h2></div>
-                    <details class="sa-more">
-                    <summary>Lihat {{ count($analysis->captures) }} capture</summary>
                     <div class="sa-phases" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
                         @foreach ($analysis->captures as $cap)
                             @php $cimg = SwingAnalysis::imageUrl($cap['image'] ?? null); @endphp
@@ -148,7 +132,6 @@
                             @endif
                         @endforeach
                     </div>
-                    </details>
                 </div>
             @endif
 

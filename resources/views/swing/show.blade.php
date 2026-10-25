@@ -41,9 +41,6 @@
     .sw-phase .txt strong { font-size: 13.5px; display: flex; justify-content: space-between; gap: 6px; }
     .sw-phase .txt small { font-size: 12px; color: #14141A; line-height: 1.3; }
     .sw-insight { background: #FFE9B8; }
-    .sw-more summary { cursor: pointer; padding: 10px 12px; border: 2px solid #14141A; border-radius: 14px; background: #FFFFFF; font-weight: 600; font-size: 14px; list-style: none; }
-    .sw-more summary::-webkit-details-marker { display: none; }
-    .sw-more[open] summary { margin-bottom: 10px; background: #EAF8EF; }
     .sw-coach { background: #EAF8EF; }
 </style>
 @endpush
@@ -71,14 +68,6 @@
         </div>
     </section>
 
-    @if ($isOwner)
-        @include('swing._replay', [
-            'captureUrl'     => route('swing.capture', $analysis),
-            'deleteVideoUrl' => route('swing.video.destroy', $analysis),
-            'deleteUrl'      => route('swing.destroy', $analysis),
-        ])
-    @endif
-
     @if ($analysis->insight)
         <section class="sw-card cdl-ink-card sw-insight">
             <h2>{!! Icons::svg('info', 'fw-ic-inline') !!} Insight AI</h2>
@@ -104,8 +93,6 @@
     @if (! empty($analysis->phases))
         <section class="sw-card cdl-ink-card">
             <h2>Tahapan Swing</h2>
-            <details class="sw-more">
-            <summary>{!! Icons::svg('image', 'fw-ic-inline') !!} Lihat gambar tahapan swing</summary>
             <div class="sw-phases">
                 @foreach ($analysis->phases as $ph)
                     @php $img = SwingAnalysis::imageUrl($ph['image'] ?? null); @endphp
@@ -118,15 +105,12 @@
                     </div>
                 @endforeach
             </div>
-            </details>
         </section>
     @endif
 
     @if (! empty($analysis->captures))
         <section class="sw-card cdl-ink-card">
             <h2>Capture dari Studio Video</h2>
-            <details class="sw-more">
-            <summary>{!! Icons::svg('image', 'fw-ic-inline') !!} Lihat {{ count($analysis->captures) }} capture</summary>
             <div class="sw-phases">
                 @foreach ($analysis->captures as $cap)
                     @php $cimg = SwingAnalysis::imageUrl($cap['image'] ?? null); @endphp
@@ -135,7 +119,6 @@
                     @endif
                 @endforeach
             </div>
-            </details>
         </section>
     @endif
 

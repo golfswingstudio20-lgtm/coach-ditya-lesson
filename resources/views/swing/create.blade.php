@@ -85,7 +85,6 @@
             </select>
         </label>
 
-        <label style="display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;color:#14141A;cursor:pointer"><input type="checkbox" id="sw-keep" checked style="width:20px;height:20px;accent-color:#22A04B"> Simpan video supaya bisa diputar ulang (maks 50 MB)</label>
         <button type="button" id="sw-start" class="fw-btn block" disabled>Mulai Analisis</button>
         <p style="font-size:12.5px;text-align:center">{!! Icons::svg('lock', 'fw-ic-inline') !!} Video tetap di perangkat kamu. Yang disimpan hanya skor, saran, dan gambar kecil tiap tahapan.</p>
     </section>
