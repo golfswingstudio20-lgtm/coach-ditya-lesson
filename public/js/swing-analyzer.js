@@ -32,6 +32,7 @@ function init(app) {
         stepUpload: $('#sw-step-upload'), stepProcess: $('#sw-step-process'), pct: $('#sw-pct'),
         ring: $('#sw-ring'), status: $('#sw-status'), error: $('#sw-error'), steps: app.querySelectorAll('[data-step]'),
         checks: app.querySelectorAll('[data-chk]'), fileInfo: $('#sw-fileinfo'), canvas: $('#sw-canvas'),
+        user: $('#sw-user'),
     };
     const storeUrl = app.getAttribute('data-store-url');
     const csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
@@ -123,6 +124,8 @@ function init(app) {
                 camera_view: view, handedness: hand, score: result.score, duration_ms: Math.round(el.video.duration * 1000),
                 frames: frames.length, insight: result.insight, metrics: result.metrics, phases: result.phases, tips: result.tips,
             };
+            // Admin: analisis untuk customer yang dipilih (kosong = untuk coach sendiri)
+            if (el.user) body.user_id = el.user.value ? Number(el.user.value) : null;
             const res = await fetch(storeUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },

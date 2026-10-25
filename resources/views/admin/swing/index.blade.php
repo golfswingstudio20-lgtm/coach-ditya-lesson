@@ -26,6 +26,9 @@
             <h1>AI Swing Analysis</h1>
             <p>Hasil analisis swing customer dari Golf Analyzer. Buka hasilnya untuk melihat detail dan menambahkan catatan coach.</p>
         </div>
+        <div class="head-actions">
+            <a href="{{ route('admin.swing.create') }}" class="btn btn-primary">{!! \App\Support\Icons::svg('video') !!} Analisis Swing Baru</a>
+        </div>
     </section>
 
     <section class="stat-row">

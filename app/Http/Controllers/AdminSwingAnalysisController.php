@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\SwingAnalysis;
+use App\Models\User;
+use App\Support\SwingAnalysisStore;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -53,6 +57,34 @@ class AdminSwingAnalysisController extends Controller
                 'players'  => (clone $all)->distinct()->count('user_id'),
                 'no_note'  => (clone $all)->where(fn ($w) => $w->whereNull('coach_note')->orWhere('coach_note', ''))->count(),
             ],
+        ]);
+    }
+
+    /** Coach membuat analisis swing baru (untuk customer tertentu atau untuk dirinya sendiri). */
+    public function create(Request $request): View
+    {
+        return view('admin.swing.create', [
+            'customers' => User::where('role', 'customer')->orderBy('name')->get(['id', 'name', 'email']),
+            'selected'  => (int) $request->query('user', 0),
+            'views'     => SwingAnalysis::VIEWS,
+            'hands'     => SwingAnalysis::HANDS,
+        ]);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'user_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', 'customer')],
+        ]);
+
+        $data     = $request->validate(SwingAnalysisStore::rules());
+        $userId   = (int) ($request->input('user_id') ?: $request->user()->id);
+        $analysis = SwingAnalysisStore::save($data, $userId);
+
+        return response()->json([
+            'ok'       => true,
+            'id'       => $analysis->id,
+            'redirect' => route('admin.swing.show', $analysis),
         ]);
     }
 

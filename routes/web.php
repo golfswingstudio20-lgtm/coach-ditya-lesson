@@ -263,6 +263,13 @@ Route::middleware([
     Route::get('/admin/swing', [AdminSwingAnalysisController::class, 'index'])
         ->name('admin.swing.index');
 
+    Route::get('/admin/swing/baru', [AdminSwingAnalysisController::class, 'create'])
+        ->name('admin.swing.create');
+
+    Route::post('/admin/swing', [AdminSwingAnalysisController::class, 'store'])
+        ->middleware('throttle:30,1')
+        ->name('admin.swing.store');
+
     Route::get('/admin/swing/{analysis}', [AdminSwingAnalysisController::class, 'show'])
         ->whereNumber('analysis')
         ->name('admin.swing.show');

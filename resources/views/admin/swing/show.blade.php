@@ -53,6 +53,7 @@
         </div>
         <div class="head-actions">
             <a href="{{ route('admin.swing.index') }}" class="btn btn-ghost">← Semua analisis</a>
+            <a href="{{ route('admin.swing.create', ['user' => $analysis->user_id]) }}" class="btn btn-primary">{!! \App\Support\Icons::svg('video') !!} Analisis lagi</a>
             @if ($analysis->user)
                 <a href="{{ route('admin.customers.show', $analysis->user) }}" class="btn btn-outline">Profil customer</a>
             @endif
